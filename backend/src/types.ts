@@ -4,89 +4,89 @@ type UserRole = 'student' | 'lecturer' | 'admin';
 
 interface User {
     zid: number;
-    first_name: string;
-    last_name: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: UserRole;
-    password_hash: string;
+    passwordHash: string;
 }
 
-interface ELSAccomodation {
-    student_id: number;
-    extra_time: number;
+interface ELSAccommodation {
+    studentId: number;
+    extraTime: number;
 }
 
 interface Course {
-    course_id: number;
-    course_name: string;
-    course_code: string;
-    course_description: string;
+    courseId: number;
+    courseName: string;
+    courseCode: string;
+    courseDescription: string;
 }
 
-interface Assignment {
-    assignment_id: number;
-    course_id: string;
-    assignment_name: string;
-    term_id: string;
-    due_date: Date;
+export interface Assignment {
+    assignmentId: number;
+    courseId: string;
+    assignmentName: string;
+    termId: string;
+    dueDate: Date;
 }
 
 interface TestCase {
-    testcase_id: number;
-    assignment_id: string;
-    file_path: string;
+    testCaseId: number;
+    assignmentId: string;
+    filePath: string;
 }
 
 interface Term {
-    term_id: string;
+    termId: string;
     year: number;
     term: 'fall' | 'spring' | 'summer'; // Assuming enum for terms
 }
 
-interface Lectures {
-    lecturer_id: number;
-    course_id: number;
-    term_id: number;
+interface Lecture {
+    lecturerId: number;
+    courseId: number;
+    termId: number;
 }
 
 interface Group {
-    group_id: number;
-    group_name: string;
-    group_size: number;
-    assignment_id: string;
+    groupId: number;
+    groupName: string;
+    groupSize: number;
+    assignmentId: string;
 }
 
 interface InGroup {
-    group_id: number;
-    student_id: number;
+    groupId: number;
+    studentId: number;
 }
 
 interface Submission {
-    submission_id: number;
-    group_id: number;
-    submission_time: Date;
-    file_path: string;
-    late_penalty: number;
+    submissionId: number;
+    groupId: number;
+    submissionTime: Date;
+    filePath: string;
+    latePenalty: number;
 }
 
 interface Grade {
-    marker_id: number;
-    submission_id: string;
+    markerId: number;
+    submissionId: string;
     mark: number;
-    marker_comments: string;
-    is_marked: boolean;
+    markerComments: string;
+    isMarked: boolean;
 }
 
 export interface DataStore {
-  users: Record<number, User>;
-  accommodations: Record<number, ELSAccomodation>;
-  courses: Record<number, Course>;
-  assignments: Record<number, Assignment>;
-  testCases: Record<number, TestCase>;
-  terms: Record<string, Term>;
-  lectures: Record<number, Lectures>;
-  groups: Record<number, Group>;
-  inGroups: Record<number, InGroup>;
-  submissions: Record<number, Submission>;
-  grades: Record<number, Grade>;
+    users: Record<number, User>;
+    accommodations: Record<number, ELSAccommodation>;
+    courses: Record<number, Course>;
+    assignments: Record<number, Assignment>;
+    testCases: Record<number, TestCase>;
+    terms: Record<string, Term>;
+    lectures: Record<number, Lecture>;
+    groups: Record<number, Group>;
+    inGroups: Record<number, InGroup>;
+    submissions: Record<number, Submission>;
+    grades: Record<number, Grade>;
 }

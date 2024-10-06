@@ -39,6 +39,7 @@ app.get('/api/lecturer/homepage', (req, res) => {
 
 /// ASSIGNMENT MANAGEMENT
 app.post('/api/lecturer/create-assignment', (req, res) => {
+  const {title, courseID, termID, dueDate} = req.body;
   res.json({ message: 'Course created' });
 });
 
