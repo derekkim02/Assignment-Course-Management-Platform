@@ -1,5 +1,6 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
+import { createAssessment } from './assessments';
 
 const prisma = new PrismaClient();
 
@@ -58,8 +59,8 @@ app.get('/api/lecturer/homepage', (req, res) => {
 
 /// ASSIGNMENT MANAGEMENT
 app.post('/api/lecturer/create-assignment', (req, res) => {
-  const {title, courseID, termID, dueDate} = req.body;
-  res.json({ message: 'Course created' });
+  const {lecturerId, title, description, dueDate, term, courseID, } = req.body;
+  res.json(createAssessment(lecturerId, title, description, dueDate, term, courseID));
 });
 
 app.put('/api/lecturer/update-assignment', (req, res) => {

@@ -76,17 +76,3 @@ interface Grade {
     markerComments: string;
     isMarked: boolean;
 }
-
-export interface DataStore {
-    users: Record<number, User>;
-    accommodations: Record<number, ELSAccommodation>;
-    courses: Record<number, Course>;
-    assignments: Record<number, Assignment>;
-    testCases: Record<number, TestCase>;
-    terms: Record<string, Term>;
-    lectures: Record<number, Lecture>;
-    groups: Record<number, Group>;
-    inGroups: Record<number, InGroup>;
-    submissions: Record<number, Submission>;
-    grades: Record<number, Grade>;
-}

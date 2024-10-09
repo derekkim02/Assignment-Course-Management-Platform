@@ -1,32 +1,49 @@
-import {getData, setData } from './datastore';
+import { PrismaClient } from '@prisma/client';
 import { Assignment } from './types';
 
-/*
-Example assessment:
+const prisma = new PrismaClient();
 
-const newAssignment: Assignment = {
-    assignment_id: 1,
-    course_id: 'CS101',
-    assignment_name: 'Assignment 1',
-    term_id: 'fall2023',
-    due_date: new Date('2023-12-01T23:59:59')
-};
+export async function createAssessment(lecturerId: string, assignmentName: string, description: string, dueDate: string, term: string, courseId: string) {
 
-*/
-function createAssessment(assignmentName: string, courseId: string, termId: string, dueDate: string) {
-  const data = getData();
+  // check that the lecturer is assigned to the course
+  // check the teachingassignments table for the lecturerId and courseId
+  const teachingAssignment = await prisma.teachingAssignment.findFirst({
+    where: {
+      lecturerId: parseInt(lecturerId),
+      courseId: parseInt(courseId)
+    }
+  });
+
+  if (!teachingAssignment) {
+    throw new Error("Permission error: You are not assigned to this course")
+  }
 
   let assignmentId: number;
   assignmentId = Math.floor(Math.random() * 1000); // Random 4 digit assignment ID
-  const newAssignment: Assignment = {
-    assignmentId: assignmentId,
-    assignmentName: assignmentName,
-    courseId: courseId,
-    termId: termId,
-    dueDate: new Date(dueDate)
-  }
 
-  
-  data.assignments[assignmentId] = newAssignment;
-  setData(data);
+  // Assume that term is given in the format '24T3'
+  const termYear = term.slice(0, 2);
+  const termTerm = term[3]
+
+  const newAssignment = await prisma.assignment.create({
+    data: (
+      {
+        id: assignmentId,
+        name: assignmentName,
+        description: description,
+        dueDate: new Date(dueDate),
+        termYear: parseInt(termYear, 10),
+        termTerm: parseInt(termTerm, 10),
+        courseId: parseInt(courseId),
+        testCases: {
+          create: []
+        },
+        groups: {
+          create: []
+        }
+      }
+    )
+  });
+
+  return newAssignment;
 }
