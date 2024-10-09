@@ -19,7 +19,7 @@ interface CSVRow {
 }
 
 function splitName(fullName: string): { firstName: string; lastName: string } {
-    const names = fullName.split(' ');
+    const names = fullName.split('');
     const firstName = names[0];
     const lastName = names.slice(1).join(' ');
     return { firstName, lastName };
@@ -111,9 +111,14 @@ model Group {
     fs.createReadStream(csvFilePath).
     pipe(csv()).
     on('data', async (data: CSVRow) => {
-        const { firstName, lastName } = splitName(data.name);
         try {
             // Upsert user by zid or email
+            // TODO fix names
+            var firstName = '';
+            var lastName = '';
+            if (data.name) {
+              const { firstName, lastName } = splitName(data.name);
+            }
             await prisma.user.upsert({
               where: { email: data.email },
               update: {
