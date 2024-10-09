@@ -12,3 +12,120 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  zid                 Int                @id @default(autoincrement())
+  firstName           String
+  lastName            String
+  email               String             @unique
+  role                Role
+  password            String
+
+  teachingAssignments TeachingAssignment[]
+  groups              Group[]
+  // This refers to the submissions that the user has marked
+  marks               Mark[]
+}
+
+model Course {
+  id                 Int                @id @default(autoincrement())
+  name               String
+  code               String             @unique
+  description        String
+
+  teachingAssignments TeachingAssignment[]
+  assignments         Assignment[]
+}
+
+model Term {
+  year               Int
+  term               Int
+
+  @@id([year, term])
+
+  teachingAssignments TeachingAssignment[]
+  assignments         Assignment[]
+}
+
+model TeachingAssignment {
+  lecturerId         Int
+  lecturer           User               @relation(fields: [lecturerId], references: [zid])
+
+  courseId           Int
+  course             Course             @relation(fields: [courseId], references: [id])
+
+  termYear           Int
+  termTerm           Int
+  term               Term               @relation(fields: [termYear, termTerm], references: [year, term])
+
+  @@id([lecturerId, courseId, termYear, termTerm])
+}
+
+model Assignment {
+  id                 Int                @id @default(autoincrement())
+  name               String
+  description        String
+  dueDate            DateTime
+
+  termYear           Int
+  termTerm           Int
+  term               Term               @relation(fields: [termYear, termTerm], references: [year, term])
+
+  courseId           Int
+  course             Course             @relation(fields: [courseId], references: [id])
+
+  testCases          TestCase[]
+  groups             Group[]
+}
+
+model TestCase {
+  id                 Int                @id @default(autoincrement())
+  filePath           String
+
+  assignmentId       Int                @unique
+  assignment         Assignment         @relation(fields: [assignmentId], references: [id])
+}
+
+model Submission {
+  id                 Int                @id @default(autoincrement())
+  filePath           String
+  submissionTime     DateTime
+  latePenalty        Int
+
+  groupId            Int
+  group              Group              @relation(fields: [groupId], references: [id])
+
+  mark               Mark?
+}
+
+model Group {
+  id                 Int                @id @default(autoincrement())
+  name               String
+  size               Int
+
+  assignmentId       Int
+  assignment         Assignment         @relation(fields: [assignmentId], references: [id])
+
+  members            User[]
+  submissions        Submission[]
+}
+
+model Mark {
+  mark               Decimal
+  feedback           String
+  isMarked           Boolean
+
+  submissionId       Int                @unique
+  submission         Submission         @relation(fields: [submissionId], references: [id])
+
+  markerId           Int
+  marker             User               @relation(fields: [markerId], references: [zid])
+
+  @@id([submissionId, markerId])
+}
+
+enum Role {
+  STUDENT
+  TUTOR
+  LECTURER
+}
