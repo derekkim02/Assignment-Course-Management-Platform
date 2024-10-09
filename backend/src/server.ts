@@ -1,4 +1,23 @@
 import express from 'express';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+// Example functions
+
+// async function main() {
+//   // Example query
+//   const allUsers = await prisma.user.findMany();
+//   console.log(allUsers);
+// }
+
+// main()
+//   .catch(e => {
+//     throw e;
+//   })
+//   .finally(async () => {
+//     await prisma.$disconnect();
+//   });
 
 const app = express();
 const port = process.env.PORT || 3001;
