@@ -1,4 +1,4 @@
-Name,zid,group Name,Class,mentor,group_id,group_id2,email,
+name,zid,group Name,Class,mentor,group_id,group_id2,email,
 John Smith,z5345234,Thor,H1OA,Steve Jobs,5345234,H10A_Thor,z5345234@student.unsw.edu.au,
 Jane Johnson,z5345235,Thor,H1OA,Steve Jobs,5345235,H1OA_Thor,z5345235@student.unsw.edu.au,
 Alex Williams,z5345236,Thor,H1OA,Steve Jobs,5345236,H1OA_Thor,z5345236@student.unsw.edu.au,
