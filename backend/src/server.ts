@@ -58,9 +58,14 @@ app.get('/api/lecturer/homepage', (req, res) => {
 });
 
 /// ASSIGNMENT MANAGEMENT
-app.post('/api/lecturer/create-assignment', (req, res) => {
+app.post('/api/lecturer/create-assignment', async (req, res) => {
   const {lecturerId, title, description, dueDate, term, courseID, } = req.body;
-  res.json(createAssessment(lecturerId, title, description, dueDate, term, courseID));
+  try {
+    const newAssignment = await createAssessment(lecturerId, title, description, dueDate, term, courseID);
+    res.json(newAssignment);
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
 });
 
 app.put('/api/lecturer/update-assignment', (req, res) => {

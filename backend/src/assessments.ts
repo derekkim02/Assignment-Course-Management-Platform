@@ -18,9 +18,6 @@ export async function createAssessment(lecturerId: string, assignmentName: strin
     throw new Error("Permission error: You are not assigned to this course")
   }
 
-  let assignmentId: number;
-  assignmentId = Math.floor(Math.random() * 1000); // Random 4 digit assignment ID
-
   // Assume that term is given in the format '24T3'
   const termYear = term.slice(0, 2);
   const termTerm = term[3]
@@ -28,7 +25,6 @@ export async function createAssessment(lecturerId: string, assignmentName: strin
   const newAssignment = await prisma.assignment.create({
     data: (
       {
-        id: assignmentId,
         name: assignmentName,
         description: description,
         dueDate: new Date(dueDate),
