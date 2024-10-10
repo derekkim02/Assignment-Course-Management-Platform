@@ -4,6 +4,7 @@ import AppRouter from './components/routes/AppRouter';
 
 
 function App() {
+
   return (
     <div className="App">
       <AuthProvider>
