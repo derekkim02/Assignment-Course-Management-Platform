@@ -3,8 +3,13 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import ProtectedRoute from './ProtectedRoute';
 import LoginPage from '../auth/LoginPage';
 import { useAuth } from '../auth/AuthContext';
+import Dasbhoard from '../dashboard/student/Dashboard';
+import CalendarSection from '../dashboard/CalendarSection';
+import CoursesSection from '../dashboard/course/CoursesSection';
+import RecentSubmissions from '../dashboard/student/RecentSubmissions';
+import CourseDetails from '../dashboard/course/CourseDetails';
+import AssignmentDetails from '../dashboard/course/assignment/AssignmentDetails';
 
-const Home = () => <div>Home Page</div>;
 const About = () => <div>About Page</div>;
 
 const AppRouter = () => {
@@ -16,7 +21,12 @@ const AppRouter = () => {
         <Route path="/login" element={<LoginPage/>}/>
         <Route path="/register" element={<LoginPage />} />
         <Route path="/dashboard" element={<ProtectedRoute element={<About/>}/>}/>
-        <Route path="*" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login"/>} />
+        <Route path="/dashboard/calendar" element={<ProtectedRoute element={<Dasbhoard content={<CalendarSection/>}/>}/>}/>
+        <Route path="/dashboard/courses" element={<ProtectedRoute element={<Dasbhoard content={<CoursesSection/>}/>}/>}/>
+        <Route path="/dashboard/courses/:courseId" element={<ProtectedRoute element={<Dasbhoard content={<CourseDetails />}/>}/>}/>
+        <Route path="/dashboard/courses/:courseId/assignments/:assignmentId" element={<Dasbhoard content={<AssignmentDetails/>}/>}/>
+        <Route path="/dashboard/submissions" element={<ProtectedRoute element={<Dasbhoard content={<RecentSubmissions/>}/>}/>}/>
+        <Route path="*" element={isAuthenticated ? <Navigate to="/dashboard/courses"/> : <Navigate to="/login"/>} />
       </Routes>
     </Router>
   );
