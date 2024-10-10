@@ -1,6 +1,7 @@
+import {describe, expect, beforeAll, afterEach, afterAll} from '@jest/globals';
 import { PrismaClient } from '@prisma/client';
 import { createAssessment } from '../assessments';
-import { resetForTests } from './utils';
+import { resetForTests, populateSampleDatabase } from './utils';
 
 export const prisma = new PrismaClient();
 
@@ -19,54 +20,16 @@ afterAll(async () => {
 
 describe('createAssessment', () => {
   it('should create a new assessment when all attributes are valid', async () => {
-    // Create a term
-    const term = await prisma.term.create({
-      data: {
-        year: 24,
-        term: 3,
-      },
-    });
-
-    // Create a lecturer
-    const lecturer = await prisma.user.create({
-      data: {
-        zid: 1234567,
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@example.com',
-        role: 'LECTURER',
-        password: 'password123',
-      },
-    });
-
-    // Create a course
-    const course = await prisma.course.create({
-      data: {
-        id: 1,
-        name: 'Computer Science Project',
-        code: 'COMP3900',
-        description: 'Capstone Project',
-      },
-    });
-
-    // Assign the lecturer to the course
-    await prisma.teachingAssignment.create({
-      data: {
-        lecturerId: lecturer.zid,
-        courseId: course.id,
-        termYear: term.year,
-        termTerm: term.term,
-      },
-    });
+    await populateSampleDatabase(prisma);
 
     // Call the createAssessment function
     const newAssessment = await createAssessment(
-      lecturer.zid.toString(),
+      '1234567',
       'Assignment 1',
       'Description of Assignment 1',
       '2024-12-01T23:59:59.000Z',
       '24T3',
-      course.id.toString()
+      '1'
     );
 
     // Verify the results
@@ -76,7 +39,7 @@ describe('createAssessment', () => {
     expect(new Date(newAssessment.dueDate).toISOString()).toBe('2024-12-01T23:59:59.000Z');
     expect(newAssessment.termYear).toBe(24);
     expect(newAssessment.termTerm).toBe(3);
-    expect(newAssessment.courseId).toBe(course.id);
+    expect(newAssessment.courseId).toBe(1);
   });
 
   it('should throw an error when the lecturer is not assigned to the course', async () => {
