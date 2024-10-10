@@ -1,5 +1,6 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
+import { createAssessment } from './assessments';
 
 const prisma = new PrismaClient();
 
@@ -57,8 +58,14 @@ app.get('/api/lecturer/homepage', (req, res) => {
 });
 
 /// ASSIGNMENT MANAGEMENT
-app.post('/api/lecturer/create-assignment', (req, res) => {
-  res.json({ message: 'Course created' });
+app.post('/api/lecturer/create-assignment', async (req, res) => {
+  const {lecturerId, title, description, dueDate, term, courseID, } = req.body;
+  try {
+    const newAssignment = await createAssessment(lecturerId, title, description, dueDate, term, courseID);
+    res.json(newAssignment);
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
 });
 
 app.put('/api/lecturer/update-assignment', (req, res) => {
