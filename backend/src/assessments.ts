@@ -1,10 +1,11 @@
 import { PrismaClient } from '@prisma/client';
-import { Assignment } from './types';
+import readline from 'readline';
 
 const prisma = new PrismaClient();
 
 export async function createAssessment(lecturerId: string, assignmentName: string, description: string, dueDate: string, term: string, courseId: string) {
 
+  
   // check that the lecturer is assigned to the course
   // check the teachingassignments table for the lecturerId and courseId
   const teachingAssignment = await prisma.teachingAssignment.findFirst({
@@ -43,3 +44,34 @@ export async function createAssessment(lecturerId: string, assignmentName: strin
 
   return newAssignment;
 }
+
+const readInterface = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+function promptFunc(prompt: string): Promise<string> {
+  return new Promise(resolve => readInterface.question(prompt, resolve));
+}
+
+async function main() {
+  console.log("Create a new assignment");
+  try {
+    const lecturerId = await promptFunc("Lecturer zID: ");
+    const assignmentName = await promptFunc("Assignment Name: ");
+    const description = await promptFunc("Description: ");
+    const dueDate = await promptFunc("Due Date: ");
+    const term = await promptFunc("Term: ");
+    const courseId = await promptFunc("Course ID: ");
+
+    const newAssignment = await createAssessment(lecturerId, assignmentName, description, dueDate, term, courseId);
+    console.log(newAssignment);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    await prisma.$disconnect();
+    readInterface.close();
+  }
+}
+
+main();

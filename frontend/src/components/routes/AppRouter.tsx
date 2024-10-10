@@ -26,7 +26,7 @@ const AppRouter = () => {
         <Route path="/dashboard/courses/:courseId" element={<ProtectedRoute element={<Dasbhoard content={<CourseDetails />}/>}/>}/>
         <Route path="/dashboard/courses/:courseId/assignments/:assignmentId" element={<Dasbhoard content={<AssignmentDetails/>}/>}/>
         <Route path="/dashboard/submissions" element={<ProtectedRoute element={<Dasbhoard content={<RecentSubmissions/>}/>}/>}/>
-        <Route path="*" element={isAuthenticated ? <Navigate to="/dashboard/student/courses"/> : <Navigate to="/login"/>} />
+        <Route path="*" element={isAuthenticated ? <Navigate to="/dashboard/courses"/> : <Navigate to="/login"/>} />
       </Routes>
     </Router>
   );
