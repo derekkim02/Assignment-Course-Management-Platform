@@ -3,14 +3,14 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 // Finds user in DB where zid = ""
-async function checkdb() {
+async function getUser(zid: number) {
     const users = await prisma.user.findFirst({
         where: {
-            zid: 5345256
+            zid: zid
         }
     });
     console.log(users);
 
     prisma.$disconnect;
 }
-checkdb();
+getUser(5345256);
