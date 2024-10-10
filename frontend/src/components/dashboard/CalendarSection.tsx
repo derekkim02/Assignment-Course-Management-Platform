@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Breadcrumb, Row, Col, Card, Calendar as AntdCalendar, Badge, Modal, Popover } from 'antd';
-import { Calendar as MobileCalendar } from 'antd-mobile';
 import dayjs, { Dayjs } from 'dayjs';
 
 const { Content } = Layout;
