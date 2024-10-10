@@ -9,17 +9,17 @@ const prisma = new PrismaClient()
 
 async function main() {
     // Example query: create a new user
-    // const newUser = await prisma.user.create({
-    //   data: {
-    //     zid: 12345,
-    //     firstName: 'firstName',
-    //     lastName: 'lastName',
-    //     email: 'data.email',
-    //     password: 'default_password', // TODO Hashing and implementation? csv wouldnt have this info
-    //     role: 'STUDENT',
-    //   },
-    // });
-    // console.log(newUser);
+    const newUser = await prisma.user.create({
+      data: {
+        zid: 12345,
+        firstName: 'firstName',
+        lastName: 'lastName',
+        email: 'data.email',
+        password: 'default_password', // TODO Hashing and implementation? csv wouldnt have this info
+        role: 'STUDENT',
+      },
+    });
+    console.log(newUser);
 
     // Example query: fetch all users
     const allUsers = await prisma.user.findMany();
