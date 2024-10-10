@@ -11,6 +11,7 @@ export async function resetForTests(prisma: PrismaClient) {
 }
 
 export async function populateSampleDatabase(prisma: PrismaClient) {
+  await resetForTests(prisma);
   // Create a term
   const term = await prisma.term.create({
     data: {

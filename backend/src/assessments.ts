@@ -78,7 +78,7 @@ export async function createAssessment(lecturerId: string, assignmentName: strin
       {
         name: assignmentName,
         description: description,
-        dueDate: new Date(dueDate),
+        dueDate: parsedDate,
         termYear: parseInt(termYear, 10),
         termTerm: parseInt(termTerm, 10),
         courseId: parseInt(courseId),

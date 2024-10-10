@@ -80,6 +80,10 @@ app.get('/api/view-assignments', (req, res) => {
   res.json({ assignments: [{ title: 'Assignment 1' }] });
 });
 
+app.get('/api/lecturer/upload-student-csv', (req, res) => {
+  const csvFile = req.body;
+  res.json({ message: 'Student database updated' });
+});
 
 /// STUDENT ASSIGNMENT MANAGEMENT
 app.post('/api/student/submit-assignment', (req, res) => {

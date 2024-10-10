@@ -27,7 +27,7 @@ describe('createAssessment', () => {
       '1234567',
       'Assignment 1',
       'Description of Assignment 1',
-      '2024-12-01T23:59:59.000Z',
+      '11/10/2024',
       '24T3',
       '1'
     );
@@ -36,7 +36,7 @@ describe('createAssessment', () => {
     expect(newAssessment).toBeDefined();
     expect(newAssessment.name).toBe('Assignment 1');
     expect(newAssessment.description).toBe('Description of Assignment 1');
-    expect(new Date(newAssessment.dueDate).toISOString()).toBe('2024-12-01T23:59:59.000Z');
+    expect(new Date(newAssessment.dueDate).toISOString()).toBe('2024-11-09T13:00:00.000Z');
     expect(newAssessment.termYear).toBe(24);
     expect(newAssessment.termTerm).toBe(3);
     expect(newAssessment.courseId).toBe(1);
@@ -80,7 +80,7 @@ describe('createAssessment', () => {
       lecturer.zid.toString(),
       'Assignment 1',
       'Description of Assignment 1',
-      '2024-12-01T23:59:59.000Z',
+      '11/10/2024',
       '23T3',
       course.id.toString()
     )
