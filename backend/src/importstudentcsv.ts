@@ -65,8 +65,8 @@ const importCsvToDb = async (csvFilePath: string) => {;
           }
     })
     .on('end', async () => {
-        // const users = await prisma.user.findMany();      DEBUGGING: PRINTS USERS
-        // console.log(users)
+        const users = await prisma.user.findMany();      // DEBUGGING: PRINTS USERS
+        console.log(users)
         prisma.$disconnect;
     });
 };
