@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Layout, Typography, List, Card } from 'antd';
+import { Layout, Typography, List, Card, Button, Modal, Form, Upload, message } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -36,6 +38,33 @@ const AssignmentDetails: React.FC = () => {
     ],
   };
 
+  const [submissions, setSubmissions] = useState<Submission[]>(assignment.submissions);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [form] = Form.useForm();
+
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+    form.resetFields();
+  };
+
+  const handleOk = () => {
+    form.validateFields().then(values => {
+      const newSubmission: Submission = {
+        id: submissions.length + 1,
+        date: dayjs().format('YYYY-MM-DD'),
+        grade: 'Pending',
+      };
+      setSubmissions([...submissions, newSubmission]);
+      setIsModalVisible(false);
+      form.resetFields();
+      message.success('Submission uploaded successfully!');
+    });
+  };
+
   return (
     <Layout style={{ padding: '20px' }}>
       <Content style={{ maxWidth: '800px', margin: '0 auto' }}>
@@ -45,9 +74,12 @@ const AssignmentDetails: React.FC = () => {
         <Title level={3}>Overall Feedback</Title>
         <Paragraph>{assignment.feedback}</Paragraph>
         <Title level={3}>Past Submissions</Title>
+        <Button type="primary" onClick={showModal} style={{ marginBottom: '20px' }}>
+          Add Submission
+        </Button>
         <List
           grid={{ gutter: 16, column: 1 }}
-          dataSource={assignment.submissions}
+          dataSource={submissions}
           renderItem={submission => (
             <List.Item>
               <Card title={`Submission ${submission.id}`}>
@@ -58,6 +90,33 @@ const AssignmentDetails: React.FC = () => {
           )}
         />
       </Content>
+
+      <Modal
+        title="Add Submission"
+        visible={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        okText="Submit"
+        cancelText="Cancel"
+      >
+        <Form form={form} layout="vertical">
+          <Form.Item
+            name="file"
+            label="Upload File"
+            valuePropName="fileList"
+            getValueFromEvent={e => (Array.isArray(e) ? e : e && e.fileList)}
+            rules={[{ required: true, message: 'Please upload a file' }]}
+          >
+            <Upload.Dragger name="files" beforeUpload={() => false}>
+              <p className="ant-upload-drag-icon">
+                <UploadOutlined />
+              </p>
+              <p className="ant-upload-text">Click or drag file to this area to upload</p>
+              <p className="ant-upload-hint">Support for a single or bulk upload.</p>
+            </Upload.Dragger>
+          </Form.Item>
+        </Form>
+      </Modal>
     </Layout>
   );
 };

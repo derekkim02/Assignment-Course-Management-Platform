@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface AuthContextType {
     isAuthenticated: boolean;
+    userRole: string;
     login: () => void;
     logout: () => void;
 }
@@ -10,6 +11,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(true);
+    const [userRole, setRole] = useState('marker');
 
     const login = () => {
         // Todo: implement login logic from backend.
@@ -22,7 +24,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+        <AuthContext.Provider value={{ isAuthenticated, login, logout, userRole }}>
             {children}
         </AuthContext.Provider>
     );
