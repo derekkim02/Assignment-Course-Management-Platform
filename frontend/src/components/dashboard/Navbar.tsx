@@ -22,7 +22,7 @@ const Navbar: React.FC<NavbarProps> = ({ children }) => {
     <>
       <AppBar position="static" style={{ backgroundColor: '#231f20' }}>
         <Toolbar style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link to="/dashboard" style={{ display: 'flex', alignItems: 'center', height: '60px' }}>
+          <Link to="/login" style={{ display: 'flex', alignItems: 'center', height: '60px' }}>
             <img src={unswNavbarLogo} alt="UNSW Logo" style={{ height: '50px', width: 'auto', marginRight: '16px', paddingBottom: '10px', paddingTop: '10px' }} />
           </Link>
           <div style={{ display: 'flex', alignItems: 'center' }}>

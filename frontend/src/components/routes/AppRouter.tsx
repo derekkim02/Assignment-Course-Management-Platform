@@ -9,6 +9,7 @@ import CoursesSection from '../dashboard/course/CoursesSection';
 import RecentSubmissions from '../dashboard/student/RecentSubmissions';
 import CourseDetails from '../dashboard/course/CourseDetails';
 import AssignmentDetails from '../dashboard/course/assignment/AssignmentDetails';
+import StudentList from '../dashboard/marker/StudentList';
 
 const About = () => <div>About Page</div>;
 
@@ -26,6 +27,7 @@ const AppRouter = () => {
         <Route path="/dashboard/courses/:courseId" element={<ProtectedRoute element={<Dasbhoard content={<CourseDetails />}/>}/>}/>
         <Route path="/dashboard/courses/:courseId/assignments/:assignmentId" element={<Dasbhoard content={<AssignmentDetails/>}/>}/>
         <Route path="/dashboard/submissions" element={<ProtectedRoute element={<Dasbhoard content={<RecentSubmissions/>}/>}/>}/>
+        <Route path="/dashboard/student-list" element={<ProtectedRoute role='marker' element={<Dasbhoard content={<StudentList/>}/>}/>}/>
         <Route path="*" element={isAuthenticated ? <Navigate to="/dashboard/courses"/> : <Navigate to="/login"/>} />
       </Routes>
     </Router>
