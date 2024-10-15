@@ -1,8 +1,12 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { createAssessment } from './assessments';
 
+import jwt from 'jsonwebtoken';
+import bodyParser from 'body-parser';
+
 const prisma = new PrismaClient();
+const secretKey = 'capstone-arat-project';
 
 // Example functions
 
@@ -22,6 +26,7 @@ const prisma = new PrismaClient();
 
 const app = express();
 const port = process.env.PORT || 3001;
+app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
@@ -31,9 +36,29 @@ app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
 
+const verifyToken = (req: Request, res: Response, next: NextFunction) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!token) {
+    return res.status(403).json({ message: 'No token provided' });
+  }
+  jwt.verify(token, secretKey, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: 'Failed to authenticate token' });
+    }
+    next();
+  });
+};
+
 /// AUTHENTICATION
 app.post('/api/auth/login', (req, res) => {
-  res.json({ token: '1234' });
+  const { username, password } = req.body;
+  // Validate username and password
+  if (username === 'user' && password === 'password') {
+    const token = jwt.sign({ username, role: 'user' }, secretKey, { expiresIn: '7 days' });
+    res.json({ token });
+  } else {
+    res.status(401).json({ message: 'Invalid credentials' });
+  }
 });
 
 app.post('/api/auth/logout', (req, res) => {

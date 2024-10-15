@@ -26,7 +26,6 @@ export async function populateSampleDatabase(prisma: PrismaClient) {
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@example.com',
-      role: 'LECTURER',
       password: 'password123',
     },
   });

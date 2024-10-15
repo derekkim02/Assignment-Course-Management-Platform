@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { submitAssignment } from '../submitAssessment';
 import { resetForTests } from './utils';
+import { submitAssignment } from '../assessments';
 
 export const prisma = new PrismaClient();
 
@@ -33,7 +33,6 @@ describe('submitAssessment', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@example.com',
-        role: 'LECTURER',
         password: 'password123',
       },
     });
@@ -103,7 +102,6 @@ describe('submitAssessment', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@example.com',
-        role: 'LECTURER',
         password: 'password123',
       },
     });
@@ -114,7 +112,6 @@ describe('submitAssessment', () => {
           firstName: 'Jane',
           lastName: 'Garcy',
           email: 'jane.garcy@example.com',
-          role: 'STUDENT',
           password: 'pasasword123',
         },
       });

@@ -95,6 +95,35 @@ export async function createAssessment(lecturerId: string, assignmentName: strin
   return newAssignment;
 }
 
+export async function submitAssignment(groupId: number, filePath: string) {
+
+	// Check if the group exists
+	const group = await prisma.group.findFirst({
+		where: {
+			id: groupId
+		}
+	});
+
+	if (!group) {
+		throw new Error("Group not found")
+	}
+
+	const submissionTime = new Date();
+
+	const newSubmission = await prisma.submission.create({
+		data: ({
+			filePath: filePath,
+			submissionTime: submissionTime,
+			latePenalty: 0, // TO BE IMPLEMENTED, is this supposed to be the percentage removed?
+			groupId: groupId,
+		})
+	})
+
+	await prisma.$disconnect();
+
+	return newSubmission;
+}
+
 const readInterface = readline.createInterface({
   input: process.stdin,
   output: process.stdout

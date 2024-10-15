@@ -19,7 +19,6 @@ async function main() {
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@example.com',
-      role: 'LECTURER',
       password: 'password123',
     },
   });

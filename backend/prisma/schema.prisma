@@ -19,13 +19,27 @@ model User {
   firstName           String
   lastName            String
   email               String             @unique
-  role                Role
   password            String
 
   teachingAssignments TeachingAssignment[]
+  markingAssignments  MarkingAssignment[]
   groups              Group[]
   // This refers to the submissions that the user has marked
   marks               Mark[]
+}
+
+model MarkingAssignment {
+  markerId         Int
+  marker           User               @relation(fields: [markerId], references: [zid])
+
+  termYear           Int
+  termTerm           Int
+  term               Term               @relation(fields: [termYear, termTerm], references: [year, term])
+
+  courseCode         String
+  course             Course             @relation(fields: [courseCode], references: [code])
+
+  @@id([markerId, courseCode, termYear, termTerm])
 }
 
 model Course {
@@ -36,6 +50,7 @@ model Course {
 
   teachingAssignments TeachingAssignment[]
   assignments         Assignment[]
+  markingAssignments  MarkingAssignment[]
 }
 
 model Term {
@@ -45,6 +60,7 @@ model Term {
   @@id([year, term])
 
   teachingAssignments TeachingAssignment[]
+  markingAssignments  MarkingAssignment[]
   assignments         Assignment[]
 }
 
@@ -52,7 +68,7 @@ model TeachingAssignment {
   lecturerId         Int
   lecturer           User               @relation(fields: [lecturerId], references: [zid])
 
-  courseId           Int
+  courseId        Int
   course             Course             @relation(fields: [courseId], references: [id])
 
   termYear           Int
@@ -123,10 +139,4 @@ model Mark {
   marker             User               @relation(fields: [markerId], references: [zid])
 
   @@id([submissionId, markerId])
-}
-
-enum Role {
-  STUDENT
-  TUTOR
-  LECTURER
 }
