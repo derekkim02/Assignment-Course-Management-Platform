@@ -23,7 +23,7 @@ describe('submitAssessment', () => {
     const term = await prisma.term.create({
       data: {
         year: 2024,
-        term: 3,
+        term: "T3",
       },
     });
 
@@ -64,7 +64,7 @@ describe('submitAssessment', () => {
         description: 'Description of Assignment 1',
         dueDate: '2024-12-01T23:59:59.000Z',
         termYear: 2024,
-        termTerm: 3,
+        termTerm: "T3",
         courseId: course.id
       }
     });
@@ -92,7 +92,7 @@ describe('submitAssessment', () => {
     const term = await prisma.term.create({
       data: {
         year: 24,
-        term: 3,
+        term: "T3",
       },
     });
 
@@ -143,7 +143,7 @@ describe('submitAssessment', () => {
         description: 'Description of Assignment 1',
         dueDate: '2024-12-01T23:59:59.000Z',
         termYear: 2024,
-        termTerm: 3,
+        termTerm: "T3",
         courseId: course.id
       }
     });

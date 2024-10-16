@@ -16,7 +16,7 @@ export async function populateSampleDatabase(prisma: PrismaClient) {
   const term = await prisma.term.create({
     data: {
       year: 24,
-      term: 3,
+      term: "T3",
     },
   });
   // Create a lecturer

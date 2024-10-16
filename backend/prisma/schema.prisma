@@ -24,22 +24,10 @@ model User {
   teachingAssignments TeachingAssignment[]
   markingAssignments  MarkingAssignment[]
   groups              Group[]
+  ELSDuration         ELSDuration?
+  admin               Admin[]
   // This refers to the submissions that the user has marked
   marks               Mark[]
-}
-
-model MarkingAssignment {
-  markerId         Int
-  marker           User               @relation(fields: [markerId], references: [zid])
-
-  termYear           Int
-  termTerm           Int
-  term               Term               @relation(fields: [termYear, termTerm], references: [year, term])
-
-  courseCode         String
-  course             Course             @relation(fields: [courseCode], references: [code])
-
-  @@id([markerId, courseCode, termYear, termTerm])
 }
 
 model Course {
@@ -49,19 +37,27 @@ model Course {
   description        String
 
   teachingAssignments TeachingAssignment[]
-  assignments         Assignment[]
   markingAssignments  MarkingAssignment[]
+  assignments         Assignment[]
 }
 
 model Term {
-  year               Int
-  term               Int
+  year                   Int
+  term                   Trimester
 
   @@id([year, term])
 
-  teachingAssignments TeachingAssignment[]
-  markingAssignments  MarkingAssignment[]
-  assignments         Assignment[]
+  teachingAssignments    TeachingAssignment[]
+  markingAssignments     MarkingAssignment[]
+  assignments            Assignment[]
+  ELSStart ELSDuration[] @relation("StartTerm")
+  ELSEnd ELSDuration[]   @relation("EndTerm")
+}
+
+enum Trimester {
+  T1
+  T2
+  T3
 }
 
 model TeachingAssignment {
@@ -72,10 +68,24 @@ model TeachingAssignment {
   course             Course             @relation(fields: [courseId], references: [id])
 
   termYear           Int
-  termTerm           Int
+  termTerm           Trimester
   term               Term               @relation(fields: [termYear, termTerm], references: [year, term])
 
   @@id([lecturerId, courseId, termYear, termTerm])
+}
+
+model MarkingAssignment {
+  markerId           Int
+  marker             User               @relation(fields: [markerId], references: [zid])
+
+  termYear           Int
+  termTerm           Trimester
+  term               Term               @relation(fields: [termYear, termTerm], references: [year, term])
+
+  courseCode         String
+  course             Course             @relation(fields: [courseCode], references: [code])
+
+  @@id([markerId, courseCode, termYear, termTerm])
 }
 
 model Assignment {
@@ -85,7 +95,7 @@ model Assignment {
   dueDate            DateTime
 
   termYear           Int
-  termTerm           Int
+  termTerm           Trimester
   term               Term               @relation(fields: [termYear, termTerm], references: [year, term])
 
   courseId           Int
@@ -139,4 +149,35 @@ model Mark {
   marker             User               @relation(fields: [markerId], references: [zid])
 
   @@id([submissionId, markerId])
+}
+
+model ELSType {
+  id                Int                @id @default(autoincrement())
+  // How many extra days are allowed for the assignment
+  extraDays         Int                @default(0)
+
+  ELSDurations      ELSDuration[]
+}
+
+model ELSDuration {
+  studentId         Int                @unique
+  student           User               @relation(fields: [studentId], references: [zid])
+
+  elsTypeId         Int
+  elsType           ELSType            @relation(fields: [elsTypeId], references: [id])
+
+  startYear         Int
+  startTerm         Trimester
+  start             Term               @relation("StartTerm", fields: [startYear, startTerm], references: [year, term])
+
+  endYear           Int
+  endTerm           Trimester
+  end               Term               @relation("EndTerm", fields: [endYear, endTerm], references: [year, term])
+
+  @@id([studentId, elsTypeId])
+}
+
+model Admin {
+  zid                 Int                @id
+  user                User               @relation(fields: [zid], references: [zid])
 }

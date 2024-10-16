@@ -47,7 +47,7 @@ describe('createAssessment', () => {
     const term = await prisma.term.create({
       data: {
         year: 23,
-        term: 3,
+        term: "T3",
       },
     });
 
