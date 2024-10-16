@@ -42,8 +42,22 @@ const LoginPage = () => {
     (location.pathname.includes('register') ? 'register' : 'login') as LoginType
   );
 
-  const onFinish = (values: any) => {
+  const onFinish = async (values: any) => {
     console.log('Received values:', values);
+    const { zid: zId, password} = values;
+
+
+    console.log('Received values:', zId, password);
+
+    try {
+      if (loginType === 'login') {
+        // login(zId, password);
+      } else {
+        // register(zId, password);
+      }
+    } catch (error) {
+      console.error('Failed to login/register:', error);
+    }
   };
 
   const onFinishFailed = (errorInfo: any) => {
@@ -140,17 +154,26 @@ const LoginPage = () => {
               </Form.Item>
               <Form.Item
                 name="password-confirm"
+                dependencies={['password']}
                 rules={[
                   {
                     required: true,
-                    message: 'Please enter your password!',
+                    message: 'Please confirm your password!',
                   },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue('password') === value) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(new Error('Passwords do not match!'));
+                    },
+                  }),
                 ]}
               >
                 <Input.Password
                   size="large"
                   prefix={<LockOutlined className="prefixIcon" />}
-                  placeholder="Password Confirm"
+                  placeholder="Confirm Password"
                 />
               </Form.Item>
             </>

@@ -14,7 +14,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [userRole, setRole] = useState('marker');
 
     const login = () => {
-        // Todo: implement login logic from backend.
         setIsAuthenticated(true);
     };
 
