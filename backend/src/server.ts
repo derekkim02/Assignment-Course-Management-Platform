@@ -1,8 +1,5 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
 import { createAssessment } from './assessments';
-
-const prisma = new PrismaClient();
 
 // Example functions
 
