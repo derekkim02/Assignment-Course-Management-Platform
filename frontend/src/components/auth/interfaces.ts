@@ -19,4 +19,4 @@ interface RegisterParams {
   password: string;
 }
 
-export type { AuthenticateResponse, LoginParams, RegisterParams }
+export type { AuthenticateResponse, LoginParams, RegisterParams };

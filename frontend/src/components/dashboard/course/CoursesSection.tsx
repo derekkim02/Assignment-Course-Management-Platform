@@ -11,7 +11,7 @@ const courses = [
   { id: 2, name: 'Course 2', description: 'Description for Course 2', term: '24T2' },
   { id: 3, name: 'Course 3', description: 'Description for Course 3', term: '24T3' },
   { id: 4, name: 'Course 4', description: 'Description for Course 4', term: '24T4' },
-  { id: 5, name: 'Course 5', description: 'Description for Course 5', term: '24T1' },
+  { id: 5, name: 'Course 5', description: 'Description for Course 5', term: '24T1' }
   // Add more courses as needed
 ];
 

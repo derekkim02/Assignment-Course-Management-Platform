@@ -4,8 +4,8 @@ const fetchWithAuth = async (url: string, token: string, role: string) => {
   const response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${token}`,
-      Role: role,
-    },
+      Role: role
+    }
   });
   if (!response.ok) {
     throw new Error('Network response was not ok');
@@ -16,13 +16,13 @@ const fetchWithAuth = async (url: string, token: string, role: string) => {
 export const useUsers = (token: string, role: string) => {
   return useQuery({
     queryKey: ['users'],
-    queryFn: () => fetchWithAuth('/api/users', token, role),
+    queryFn: () => fetchWithAuth('/api/users', token, role)
   });
 };
 
 export const useCourses = (token: string, role: string) => {
   return useQuery({
     queryKey: ['courses'],
-    queryFn: () => fetchWithAuth('/api/courses', token, role),
+    queryFn: () => fetchWithAuth('/api/courses', token, role)
   });
 };

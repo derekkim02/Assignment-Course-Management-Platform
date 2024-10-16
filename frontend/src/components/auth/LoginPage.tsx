@@ -2,10 +2,10 @@ import React, { useState, CSSProperties } from 'react';
 import {
   LockOutlined,
   MobileOutlined,
-  UserOutlined,
+  UserOutlined
 } from '@ant-design/icons';
 import { Tabs, Button, Form, Input } from 'antd';
-import { useAuth } from './AuthContext'; 
+import { useAuth } from './AuthContext';
 import unswLoginLogo from '../../assets/unswLoginLogo.png'; // Ensure the path is correct
 import { useNavigate, useLocation } from 'react-router-dom'; // Import React Router hooks
 import { AuthenticateResponse, LoginParams, RegisterParams } from './interfaces';
@@ -18,7 +18,7 @@ const containerStyle: CSSProperties = {
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  height: '100vh',
+  height: '100vh'
 };
 
 const formContainerStyle: CSSProperties = {
@@ -27,23 +27,23 @@ const formContainerStyle: CSSProperties = {
   padding: '30px',
   boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)', // Increased the offset and blur radius
   borderRadius: '8px',
-  backgroundColor: '#fff',
+  backgroundColor: '#fff'
 };
 
 const logoStyle: CSSProperties = {
   display: 'block',
   margin: '0 auto 20px',
   width: '200px',
-  height: 'auto',
+  height: 'auto'
 };
 
-const submitLogin = async ({email, password}: LoginParams) => {
+const submitLogin = async ({ email, password }: LoginParams) => {
   return fetch(`${config.backendUrl}/api/auth/login`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password })
   }).then((res) => res.json());
 };
 
@@ -58,7 +58,7 @@ const LoginPage = () => {
 
   const onFinish = async (values: any) => {
     console.log('Received values:', values);
-    const {email, password} = values;
+    const { email, password } = values;
 
     try {
       if (loginType === 'login') {
@@ -109,8 +109,8 @@ const LoginPage = () => {
                 rules={[
                   {
                     required: true,
-                    message: 'Please enter your email!',
-                  },
+                    message: 'Please enter your email!'
+                  }
                 ]}
               >
                 <Input
@@ -124,8 +124,8 @@ const LoginPage = () => {
                 rules={[
                   {
                     required: true,
-                    message: 'Please enter your password!',
-                  },
+                    message: 'Please enter your password!'
+                  }
                 ]}
               >
                 <Input.Password
@@ -143,8 +143,8 @@ const LoginPage = () => {
                 rules={[
                   {
                     required: true,
-                    message: 'Please enter your first name!',
-                  },
+                    message: 'Please enter your first name!'
+                  }
                 ]}
               >
                 <Input
@@ -158,8 +158,8 @@ const LoginPage = () => {
                 rules={[
                   {
                     required: true,
-                    message: 'Please enter your last name!',
-                  },
+                    message: 'Please enter your last name!'
+                  }
                 ]}
               >
                 <Input
@@ -173,8 +173,8 @@ const LoginPage = () => {
                 rules={[
                   {
                     required: true,
-                    message: 'Please enter your zid!',
-                  },
+                    message: 'Please enter your zid!'
+                  }
                 ]}
               >
                 <Input
@@ -188,8 +188,8 @@ const LoginPage = () => {
                 rules={[
                   {
                     required: true,
-                    message: 'Please enter your password!',
-                  },
+                    message: 'Please enter your password!'
+                  }
                 ]}
               >
                 <Input.Password
@@ -204,16 +204,16 @@ const LoginPage = () => {
                 rules={[
                   {
                     required: true,
-                    message: 'Please confirm your password!',
+                    message: 'Please confirm your password!'
                   },
                   ({ getFieldValue }) => ({
-                    validator(_, value) {
+                    validator (_, value) {
                       if (!value || getFieldValue('password') === value) {
                         return Promise.resolve();
                       }
                       return Promise.reject(new Error('Passwords do not match!'));
-                    },
-                  }),
+                    }
+                  })
                 ]}
               >
                 <Input.Password
