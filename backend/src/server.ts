@@ -50,14 +50,18 @@ const verifyToken = (req: Request, res: Response, next: NextFunction) => {
 };
 
 /// AUTHENTICATION
-app.post('/api/auth/login', (req, res) => {
-  const { username, password } = req.body;
+app.post('/api/auth/login', async (req, res) => {
+  const { email, password } = req.body;
+  const user = await prisma.user.findUnique({
+    where: { email: email }
+  });
+
   // Validate username and password
-  if (username === 'user' && password === 'password') {
-    const token = jwt.sign({ username, role: 'user' }, secretKey, { expiresIn: '7 days' });
+  if (user && user.password === password) {
+    const token = jwt.sign({ email: user.email }, secretKey, { expiresIn: '7 days' });
     res.json({ token });
-  } else {
-    res.status(401).json({ message: 'Invalid credentials' });
+  } else { 
+    res.status(400).json({ error: 'Invalid username or password '});
   }
 });
 
@@ -131,4 +135,9 @@ app.get('/api/tutor/view-assignments', (req, res) => {
 
 app.get('/api/tutor/student-search', (req, res) => {
   res.json({ assignment: { title: 'Assignment 1' } });
+});
+
+process.on('SIGINT', async () => {
+  await prisma.$disconnect();
+  process.exit();
 });
