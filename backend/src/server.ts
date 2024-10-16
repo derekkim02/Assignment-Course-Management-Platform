@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { createAssessment } from './assessments';
 
 import jwt from 'jsonwebtoken';
@@ -69,8 +69,31 @@ app.post('/api/auth/logout', (req, res) => {
   res.json({ message: 'Logged out' });
 });
 
-app.post('/api/auth/register', (req, res) => {
-  res.json({ message: 'Registered' });
+app.post('/api/auth/register', async (req, res) => {
+  const {firstName, lastName, email, password, cpassword} = req.body;
+  if (password !== cpassword) {
+    res.status(400).json({ error: 'Passwords do not match' });
+  }
+
+  try {
+    await prisma.user.create({
+      data: {
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        password: password
+      }
+    });
+    res.status(201).json({ message: 'Account created' });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      if (e.code === 'P2002') {
+        res.status(400).json({ error: 'Email already exists' });
+      }
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
 });
 
 /// HOMEPAGES
