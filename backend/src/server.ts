@@ -1,4 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
+import cors from 'cors';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { createAssessment } from './assessments';
 
@@ -27,6 +28,7 @@ const secretKey = 'capstone-arat-project';
 const app = express();
 const port = process.env.PORT || 3001;
 app.use(bodyParser.json());
+app.use(cors());
 
 app.get('/', (req, res) => {
   res.send('Hello World!');

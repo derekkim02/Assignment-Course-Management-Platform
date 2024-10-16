@@ -5,9 +5,12 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { Tabs, Button, Form, Input } from 'antd';
-import { useAuth } from './AuthContext'; // Adjust the import path as necessary
+import { useAuth } from './AuthContext'; 
 import unswLoginLogo from '../../assets/unswLoginLogo.png'; // Ensure the path is correct
 import { useNavigate, useLocation } from 'react-router-dom'; // Import React Router hooks
+import { AuthenticateResponse, LoginParams, RegisterParams } from './interfaces';
+import { config } from '../../config'; // Import the config file
+import { useAlertBox } from '../AlertBox'; // Import the useAlertBox hook
 
 type LoginType = 'login' | 'register';
 
@@ -34,6 +37,16 @@ const logoStyle: CSSProperties = {
   height: 'auto',
 };
 
+const submitLogin = async ({email, password}: LoginParams) => {
+  return fetch(`${config.backendUrl}/api/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
+  }).then((res) => res.json());
+};
+
 const LoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -41,16 +54,20 @@ const LoginPage = () => {
   const [loginType, setLoginType] = useState<LoginType>(
     (location.pathname.includes('register') ? 'register' : 'login') as LoginType
   );
+  const { addAlert } = useAlertBox();
 
   const onFinish = async (values: any) => {
     console.log('Received values:', values);
-    const { zid: zId, password } = values;
-
-    console.log('Received values:', zId, password);
+    const {email, password} = values;
 
     try {
       if (loginType === 'login') {
-        // login(zId, password);
+        const res = await submitLogin({ email, password });
+        if ('error' in res) {
+          addAlert(res.error, 'error');
+          return;
+        }
+        login();
       } else {
         // register(zId, password);
       }
@@ -190,7 +207,7 @@ const LoginPage = () => {
                     message: 'Please confirm your password!',
                   },
                   ({ getFieldValue }) => ({
-                    validator (_, value) {
+                    validator(_, value) {
                       if (!value || getFieldValue('password') === value) {
                         return Promise.resolve();
                       }
