@@ -9,7 +9,7 @@ async function main() {
   const term = await prisma.term.create({
     data: {
       year: 2024,
-      term: 3,
+      term: "T3",
     },
   });
 
@@ -19,7 +19,6 @@ async function main() {
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@example.com',
-      role: 'LECTURER',
       password: 'password123',
     },
   });
@@ -50,7 +49,7 @@ async function main() {
       description: 'Description of Assignment 1',
       dueDate: '2024-12-01T23:59:59.000Z',
       termYear: 2024,
-      termTerm: 3,
+      termTerm: "T3",
       courseId: course.id
     }
   });
