@@ -89,18 +89,18 @@ const LoginPage = () => {
           {loginType === 'login' && (
             <>
               <Form.Item
-                name="zid"
+                name="email"
                 rules={[
                   {
                     required: true,
-                    message: 'Please enter your zid!',
+                    message: 'Please enter your email!',
                   },
                 ]}
               >
                 <Input
                   size="large"
                   prefix={<UserOutlined className="prefixIcon" />}
-                  placeholder="zID"
+                  placeholder="Email"
                 />
               </Form.Item>
               <Form.Item
@@ -123,7 +123,37 @@ const LoginPage = () => {
           {loginType === 'register' && (
             <>
               <Form.Item
-                name="zid"
+                name="firstName"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please enter your first name!',
+                  },
+                ]}
+              >
+                <Input
+                  size="large"
+                  prefix={<UserOutlined className="prefixIcon" />}
+                  placeholder="First Name"
+                />
+              </Form.Item>
+              <Form.Item
+                name="lastName"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please enter your last name!',
+                  },
+                ]}
+              >
+                <Input
+                  size="large"
+                  prefix={<UserOutlined className="prefixIcon" />}
+                  placeholder="Last Name"
+                />
+              </Form.Item>
+              <Form.Item
+                name="email"
                 rules={[
                   {
                     required: true,
@@ -134,7 +164,7 @@ const LoginPage = () => {
                 <Input
                   size="large"
                   prefix={<UserOutlined className="prefixIcon" />}
-                  placeholder="zID"
+                  placeholder="Email"
                 />
               </Form.Item>
               <Form.Item
