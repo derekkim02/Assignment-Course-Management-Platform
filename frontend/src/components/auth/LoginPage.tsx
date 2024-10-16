@@ -47,6 +47,16 @@ const submitLogin = async ({ email, password }: LoginParams) => {
   }).then((res) => res.json());
 };
 
+const submitRegister = async ({ firstName, lastName, email, password, cpassword }: RegisterParams) => {
+  return fetch(`${config.backendUrl}/api/auth/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ firstName, lastName, email, password, cpassword })
+  }).then((res) => res.json());
+}
+
 const LoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -58,10 +68,10 @@ const LoginPage = () => {
 
   const onFinish = async (values: any) => {
     console.log('Received values:', values);
-    const { email, password } = values;
 
     try {
       if (loginType === 'login') {
+        const { email, password } = values;
         const res = await submitLogin({ email, password });
         if ('error' in res) {
           addAlert(res.error, 'error');
@@ -69,6 +79,13 @@ const LoginPage = () => {
         }
         login();
       } else {
+        const { firstName, lastName, email, password, 'password-confirm': cpassword } = values;
+        const res = await submitRegister({ firstName, lastName, email, password, cpassword });
+        if ('error' in res) {
+          addAlert(res.error, 'error');
+          return;
+        }
+        login();
         // register(zId, password);
       }
     } catch (error) {
@@ -77,7 +94,7 @@ const LoginPage = () => {
   };
 
   const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
+    addAlert('Missing Credentials!', 'error');
   };
 
   const handleTabChange = (activeKey: string) => {

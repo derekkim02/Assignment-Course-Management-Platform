@@ -17,6 +17,7 @@ interface RegisterParams {
   lastName: string;
   email: string;
   password: string;
+  cpassword: string;
 }
 
 export type { AuthenticateResponse, LoginParams, RegisterParams };

@@ -15,8 +15,6 @@ services:
       - "3001:3001"
     volumes:
       - ./backend/src:/app/src
-    environment:
-      DATABASE_URL: postgres://teamrat:RATT4TA7A@localhost:5432/igivedb
     depends_on:
       - postgres
 
