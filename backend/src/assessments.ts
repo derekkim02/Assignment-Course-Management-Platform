@@ -126,5 +126,3 @@ async function main() {
     readInterface.close();
   }
 }
-
-main();
