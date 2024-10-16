@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 const fetchWithAuth = async (url: string, token: string, role: string) => {
   const response = await fetch(url, {
@@ -14,9 +14,15 @@ const fetchWithAuth = async (url: string, token: string, role: string) => {
 };
 
 export const useUsers = (token: string, role: string) => {
-  return useQuery('users', () => fetchWithAuth('/api/users', token, role));
+  return useQuery({
+    queryKey: ['users'],
+    queryFn: () => fetchWithAuth('/api/users', token, role),
+  });
 };
 
 export const useCourses = (token: string, role: string) => {
-  return useQuery('courses', () => fetchWithAuth('/api/courses', token, role));
+  return useQuery({
+    queryKey: ['courses'],
+    queryFn: () => fetchWithAuth('/api/courses', token, role),
+  });
 };
