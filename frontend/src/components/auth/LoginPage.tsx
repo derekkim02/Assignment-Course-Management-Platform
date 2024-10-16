@@ -44,8 +44,7 @@ const LoginPage = () => {
 
   const onFinish = async (values: any) => {
     console.log('Received values:', values);
-    const { zid: zId, password} = values;
-
+    const { zid: zId, password } = values;
 
     console.log('Received values:', zId, password);
 
@@ -191,7 +190,7 @@ const LoginPage = () => {
                     message: 'Please confirm your password!',
                   },
                   ({ getFieldValue }) => ({
-                    validator(_, value) {
+                    validator (_, value) {
                       if (!value || getFieldValue('password') === value) {
                         return Promise.resolve();
                       }

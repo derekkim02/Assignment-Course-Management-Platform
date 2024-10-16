@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 const fetchWithAuth = async (url: string, token: string, role: string) => {
   const response = await fetch(url, {
     headers: {
-      'Authorization': `Bearer ${token}`,
-      'Role': role,
+      Authorization: `Bearer ${token}`,
+      Role: role,
     },
   });
   if (!response.ok) {

@@ -11,7 +11,6 @@ interface SidebarMenuProps {
 }
 
 const SidebarMenu: React.FC<SidebarMenuProps> = ({ isMobile, children }) => {
-
   const menuItems = [
     { key: '1', icon: <FileTextOutlined />, path: '/dashboard/submissions', label: 'Submissions' },
     { key: '2', icon: <BookOutlined />, path: '/dashboard/courses', label: 'Courses' },
