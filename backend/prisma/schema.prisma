@@ -25,6 +25,7 @@ model User {
   markingAssignments  MarkingAssignment[]
   groups              Group[]
   ELSDuration         ELSDuration?
+  admin               Admin[]
   // This refers to the submissions that the user has marked
   marks               Mark[]
 }
@@ -174,4 +175,9 @@ model ELSDuration {
   end               Term               @relation("EndTerm", fields: [endYear, endTerm], references: [year, term])
 
   @@id([studentId, elsTypeId])
+}
+
+model Admin {
+  zid                 Int                @id
+  user                User               @relation(fields: [zid], references: [zid])
 }
