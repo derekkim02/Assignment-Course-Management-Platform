@@ -59,7 +59,7 @@ export async function createAssessment(lecturerId: string, assignmentName: strin
   if (!course) {
     throw new Error("Course does not exist");
   }
-  
+
   // check that the lecturer is assigned to the course
   // check the teachingassignments table for the lecturerId and courseId
   const teachingAssignment = await prisma.teachingAssignment.findFirst({
@@ -155,5 +155,3 @@ async function main() {
     readInterface.close();
   }
 }
-
-main();
