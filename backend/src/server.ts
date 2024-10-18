@@ -38,14 +38,17 @@ app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
 
-const verifyToken = (req: Request, res: Response, next: NextFunction) => {
+// Middleware to verify JWT token
+const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) {
-    return res.status(403).json({ message: 'No token provided' });
+    res.status(403).json({ message: 'No token provided' });
+    return;
   }
   jwt.verify(token, secretKey, (err, decoded) => {
     if (err) {
-      return res.status(403).json({ message: 'Failed to authenticate token' });
+      res.status(403).json({ message: 'Failed to authenticate token' });
+      return;
     }
     next();
   });
@@ -116,6 +119,16 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 /// HOMEPAGES
+app.get('/api/courses', verifyToken, async (req, res) => {
+  try {
+    // TODO: Find courses based on which role and stuff.
+    const courses = await prisma.course.findMany();
+    res.json(courses);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch courses' });
+  }
+});
+
 app.get('/api/student/homepage', (req, res) => {
   res.json({ user: { name: 'John Doe' } });
 });

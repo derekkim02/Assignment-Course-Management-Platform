@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const decodedToken: { role: string, exp: number } = jwtDecode(token);
     const expirationDate = new Date(decodedToken.exp * 1000); // Convert exp to milliseconds
     Cookies.set('token', token, { expires: expirationDate });
+
     setIsAuthenticated(true);
   };
 
