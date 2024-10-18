@@ -61,9 +61,13 @@ app.post('/api/auth/login', async (req, res) => {
 
   // Validate username and password
   if (user && user.password === password) {
-    const token = jwt.sign({ email: user.email }, secretKey, { expiresIn: '7 days' });
+    const isAdmin = await prisma.admin.findUnique({
+      where: { zid: user.zid }
+    });
+
+    const token = jwt.sign({ email: user.email, isAdmin: Boolean(isAdmin) }, secretKey, { expiresIn: '7 days' });
     res.json({ token });
-  } else { 
+  } else {
     res.status(400).json({ error: 'Invalid username or password'});
   }
 });
@@ -82,7 +86,8 @@ app.post('/api/auth/register', async (req, res) => {
   }
 
   try {
-    await prisma.user.create({
+    const userCount = await prisma.user.count();
+    const user = await prisma.user.create({
       data: {
         firstName: firstName,
         lastName: lastName,
@@ -90,6 +95,13 @@ app.post('/api/auth/register', async (req, res) => {
         password: password
       }
     });
+    if (userCount === 0) {
+      await prisma.admin.create({
+        data: {
+          zid: user.zid
+        }
+      });
+    }
     const token = jwt.sign({ email: email }, secretKey, { expiresIn: '7 days' });
     res.status(201).json({ token, message: 'Account created' });
   } catch (e) {

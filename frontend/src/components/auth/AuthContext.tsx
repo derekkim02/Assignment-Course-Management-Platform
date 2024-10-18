@@ -1,8 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  isIGiveAdmin: boolean;
   userRole: string;
   login: (token: string) => void;
   logout: () => void;
@@ -12,11 +14,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(!!Cookies.get('token'));
-  console.log(isAuthenticated);
+  const [isIGiveAdmin, setIsIGiveAdmin] = useState(false);
   const [userRole, setRole] = useState('marker');
 
+  useEffect(() => {
+    const token = Cookies.get('token');
+    if (token) {
+      const decodedToken: { email : string, isAdmin: boolean } = jwtDecode(token);
+      setIsIGiveAdmin(decodedToken.isAdmin);
+    }
+  }, [isAuthenticated]);
+
   const login = (token: string) => {
-    Cookies.set('token', token, { expires: 7 });
+    const decodedToken: { role: string, exp: number } = jwtDecode(token);
+    const expirationDate = new Date(decodedToken.exp * 1000); // Convert exp to milliseconds
+    Cookies.set('token', token, { expires: expirationDate });
     setIsAuthenticated(true);
   };
 
@@ -26,7 +38,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, userRole }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, logout, userRole, isIGiveAdmin }}>
       {children}
     </AuthContext.Provider>
   );
