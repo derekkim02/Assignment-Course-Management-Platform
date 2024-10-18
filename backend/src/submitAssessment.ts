@@ -1,35 +1,8 @@
 import { PrismaClient } from '@prisma/client';
+import { submitAssignment } from './assessments';
 
 const prisma = new PrismaClient();
 
-export async function submitAssignment(groupId: number, filePath: string) {
-
-	// Check if the group exists
-	const group = await prisma.group.findFirst({
-		where: {
-			id: groupId
-		}
-	});
-
-	if (!group) {
-		throw new Error("Group not found")
-	}
-
-	const submissionTime = new Date();
-
-	const newSubmission = await prisma.submission.create({
-		data: ({
-			filePath: filePath,
-			submissionTime: submissionTime,
-			latePenalty: 0, // TO BE IMPLEMENTED, is this supposed to be the percentage removed?
-			groupId: groupId,
-		})
-	})
-
-	await prisma.$disconnect();
-
-	return newSubmission;
-}
 
 // Remember to run npx prisma migrate reset in the backend directory to reset the database
 async function main() {

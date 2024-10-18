@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Trimester } from '@prisma/client';
 import readline from 'readline';
 import { resetForTests, populateSampleDatabase } from './tests/utils';
 import { parse, isValid } from 'date-fns';
@@ -13,13 +13,13 @@ export async function createAssessment(lecturerId: string, assignmentName: strin
   }
 
   const termYear = term.slice(0, 2);
-  const termTerm = term[3]
+  const termTerm = term[3] as keyof typeof Trimester;
 
   // Check that the term exists
   const termExists = await prisma.term.findFirst({
     where: {
       year: parseInt(termYear, 10),
-      term: parseInt(termTerm, 10)
+      term: Trimester[termTerm]
     }
   });
 
@@ -59,7 +59,7 @@ export async function createAssessment(lecturerId: string, assignmentName: strin
   if (!course) {
     throw new Error("Course does not exist");
   }
-  
+
   // check that the lecturer is assigned to the course
   // check the teachingassignments table for the lecturerId and courseId
   const teachingAssignment = await prisma.teachingAssignment.findFirst({
@@ -80,7 +80,7 @@ export async function createAssessment(lecturerId: string, assignmentName: strin
         description: description,
         dueDate: parsedDate,
         termYear: parseInt(termYear, 10),
-        termTerm: parseInt(termTerm, 10),
+        termTerm: Trimester[termTerm],
         courseId: parseInt(courseId),
         testCases: {
           create: []
@@ -93,6 +93,35 @@ export async function createAssessment(lecturerId: string, assignmentName: strin
   });
 
   return newAssignment;
+}
+
+export async function submitAssignment(groupId: number, filePath: string) {
+
+	// Check if the group exists
+	const group = await prisma.group.findFirst({
+		where: {
+			id: groupId
+		}
+	});
+
+	if (!group) {
+		throw new Error("Group not found")
+	}
+
+	const submissionTime = new Date();
+
+	const newSubmission = await prisma.submission.create({
+		data: ({
+			filePath: filePath,
+			submissionTime: submissionTime,
+			latePenalty: 0, // TO BE IMPLEMENTED, is this supposed to be the percentage removed?
+			groupId: groupId,
+		})
+	})
+
+	await prisma.$disconnect();
+
+	return newSubmission;
 }
 
 const readInterface = readline.createInterface({

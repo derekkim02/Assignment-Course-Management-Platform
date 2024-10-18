@@ -45,7 +45,6 @@ const importCsvToDb = async (csvFilePath: string) => {;
                 lastName,
                 email: data.email,
                 password: 'default_password', // TODO Hashing and implementation? csv wouldnt have this info
-                role: 'STUDENT',
                 /*groups: {
                   connectOrCreate: [
                     {

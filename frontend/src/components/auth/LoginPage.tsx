@@ -2,12 +2,15 @@ import React, { useState, CSSProperties } from 'react';
 import {
   LockOutlined,
   MobileOutlined,
-  UserOutlined,
+  UserOutlined
 } from '@ant-design/icons';
 import { Tabs, Button, Form, Input } from 'antd';
-import { useAuth } from './AuthContext'; // Adjust the import path as necessary
+import { useAuth } from './AuthContext';
 import unswLoginLogo from '../../assets/unswLoginLogo.png'; // Ensure the path is correct
 import { useNavigate, useLocation } from 'react-router-dom'; // Import React Router hooks
+import { AuthenticateResponse, LoginParams, RegisterParams } from './interfaces';
+import { config } from '../../config'; // Import the config file
+import { useAlertBox } from '../AlertBox'; // Import the useAlertBox hook
 
 type LoginType = 'login' | 'register';
 
@@ -15,7 +18,7 @@ const containerStyle: CSSProperties = {
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  height: '100vh',
+  height: '100vh'
 };
 
 const formContainerStyle: CSSProperties = {
@@ -24,15 +27,35 @@ const formContainerStyle: CSSProperties = {
   padding: '30px',
   boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)', // Increased the offset and blur radius
   borderRadius: '8px',
-  backgroundColor: '#fff',
+  backgroundColor: '#fff'
 };
 
 const logoStyle: CSSProperties = {
   display: 'block',
   margin: '0 auto 20px',
   width: '200px',
-  height: 'auto',
+  height: 'auto'
 };
+
+const submitLogin = async ({ email, password }: LoginParams) => {
+  return fetch(`${config.backendUrl}/api/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ email, password })
+  }).then((res) => res.json());
+};
+
+const submitRegister = async ({ firstName, lastName, email, password, cpassword }: RegisterParams) => {
+  return fetch(`${config.backendUrl}/api/auth/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ firstName, lastName, email, password, cpassword })
+  }).then((res) => res.json());
+}
 
 const LoginPage = () => {
   const { login } = useAuth();
@@ -41,13 +64,34 @@ const LoginPage = () => {
   const [loginType, setLoginType] = useState<LoginType>(
     (location.pathname.includes('register') ? 'register' : 'login') as LoginType
   );
+  const { addAlert } = useAlertBox();
 
-  const onFinish = (values: any) => {
+  const onFinish = async (values: any) => {
     console.log('Received values:', values);
+
+    try {
+      if (loginType === 'login') {
+        const { email, password } = values;
+        const res = await submitLogin({ email, password });
+        if ('error' in res) {
+          addAlert(res.error, 'error');
+          return;
+        }
+        login(res.token);
+      } else {
+        const { firstName, lastName, email, password, 'password-confirm': cpassword } = values;
+        const res = await submitRegister({ firstName, lastName, email, password, cpassword });
+        if ('error' in res) {
+          addAlert(res.error, 'error');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to login/register:', error);
+    }
   };
 
   const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
+    addAlert('Missing Credentials!', 'error');
   };
 
   const handleTabChange = (activeKey: string) => {
@@ -75,18 +119,18 @@ const LoginPage = () => {
           {loginType === 'login' && (
             <>
               <Form.Item
-                name="zid"
+                name="email"
                 rules={[
                   {
                     required: true,
-                    message: 'Please enter your zid!',
-                  },
+                    message: 'Please enter your email!'
+                  }
                 ]}
               >
                 <Input
                   size="large"
                   prefix={<UserOutlined className="prefixIcon" />}
-                  placeholder="zID"
+                  placeholder="Email"
                 />
               </Form.Item>
               <Form.Item
@@ -94,8 +138,8 @@ const LoginPage = () => {
                 rules={[
                   {
                     required: true,
-                    message: 'Please enter your password!',
-                  },
+                    message: 'Please enter your password!'
+                  }
                 ]}
               >
                 <Input.Password
@@ -109,18 +153,48 @@ const LoginPage = () => {
           {loginType === 'register' && (
             <>
               <Form.Item
-                name="zid"
+                name="firstName"
                 rules={[
                   {
                     required: true,
-                    message: 'Please enter your zid!',
-                  },
+                    message: 'Please enter your first name!'
+                  }
                 ]}
               >
                 <Input
                   size="large"
                   prefix={<UserOutlined className="prefixIcon" />}
-                  placeholder="zID"
+                  placeholder="First Name"
+                />
+              </Form.Item>
+              <Form.Item
+                name="lastName"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please enter your last name!'
+                  }
+                ]}
+              >
+                <Input
+                  size="large"
+                  prefix={<UserOutlined className="prefixIcon" />}
+                  placeholder="Last Name"
+                />
+              </Form.Item>
+              <Form.Item
+                name="email"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please enter your zid!'
+                  }
+                ]}
+              >
+                <Input
+                  size="large"
+                  prefix={<UserOutlined className="prefixIcon" />}
+                  placeholder="Email"
                 />
               </Form.Item>
               <Form.Item
@@ -128,8 +202,8 @@ const LoginPage = () => {
                 rules={[
                   {
                     required: true,
-                    message: 'Please enter your password!',
-                  },
+                    message: 'Please enter your password!'
+                  }
                 ]}
               >
                 <Input.Password
@@ -140,17 +214,26 @@ const LoginPage = () => {
               </Form.Item>
               <Form.Item
                 name="password-confirm"
+                dependencies={['password']}
                 rules={[
                   {
                     required: true,
-                    message: 'Please enter your password!',
+                    message: 'Please confirm your password!'
                   },
+                  ({ getFieldValue }) => ({
+                    validator (_, value) {
+                      if (!value || getFieldValue('password') === value) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(new Error('Passwords do not match!'));
+                    }
+                  })
                 ]}
               >
                 <Input.Password
                   size="large"
                   prefix={<LockOutlined className="prefixIcon" />}
-                  placeholder="Password Confirm"
+                  placeholder="Confirm Password"
                 />
               </Form.Item>
             </>
