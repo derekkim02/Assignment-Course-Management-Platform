@@ -17,7 +17,6 @@ services:
       - ./backend/src:/app/src
     depends_on:
       - postgres
-
   postgres:
     image: postgres
     restart: unless-stopped

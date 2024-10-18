@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AppBar, Toolbar, IconButton, Menu, MenuItem, Avatar } from '@mui/material';
 import { Link } from 'react-router-dom';
 import unswNavbarLogo from '../../assets/unswNavbarLogo.png';
+import { useAuth } from '../auth/AuthContext';
 
 interface NavbarProps {
   children?: React.ReactNode;
@@ -9,6 +10,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ children }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const auth = useAuth();
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -36,7 +38,7 @@ const Navbar: React.FC<NavbarProps> = ({ children }) => {
               onClose={handleMenuClose}
             >
               <MenuItem onClick={handleMenuClose}>Settings</MenuItem>
-              <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
+              <MenuItem onClick={() => auth.logout()}>Logout</MenuItem>
             </Menu>
           </div>
         </Toolbar>

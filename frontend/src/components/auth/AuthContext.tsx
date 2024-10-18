@@ -1,24 +1,27 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import Cookies from 'js-cookie';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   userRole: string;
-  login: () => void;
+  login: (token: string) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!Cookies.get('token'));
+  console.log(isAuthenticated);
   const [userRole, setRole] = useState('marker');
 
-  const login = () => {
+  const login = (token: string) => {
+    Cookies.set('token', token, { expires: 7 });
     setIsAuthenticated(true);
   };
 
   const logout = () => {
-    // Todo: implement logout logic from backend.
+    Cookies.remove('token');
     setIsAuthenticated(false);
   };
 

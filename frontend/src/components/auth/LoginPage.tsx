@@ -77,16 +77,13 @@ const LoginPage = () => {
           addAlert(res.error, 'error');
           return;
         }
-        login();
+        login(res.token);
       } else {
         const { firstName, lastName, email, password, 'password-confirm': cpassword } = values;
         const res = await submitRegister({ firstName, lastName, email, password, cpassword });
         if ('error' in res) {
           addAlert(res.error, 'error');
-          return;
         }
-        login();
-        // register(zId, password);
       }
     } catch (error) {
       console.error('Failed to login/register:', error);
