@@ -16,7 +16,7 @@ const dummyStudents: Student[] = [
   { id: 1, name: 'John Doe', email: 'john.doe@example.com', zid: 'z1234567' },
   { id: 2, name: 'Jane Smith', email: 'jane.smith@example.com', zid: 'z7654321' },
   { id: 3, name: 'Alice Johnson', email: 'alice.johnson@example.com', zid: 'z1122334' },
-  { id: 4, name: 'Bob Brown', email: 'bob.brown@example.com', zid: 'z4433221' },
+  { id: 4, name: 'Bob Brown', email: 'bob.brown@example.com', zid: 'z4433221' }
   // Add more dummy students as needed
 ];
 

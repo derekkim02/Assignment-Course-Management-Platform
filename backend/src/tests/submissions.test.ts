@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { submitAssignment } from '../submitAssessment';
 import { resetForTests } from './utils';
+import { submitAssignment } from '../assessments';
 
 export const prisma = new PrismaClient();
 

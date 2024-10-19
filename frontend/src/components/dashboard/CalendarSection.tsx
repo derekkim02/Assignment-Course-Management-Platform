@@ -14,7 +14,7 @@ const events: Event[] = [
   { date: '2023-10-10', type: 'success', content: 'Assignment 1 Due' },
   { date: '2023-10-15', type: 'warning', content: 'Midterm Exam' },
   { date: '2023-10-15-18', type: 'warning', content: 'Midterm Exam' },
-  { date: '2023-10-20', type: 'error', content: 'Project Deadline' },
+  { date: '2023-10-20', type: 'error', content: 'Project Deadline' }
 ];
 
 const getListData = (value: Dayjs) => {
@@ -69,7 +69,7 @@ const CalendarSection: React.FC = () => {
               justifyContent: 'center',
               height: '100%',
               cursor: 'pointer',
-              padding: '4px',
+              padding: '4px'
             }}
           >
             {listData.map(item => (
@@ -89,7 +89,7 @@ const CalendarSection: React.FC = () => {
           padding: 24,
           margin: 0,
           minHeight: 280,
-          backgroundColor: '#fff',
+          backgroundColor: '#fff'
         }}
       >
         <Row gutter={[16, 16]}>

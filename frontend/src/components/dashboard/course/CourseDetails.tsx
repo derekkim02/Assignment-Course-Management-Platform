@@ -19,7 +19,7 @@ const CourseDetails: React.FC = () => {
   const [assignments, setAssignments] = useState<Assignment[]>([
     { id: 1, title: 'Assignment 1', dueDate: '2023-10-01 10:00', weighting: 20 },
     { id: 2, title: 'Assignment 2', dueDate: '2023-11-01 12:00', weighting: 30 },
-    { id: 3, title: 'Assignment 3', dueDate: '2023-12-01 14:00', weighting: 50 },
+    { id: 3, title: 'Assignment 3', dueDate: '2023-12-01 14:00', weighting: 50 }
   ]);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [form] = Form.useForm();
@@ -39,7 +39,7 @@ const CourseDetails: React.FC = () => {
         id: assignments.length + 1,
         title: values.title,
         dueDate: values.dueDate.format('YYYY-MM-DD HH:mm'),
-        weighting: values.weighting,
+        weighting: values.weighting
       };
       setAssignments([...assignments, newAssignment]);
       setIsModalVisible(false);

@@ -34,8 +34,8 @@ const AssignmentDetails: React.FC = () => {
     feedback: 'Overall great job on this assignment!',
     submissions: [
       { id: 1, date: '2023-09-15', grade: 'A' },
-      { id: 2, date: '2023-09-20', grade: 'B+' },
-    ],
+      { id: 2, date: '2023-09-20', grade: 'B+' }
+    ]
   };
 
   const [submissions, setSubmissions] = useState<Submission[]>(assignment.submissions);
@@ -56,7 +56,7 @@ const AssignmentDetails: React.FC = () => {
       const newSubmission: Submission = {
         id: submissions.length + 1,
         date: dayjs().format('YYYY-MM-DD'),
-        grade: 'Pending',
+        grade: 'Pending'
       };
       setSubmissions([...submissions, newSubmission]);
       setIsModalVisible(false);

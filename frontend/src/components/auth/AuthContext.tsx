@@ -1,39 +1,54 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
 
 interface AuthContextType {
-    isAuthenticated: boolean;
-    userRole: string;
-    login: () => void;
-    logout: () => void;
+  isAuthenticated: boolean;
+  isIGiveAdmin: boolean;
+  userRole: string;
+  login: (token: string) => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(true);
-    const [userRole, setRole] = useState('marker');
+  const [isAuthenticated, setIsAuthenticated] = useState(!!Cookies.get('token'));
+  const [isIGiveAdmin, setIsIGiveAdmin] = useState(false);
+  const [userRole, setRole] = useState('marker');
 
-    const login = () => {
-        // Todo: implement login logic from backend.
-        setIsAuthenticated(true);
-    };
+  useEffect(() => {
+    const token = Cookies.get('token');
+    if (token) {
+      const decodedToken: { email : string, isAdmin: boolean } = jwtDecode(token);
+      setIsIGiveAdmin(decodedToken.isAdmin);
+    }
+  }, [isAuthenticated]);
 
-    const logout = () => {
-        // Todo: implement logout logic from backend.
-        setIsAuthenticated(false);
-    };
+  const login = (token: string) => {
+    const decodedToken: { role: string, exp: number } = jwtDecode(token);
+    const expirationDate = new Date(decodedToken.exp * 1000); // Convert exp to milliseconds
+    Cookies.set('token', token, { expires: expirationDate });
 
-    return (
-        <AuthContext.Provider value={{ isAuthenticated, login, logout, userRole }}>
-            {children}
-        </AuthContext.Provider>
-    );
+    setIsAuthenticated(true);
+  };
+
+  const logout = () => {
+    Cookies.remove('token');
+    setIsAuthenticated(false);
+  };
+
+  return (
+    <AuthContext.Provider value={{ isAuthenticated, login, logout, userRole, isIGiveAdmin }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
