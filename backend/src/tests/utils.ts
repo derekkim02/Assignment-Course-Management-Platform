@@ -1,17 +1,22 @@
 import { PrismaClient } from '@prisma/client';
+import { exec } from 'child_process';
 
-export async function resetForTests(prisma: PrismaClient) {
-  await prisma.$transaction([
-    prisma.teachingAssignment.deleteMany({}),
-    prisma.assignment.deleteMany({}),
-    prisma.course.deleteMany({}),
-    prisma.user.deleteMany({}),
-    prisma.term.deleteMany({}),
-  ]);
+export function resetDatabase(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    exec('npx prisma migrate reset --force --skip-seed', (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error resetting database: ${stderr}`);
+        reject(error);
+      } else {
+        console.log(`Database reset: ${stdout}`);
+        resolve();
+      }
+    });
+  });
 }
 
 export async function populateSampleDatabase(prisma: PrismaClient) {
-  await resetForTests(prisma);
+  await resetDatabase();
   // Create a term
   const term = await prisma.term.create({
     data: {

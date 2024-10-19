@@ -1,16 +1,16 @@
 import {describe, expect, beforeAll, afterEach, afterAll} from '@jest/globals';
 import { PrismaClient } from '@prisma/client';
 import { createAssessment } from '../assessments';
-import { resetForTests, populateSampleDatabase } from './utils';
+import { resetDatabase, populateSampleDatabase } from './utils';
 
 export const prisma = new PrismaClient();
 
 beforeAll(async () => {
-  await resetForTests(prisma);
+  await resetDatabase();
 });
 
 afterEach(async () => {
-  await resetForTests(prisma);
+  await resetDatabase();
 });
 
 afterAll(async () => {

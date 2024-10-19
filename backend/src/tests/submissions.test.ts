@@ -1,15 +1,15 @@
 import { PrismaClient } from '@prisma/client';
-import { resetForTests } from './utils';
+import { resetDatabase } from './utils';
 import { submitAssignment } from '../assessments';
 
 export const prisma = new PrismaClient();
 
 beforeAll(async () => {
-  await resetForTests(prisma);
+  await resetDatabase();
 });
 
 afterEach(async () => {
-  await resetForTests(prisma);
+  await resetDatabase();
 });
 
 afterAll(async () => {

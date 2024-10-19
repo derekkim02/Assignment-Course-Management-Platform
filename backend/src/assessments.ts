@@ -1,6 +1,4 @@
 import { PrismaClient, Trimester } from '@prisma/client';
-import readline from 'readline';
-import { resetForTests, populateSampleDatabase } from './tests/utils';
 import { parse, isValid } from 'date-fns';
 
 const prisma = new PrismaClient();
@@ -95,6 +93,70 @@ export async function createAssessment(lecturerId: string, assignmentName: strin
   });
 
   return newAssignment;
+}
+
+// Function for a lecturer to update an assignment. 
+export async function updateAssignment(lecturerId: string, assignmentId: number, assignmentName: string, description: string, dueDate: string, courseId: string) {
+
+    // Check that lecturererId is 7 characters long
+    if (lecturerId.length !== 7) {
+      throw new Error("Invalid lecturer ID")
+    }
+  
+    // check that the lecturer exists in the database
+    const lecturer = await prisma.user.findFirst({
+      where: {
+        zid: parseInt(lecturerId)
+      }
+    });
+  
+    if (!lecturer) {
+      throw new Error("Lecturer not found")
+    }
+  
+    // check that the lecturer is assigned to the course
+    // check the teachingassignments table for the lecturerId and courseId
+    // Later on we'll check using a token system. 
+    const teachingAssignment = await prisma.teachingAssignment.findFirst({
+      where: {
+        lecturerId: parseInt(lecturerId),
+        courseId: parseInt(courseId),
+      }
+    });
+  
+    if (!teachingAssignment) {
+      throw new Error("Permission error: You are not assigned to this course")
+    }
+
+    // Check that the assignment exists
+    const assignment = await prisma.assignment.findFirst({
+      where: {
+        id: assignmentId
+      }
+    });
+  
+    if (!assignment) {
+      throw new Error("Assignment not found")
+    }
+  
+    // Check that the due date is a valid date
+    const parsedDate = parse(dueDate, 'dd/MM/yyyy', new Date());
+    if (!isValid(parsedDate)) {
+      throw new Error("Invalid due date");
+    }
+  
+    const updatedAssignment = await prisma.assignment.update({
+      where: {
+        id: assignmentId
+      },
+      data: {
+        name: assignmentName,
+        description: description,
+        dueDate: parsedDate
+      }
+    });
+  
+    return updatedAssignment;
 }
 
 export async function submitAssignment(groupId: number, filePath: string) {
