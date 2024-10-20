@@ -22,7 +22,7 @@ describe('submitAssessment', () => {
     // Create a term
     const term = await prisma.term.create({
       data: {
-        year: 2024,
+        year: 24,
         term: "T3",
       },
     });
@@ -63,7 +63,7 @@ describe('submitAssessment', () => {
         name: 'Assignment 1',
         description: 'Description of Assignment 1',
         dueDate: '2024-12-01T23:59:59.000Z',
-        termYear: 2024,
+        termYear: 24,
         termTerm: "T3",
         courseId: course.id
       }

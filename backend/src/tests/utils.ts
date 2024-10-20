@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Trimester } from '@prisma/client';
 import { exec } from 'child_process';
 
 export function resetDatabase(): Promise<void> {
@@ -16,12 +16,12 @@ export function resetDatabase(): Promise<void> {
 }
 
 export async function populateSampleDatabase(prisma: PrismaClient) {
-  await resetDatabase();
+  //await resetDatabase();
   // Create a term
   const term = await prisma.term.create({
     data: {
       year: 24,
-      term: "T3",
+      term: "T3" as Trimester,
     },
   });
   // Create a lecturer
