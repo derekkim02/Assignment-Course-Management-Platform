@@ -4,18 +4,18 @@ import { useAuth } from '../auth/AuthContext';
 
 interface ProtectedRouteProps {
   element: JSX.Element;
-  role?: string;
+  checkAccess: () => boolean;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element, role }) => {
-  const { isAuthenticated, userRole } = useAuth();
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element, checkAccess, }) => {
+  const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
   }
 
-  if (role && userRole !== role) {
-    return <Navigate to="/unauthorized" />;
+  if (!checkAccess()) {
+    return <Navigate to='/page-not-found' />;
   }
 
   return element;

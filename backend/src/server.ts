@@ -1,13 +1,15 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request } from 'express';
 import cors from 'cors';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient, User } from '@prisma/client';
 import { createAssessment } from './assessments';
 
 import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
+import { checkIgiveAdmin, verifyToken } from './middleware';
+import { courseFetchStrategies } from './utils';
 
-const prisma = new PrismaClient();
-const secretKey = 'capstone-arat-project';
+export const prisma = new PrismaClient();
+export const secretKey = 'capstone-arat-project';
 
 // Example functions
 
@@ -38,20 +40,22 @@ app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
 
-// Middleware to verify JWT token
-const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
+
+// This it will always check if the token is valid, there fore a user will always be returned.
+const getUserFromToken = async (req: Request): Promise<User> => {
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) {
-    res.status(403).json({ message: 'No token provided' });
-    return;
+    throw new Error('No token provided');
   }
-  jwt.verify(token, secretKey, (err, decoded) => {
-    if (err) {
-      res.status(403).json({ message: 'Failed to authenticate token' });
-      return;
-    }
-    next();
+
+  const decoded = jwt.verify(token, secretKey) as { email: string };
+  const email = decoded.email;
+
+  const user = await prisma.user.findUnique({
+    where: { email }
   });
+
+  return user!;
 };
 
 /// AUTHENTICATION
@@ -126,6 +130,45 @@ app.get('/api/courses', verifyToken, async (req, res) => {
     res.json(courses);
   } catch (e) {
     res.status(500).json({ error: 'Failed to fetch courses' });
+  }
+});
+
+app.get('/api/enrollments', verifyToken, async (req, res) => {
+  try {
+    const user = await getUserFromToken(req);
+    const role = req.query.role as string;
+    const fetchCourses = courseFetchStrategies[role];
+    const courses = await fetchCourses(user);
+
+    res.json(courses);
+  } catch (e) {
+    console.error('Error fetching courses:', e);
+    res.status(500).json({ error: 'Failed to fetch courses' });
+  }
+});
+
+app.get('/api/users', verifyToken, checkIgiveAdmin, async (req, res) => {
+  try {
+    const users = await prisma.user.findMany();
+    res.json(users);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch courses' });
+  }
+});
+
+app.post('/api/courses', verifyToken, checkIgiveAdmin, async (req, res) => {
+  const { name, code, description } = req.body;
+  try {
+    const newCourse = await prisma.course.create({
+      data: {
+        name,
+        code,
+        description
+      }
+    });
+    res.json(newCourse);
+  } catch (e) {
+    res.status(400).json({ error: 'Failed to create course' });
   }
 });
 

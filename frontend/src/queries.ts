@@ -29,3 +29,11 @@ export const useCourses = (role: string) => {
     queryFn: () => fetchWithAuth('api/courses', token, role)
   });
 };
+
+export const useEnrollments = (role: string) => {
+  const token = Cookies.get('token') || '';
+  return useQuery({
+    queryKey: ['courses'],
+    queryFn: () => fetchWithAuth('api/enrollments', token, role)
+  });
+};
