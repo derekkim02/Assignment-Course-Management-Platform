@@ -152,7 +152,9 @@ app.post('/api/lecturer/create-assignment', async (req, res) => {
   }
 });
 
-app.put('/api/lecturer/update-assignment', (req, res) => {
+app.put('/api/lecturer/update-assignment/:id', (req, res) => {
+  const { id } = req.params;
+  // Update assignment logic here
   res.json({ message: 'Course updated' });
 });
 
