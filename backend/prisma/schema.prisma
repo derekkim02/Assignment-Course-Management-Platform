@@ -102,14 +102,24 @@ model Assignment {
   course             Course             @relation(fields: [courseId], references: [id])
 
   testCases          TestCase[]
+  autotestExecutable AutotestExecutable?
   groups             Group[]
 }
 
-model TestCase {
+model AutotestExecutable {
   id                 Int                @id @default(autoincrement())
   filePath           String
 
   assignmentId       Int                @unique
+  assignment         Assignment         @relation(fields: [assignmentId], references: [id])
+}
+
+model TestCase {
+  id                 Int                @id @default(autoincrement())
+  input              String
+  expectedOutput     String
+
+  assignmentId       Int
   assignment         Assignment         @relation(fields: [assignmentId], references: [id])
 }
 
