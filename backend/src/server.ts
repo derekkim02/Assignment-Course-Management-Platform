@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import { createAssessment } from './assessments';
 import authRouter from './routes/authRouter';
+import studentRouter from './routes/studentRouter';
 import prisma from './prismaClient';
 
 import jwt from 'jsonwebtoken';
@@ -16,10 +17,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.use('/api/auth', authRouter);
-
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
+app.use('/api/student', studentRouter);
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
@@ -50,10 +48,6 @@ app.get('/api/courses', verifyToken, async (req, res) => {
   } catch {
     res.status(500).json({ error: 'Failed to fetch courses' });
   }
-});
-
-app.get('/api/student/homepage', (req, res) => {
-  res.json({ user: { name: 'John Doe' } });
 });
 
 app.get('/api/tutor/homepage', (req, res) => {
@@ -90,15 +84,6 @@ app.get('/api/view-assignments', (req, res) => {
 app.get('/api/lecturer/upload-student-csv', (req, res) => {
   const csvFile = req.body;
   res.json({ message: 'Student database updated' });
-});
-
-/// STUDENT ASSIGNMENT MANAGEMENT
-app.post('/api/student/submit-assignment', (req, res) => {
-  res.json({ message: 'Assignment submitted' });
-});
-
-app.get('/api/student/view-marks', (req, res) => {
-  res.json({ assignment: { title: 'Assignment 1' } });
 });
 
 /// TUTOR ASSIGNMENT MANAGEMENT
