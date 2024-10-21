@@ -6,19 +6,19 @@ const router = express.Router();
 router.get('/homepage', );
 
 // View assignment details
-router.get('/:assignment/view', );
+router.get('/courses/:courseId/assignments/:assignmentId/view', );
 
 // View a submission's content
-router.get('/:assignment/:submission/view', );
+router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/view', );
 
 // View submission mark
-router.get('/:assignment/:submission/mark', );
+router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/mark', );
 
 // Assign a mark to a student submission
-router.put('/:assignment/:submission/mark', );
+router.put('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/mark', );
 
 // Download a student submission
-router.get('/:assignment/:submission/download', );
+router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/download', );
 
 // Search for students
 router.get('/students', );
