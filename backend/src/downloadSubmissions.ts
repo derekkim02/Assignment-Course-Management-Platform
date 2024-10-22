@@ -9,6 +9,7 @@ export async function downloadSubmissions(groupId: number, assignmentId: number)
             id: groupId
         }
     });
+    console.log(group) //////// Debug line
 
     if (!group) {
 		throw new Error("Group not found")
@@ -30,6 +31,7 @@ export async function downloadSubmissions(groupId: number, assignmentId: number)
             submissionTime: 'desc'
         }
       });
+      console.log(submissions) //////// Debug line
 
       return submissions;
 
@@ -41,3 +43,5 @@ export async function downloadSubmissions(groupId: number, assignmentId: number)
     //     }
 	// });
 }
+
+downloadSubmissions(1, 1);

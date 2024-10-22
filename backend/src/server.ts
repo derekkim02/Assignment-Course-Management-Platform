@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { createAssessment } from './assessments';
+import { downloadSubmissions } from './downloadSubmissions';
 
 import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
@@ -176,6 +177,16 @@ app.post('/api/student/submit-assignment', (req, res) => {
 
 app.get('/api/student/view-marks', (req, res) => {
   res.json({ assignment: { title: 'Assignment 1' } });
+});
+
+app.get('/api/student/download-submissions', async (req, res) => {
+  const { groupId, assignmentId } = req.body;
+  try {
+    const submissions = await downloadSubmissions(groupId, assignmentId);
+    res.json(submissions);
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
 });
 
 /// TUTOR ASSIGNMENT MANAGEMENT
