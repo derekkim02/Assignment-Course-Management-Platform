@@ -24,10 +24,8 @@ interface Course {
 
 const AdminSettings: React.FC = () => {
   const token = Cookies.get('token') || '';
-  const auth = useAuth();
-
-  const { data: users, isLoading: isLoadingUsers, refetch: refetchUsers } = useUsers(token, 'IgiveAdmin');
-  const { data: courses, isLoading: isLoadingCourses, refetch: refetchCourses } = useCourses(token);
+  const { data: users, isLoading: isLoadingUsers, refetch: refetchUsers } = useUsers('IgiveAdmin');
+  const { data: courses, isLoading: isLoadingCourses, refetch: refetchCourses } = useCourses('IgiveAdmin');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isCourseOfferingModalVisible, setIsCourseOfferingModalVisible] = useState(false);
   const [form] = Form.useForm();

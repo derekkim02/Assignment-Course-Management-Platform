@@ -1,5 +1,5 @@
 import { User } from "@prisma/client";
-import { prisma } from "./server";
+import prisma from "./prismaClient";
 
 const fetchCoursesForMarker = async (user: User) => {
   return await prisma.course.findMany({
@@ -10,6 +10,7 @@ const fetchCoursesForMarker = async (user: User) => {
       ]
     },
     select: {
+      id: true,
       code: true,
       name: true,
       teachingAssignments: {

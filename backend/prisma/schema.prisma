@@ -65,7 +65,7 @@ model TeachingAssignment {
   lecturerId         Int
   lecturer           User               @relation(fields: [lecturerId], references: [zid])
 
-  courseId        Int
+  courseId           Int
   course             Course             @relation(fields: [courseId], references: [id])
 
   termYear           Int

@@ -56,8 +56,6 @@ const groupCoursesByTerm = (courses: Course[]) => {
 const CoursesSection: React.FC = () => {
   const { data: enrollments, isLoading, error } = useEnrollments('marker');
 
-  console.log('enrollments:', enrollments);
-
   const groupedCourses = enrollments ? groupCoursesByTerm(enrollments) : {};
   const sortedTerms = Object.keys(groupedCourses).sort((a, b) => {
     const [aYear, aTerm] = a.split('-');
@@ -78,7 +76,7 @@ const CoursesSection: React.FC = () => {
               <Row gutter={[32, 32]} wrap>
                 {groupedCourses[termKey].map((course: Course) => (
                   <Col key={course.id} xs={24} sm={12} md={8} lg={6}>
-                    <Link to={`${course.id}`}>
+                    <Link to={`${termYear}|${termTerm}|${course.id}`}>
                       <Card hoverable style={{ marginBottom: '20px' }}>
                         <Meta title={course.code} description={course.description} />
                       </Card>
