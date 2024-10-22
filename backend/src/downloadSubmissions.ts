@@ -1,19 +1,34 @@
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-
+/**
+ * Returns submission details of a given assignment and group
+ * @param groupId number
+ * @param assignmentId number
+ * @returns Submissions of corresponding arguments from most recent submission
+ */
 export async function downloadSubmissions(groupId: number, assignmentId: number) {
     // Check if the group exists
     const group = await prisma.group.findFirst({
-        where: {
-            id: groupId
-        }
+      where: {
+        id: groupId
+      }
     });
-    console.log(group) //////// Debug line
 
     if (!group) {
-		throw new Error("Group not found")
-	}
+      throw new Error("Group not found")
+	  }
+
+    // Check if the assignment exists
+    const assignment = await prisma.assignment.findFirst({
+      where: {
+        id: assignmentId
+      }
+    });
+
+    if (!assignment) {
+      throw new Error("Assignment not found")
+    }
 
     const submissions = await prisma.submission.findMany({
         where: {
@@ -31,17 +46,11 @@ export async function downloadSubmissions(groupId: number, assignmentId: number)
             submissionTime: 'desc'
         }
       });
-      console.log(submissions) //////// Debug line
 
+      if (submissions.length === 0) {
+        return "No submissions found"
+      }
       return submissions;
-
-    // const submissions = await prisma.submission.findMany({
-	// 	where: {
-    //         groupId: groupId
-    //     }, orderBy: {
-    //         submissionTime: 'desc'
-    //     }
-	// });
 }
 
 downloadSubmissions(1, 1);
