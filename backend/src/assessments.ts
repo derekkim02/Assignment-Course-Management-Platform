@@ -98,7 +98,7 @@ export async function createAssessment(lecturerId: string, assignmentName: strin
 // Function for a lecturer to update an assignment. 
 // THIS DOES NOT INCLUDE ADDING TEST CASES TO AN ASSIGNMENT
 // TEST CASES WILL BE ADDED THROUGH ANOTHER FUNCTION
-export async function updateAssessment(lecturerId: string, assignmentId: number, assignmentName: string, description: string, dueDate: string, courseId: string) {
+export async function updateAssessment(lecturerId: string, assignmentId: string, assignmentName: string, description: string, dueDate: string, courseId: string) {
 
     // Check that lecturererId is 7 characters long
     if (lecturerId.length !== 7) {
@@ -133,7 +133,7 @@ export async function updateAssessment(lecturerId: string, assignmentId: number,
     // Check that the assignment exists
     const assignment = await prisma.assignment.findFirst({
       where: {
-        id: assignmentId
+        id: parseInt(assignmentId)
       }
     });
   
@@ -149,7 +149,7 @@ export async function updateAssessment(lecturerId: string, assignmentId: number,
   
     const updatedAssignment = await prisma.assignment.update({
       where: {
-        id: assignmentId
+        id: parseInt(assignmentId)
       },
       data: {
         name: assignmentName,
