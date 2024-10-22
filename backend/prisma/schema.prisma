@@ -125,7 +125,7 @@ enum SubmissionType {
   Group
 }
 
-model AutotestExecutable {
+model TestCase {
   id                 Int                @id @default(autoincrement())
   input              String
   expectedOutput     String
