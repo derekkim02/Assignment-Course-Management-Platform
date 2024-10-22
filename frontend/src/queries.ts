@@ -2,11 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
 import { config } from './config';
 
-const fetchWithAuth = async (url: string, token: string, role: string) => {
-  const response = await fetch(`${config.backendUrl}/${url}`, {
+const fetchWithAuth = async (url: string, queries: { [key: string]: string }) => {
+  const token = Cookies.get('token') || '';
+  const queryParams = new URLSearchParams(queries).toString();
+  const response = await fetch(`${config.backendUrl}/${url}?${queryParams}`, {
     headers: {
-      Authorization: `Bearer ${token}`,
-      Role: role
+      Authorization: `Bearer ${token}`
     }
   });
   if (!response.ok) {
@@ -18,22 +19,27 @@ const fetchWithAuth = async (url: string, token: string, role: string) => {
 export const useUsers = (token: string, role: string) => {
   return useQuery({
     queryKey: ['users'],
-    queryFn: () => fetchWithAuth('api/users', token, role)
+    queryFn: () => fetchWithAuth('api/users', { role })
   });
 };
 
 export const useCourses = (role: string) => {
-  const token = Cookies.get('token') || '';
   return useQuery({
     queryKey: ['courses'],
-    queryFn: () => fetchWithAuth('api/courses', token, role)
+    queryFn: () => fetchWithAuth('api/courses', { role })
+  });
+};
+
+export const useEnrollements = (role: string) => {
+  return useQuery({
+    queryKey: ['enrollments'],
+    queryFn: () => fetchWithAuth('api/enrollments', { role })
   });
 };
 
 export const useEnrollments = (role: string) => {
-  const token = Cookies.get('token') || '';
   return useQuery({
     queryKey: ['courses'],
-    queryFn: () => fetchWithAuth('api/enrollments', token, role)
+    queryFn: () => fetchWithAuth('api/enrollments', { role })
   });
 };
