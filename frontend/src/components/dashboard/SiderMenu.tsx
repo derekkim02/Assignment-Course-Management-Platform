@@ -21,7 +21,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isMobile, children }) => {
     { key: '2', icon: <BookOutlined />, path: '/dashboard/courses', label: 'Courses', condition: true },
     { key: '3', icon: <CalendarOutlined />, path: '/dashboard/calendar', label: 'Calendar', condition: true },
     { key: '4', icon: <UserOutlined />, path: '/dashboard/student-list', label: 'Students', condition: true },
-    { key: '5', icon: <SettingOutlined />, path: '/dashboard/admin', label: 'Admin Settings', condition: isAdmin } // Admin-only item
+    { key: '5', icon: <SettingOutlined />, path: '/dashboard/admin-settings', label: 'Admin Settings', condition: isAdmin } // Admin-only item
   ];
 
   const filteredMenuItems = menuItems.filter(item => item.condition);

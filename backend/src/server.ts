@@ -1,12 +1,28 @@
+// Example functions
+
+// async function main() {
+//   // Example query
+//   const allUsers = await prisma.user.findMany();
+//   console.log(allUsers);
+// }
+
+// main()
+//   .catch(e => {
+//     throw e;
+//   })
+//   .finally(async () => {
+//     await prisma.$disconnect();
+//   });
+
 import express from 'express';
 import cors from 'cors';
 import authRouter from './routes/authRouter';
 import studentRouter from './routes/studentRouter';
 import tutorRouter from './routes/tutorRouter';
 import lecturerRouter from './routes/lecturerRouter';
-import prisma from './prismaClient';
-import { verifyToken } from './jwtUtils';
-
+import adminRouter from './routes/adminRouter';
+import userRouter from './routes/userRouter';
+import enrollmentsRouter from './routes/enrollmentsRouter';
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -18,17 +34,10 @@ app.use('/api/auth', authRouter);
 app.use('/api/student', studentRouter);
 app.use('/api/tutor', tutorRouter);
 app.use('/api/lecturer', lecturerRouter);
+app.use('/api/admin', adminRouter);
+app.use('/api/users', userRouter);
+app.use('/api/enrollments', enrollmentsRouter);
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
-});
-
-app.get('/api/courses', verifyToken, async (req, res) => {
-  try {
-    // TODO: Find courses based on which role and stuff.
-    const courses = await prisma.course.findMany();
-    res.json(courses);
-  } catch {
-    res.status(500).json({ error: 'Failed to fetch courses' });
-  }
 });

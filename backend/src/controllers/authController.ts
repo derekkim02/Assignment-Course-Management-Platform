@@ -9,13 +9,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 		const user = await prisma.user.findUnique({
 			where: { email: email }
 		});
-		
+
 		// Validate username and password
 		if (user && user.password === password) {
 			const isAdmin = await prisma.admin.findUnique({
 				where: { zid: user.zid }
 			});
-		
+
 			const token = generateToken(email, Boolean(isAdmin));
 			res.status(200).json({ token });
 		} else {
@@ -28,7 +28,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 export const register = async (req: Request, res: Response): Promise<void> => {
 	const { firstName, lastName, email, password, cpassword } = req.body;
-	
+
 	if (password !== cpassword) {
 		res.status(400).json({ error: 'Passwords do not match' });
 		return;
