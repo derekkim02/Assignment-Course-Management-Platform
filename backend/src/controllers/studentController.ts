@@ -6,6 +6,11 @@ export const homepage = async (req: Request, res: Response): Promise<void> => {
 }
 
 export const submitAssignment = async (req: Request, res: Response): Promise<void> => {
+	const { courseId, assignmentId } = req.params;
+	const { groupId, file } = req.body;
+	const userEmail = req.userEmail;
+
+
 	res.json({ message: 'Assignment submitted' });
 }
 
