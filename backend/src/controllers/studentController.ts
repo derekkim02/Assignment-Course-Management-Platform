@@ -21,9 +21,9 @@ export const submitAssignment = async (req: Request, res: Response): Promise<voi
 			return;
 		}
 
-		const offeringId = await prisma.assignment.findFirst({
+		const courseOfferingId = await prisma.assignment.findFirst({
 			where: { id: parseInt(assignmentId) },
-			select: { offeringId: true },
+			select: { courseOfferingId: true },
 		});
 
 		if (!assignment) {
