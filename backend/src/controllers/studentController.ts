@@ -6,22 +6,31 @@ export const homepage = async (req: Request, res: Response): Promise<void> => {
 }
 
 export const submitAssignment = async (req: Request, res: Response): Promise<void> => {
-	const { groupId, filePath } = req.body;
+	const { assignmentId } = req.params;
+	const { filePath } = req.body;
 	const userEmail = req.userEmail;
 
 	try {
-		const group = await prisma.group.findFirst({
-			where: { id: parseInt(groupId) },
+		const zid = await prisma.user.findFirst({
+			where: { email: userEmail },
+			select: { zid: true },
 		});
 
-		if (!group) {
-			res.status(404).json({ error: 'Group not found' });
+		if (!zid) {
+			res.status(404).json({ error: 'You are not on the system' });
 			return;
 		}
 
-		const assignment = await prisma.assignment.findFirst({
-			where: { id: group.assignmentId },
+		const offeringId = await prisma.assignment.findFirst({
+			where: { id: parseInt(assignmentId) },
+			select: { offeringId: true },
 		});
+
+		if (!assignment) {
+			res.status(404).json({ error: 'Assignment not found' });
+			return;
+		}
+		
 
 		if (!assignment) {
 			res.status(404).json({ error: 'Assignment not found' });

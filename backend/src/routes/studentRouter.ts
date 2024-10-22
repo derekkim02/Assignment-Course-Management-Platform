@@ -9,7 +9,10 @@ router.use(verifyToken);
 router.get('/homepage', homepage);
 
 // Submit an assignment
-router.post('/assignments/submit', submitAssignment);
+router.post('/assignments/:assignmentId/submit', submitAssignment);
+
+// Submit group assignment
+router.post('/assignments/group/submit', );
 
 // View marks
 router.get('/marks', viewMarks);
