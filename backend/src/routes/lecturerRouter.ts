@@ -1,12 +1,15 @@
 import express from 'express';
+import { verifyToken } from '../jwtUtils';
+import { createAssignment } from '../controllers/lecturerController';
 
 const router = express.Router();
+router.use(verifyToken);
 
 // Homepage
 router.get('/homepage', );
 
 // Create assignment
-router.post('/courses/:courseId/assignments', );
+router.post('/courses/:courseId/assignments', createAssignment);
 
 // Change assignment details
 router.put('/courses/:courseId/assignments/:assignmentId', );

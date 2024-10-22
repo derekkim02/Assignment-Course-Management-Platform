@@ -1,6 +1,8 @@
 import express from 'express';
+import { verifyToken } from '../jwtUtils';
 
 const router = express.Router();
+router.use(verifyToken);
 
 // View tutor homepage
 router.get('/homepage', );

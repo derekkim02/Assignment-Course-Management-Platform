@@ -1,7 +1,9 @@
 import express from 'express';
 import { homepage, submitAssignment, viewMarks, viewAssignment } from '../controllers/studentController';
+import { verifyToken } from '../jwtUtils';
 
 const router = express.Router();
+router.use(verifyToken);
 
 // View student homepage
 router.get('/homepage', homepage);

@@ -1,10 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
-import { config } from '../config';
+import { generateToken } from '../jwtUtils';
 import prisma from '../prismaClient';
-
-const secretKey = config.jwtSecretKey;
 
 export const login = async (req: Request, res: Response): Promise<void> => {
 	const { email, password } = req.body;
@@ -19,8 +16,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 				where: { zid: user.zid }
 			});
 		
-			const token = jwt.sign({ email: user.email, isAdmin: Boolean(isAdmin) }, secretKey, { expiresIn: '7 days' });
-			res.json({ token });
+			const token = generateToken(email, Boolean(isAdmin));
+			res.status(200).json({ token });
 		} else {
 			res.status(400).json({ error: 'Invalid username or password'});
 		}
@@ -54,8 +51,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 				}
 			});
 		}
-		const token = jwt.sign({ email: email }, secretKey, { expiresIn: '7 days' });
-		res.status(201).json({ token, message: 'Account created' });
+		res.status(201).json({ message: 'Account created' });
 	} catch (e) {
 		if (e instanceof Prisma.PrismaClientKnownRequestError) {
 			if (e.code === 'P2002') {

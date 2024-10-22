@@ -1,47 +1,28 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import cors from 'cors';
-import { createAssessment } from './assessments';
 import authRouter from './routes/authRouter';
 import studentRouter from './routes/studentRouter';
 import tutorRouter from './routes/tutorRouter';
+import lecturerRouter from './routes/lecturerRouter';
 import prisma from './prismaClient';
+import { verifyToken } from './jwtUtils';
 
-import jwt from 'jsonwebtoken';
-import bodyParser from 'body-parser';
-
-const secretKey = 'capstone-arat-project';
 
 const app = express();
 const port = process.env.PORT || 3001;
 
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(cors());
 
 app.use('/api/auth', authRouter);
 app.use('/api/student', studentRouter);
 app.use('/api/tutor', tutorRouter);
+app.use('/api/lecturer', lecturerRouter);
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
 
-// Middleware to verify JWT token
-const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
-  const token = req.headers['authorization']?.split(' ')[1];
-  if (!token) {
-    res.status(403).json({ message: 'No token provided' });
-    return;
-  }
-  jwt.verify(token, secretKey, (err, decoded) => {
-    if (err) {
-      res.status(403).json({ message: 'Failed to authenticate token' });
-      return;
-    }
-    next();
-  });
-};
-
-/// HOMEPAGES
 app.get('/api/courses', verifyToken, async (req, res) => {
   try {
     // TODO: Find courses based on which role and stuff.
@@ -52,35 +33,4 @@ app.get('/api/courses', verifyToken, async (req, res) => {
   }
 });
 
-app.get('/api/lecturer/homepage', (req, res) => {
-  res.json({ user: { name: 'Andrew Taylor' } });
-});
-
-/// ASSIGNMENT MANAGEMENT
-app.post('/api/lecturer/create-assignment', async (req, res) => {
-  const {lecturerId, title, description, dueDate, term, courseID, } = req.body;
-  try {
-    const newAssignment = await createAssessment(lecturerId, title, description, dueDate, term, courseID);
-    res.json(newAssignment);
-  } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
-  }
-});
-
-app.put('/api/lecturer/update-assignment', (req, res) => {
-  res.json({ message: 'Course updated' });
-});
-
-app.delete('/api/lecturer/delete-assignment', (req, res) => {
-  res.json({ message: 'Course deleted' });
-});
-
-app.get('/api/view-assignments', (req, res) => {
-  res.json({ assignments: [{ title: 'Assignment 1' }] });
-});
-
-app.get('/api/lecturer/upload-student-csv', (req, res) => {
-  const csvFile = req.body;
-  res.json({ message: 'Student database updated' });
-});
 
