@@ -1,9 +1,8 @@
 import {describe, expect, beforeAll, afterEach, afterAll} from '@jest/globals';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../prismaClient';
 import { createAssessment, updateAssessment } from '../assessments';
 import { resetDatabase, populateSampleDatabase } from './utils';
 
-export const prisma = new PrismaClient();
 
 beforeAll(async () => {
   await resetDatabase();
@@ -38,7 +37,7 @@ describe('updateAssessment', () => {
     // Call the updateAssessment function
     const updatedAssessment = await updateAssessment(
       '1234567',
-      newAssessment.id,
+      newAssessment.id.toString(),
       'Assignment 2',
       'Description of Assignment 2',
       '12/10/2024',
@@ -59,7 +58,7 @@ describe('updateAssessment', () => {
     // Call the updateAssessment function
     await expect( updateAssessment(
       '1234567',
-      1,
+      "1",
       'Assignment 2',
       'Description of Assignment 2',
       '12/10/2024',
