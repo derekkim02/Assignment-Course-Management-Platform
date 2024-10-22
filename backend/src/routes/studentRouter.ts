@@ -9,19 +9,28 @@ router.use(verifyToken);
 router.get('/homepage', homepage);
 
 // Submit an assignment
-router.post('/courses/:courseId/assignments/:assignmentId/submit', submitAssignment);
+router.post('/assignments/submit', submitAssignment);
 
 // View marks
 router.get('/marks', viewMarks);
 
 // View assignment details
-router.get('/courses/:courseId/assignments/:assignmentId/view', viewAssignment);
+router.get('/assignments/:assignmentId/view', viewAssignment);
 
 // Fetch all upcoming assignments
-router.get('/courses/:courseId/assignments', );
+router.get('/assignments/new', );
+
+// Fetch all assignments
+router.get('/assignments', );
+
+// Fetch all submitted assignments
+router.get('/assignments/submitted', );
 
 // Fetch all enrolled courses
 router.get('/courses', );
+
+// Fetch course details
+router.get('/courses/:courseId', );
 
 
 export default router;
