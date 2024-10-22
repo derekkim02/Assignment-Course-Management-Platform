@@ -1,7 +1,7 @@
-import { PrismaClient, Trimester } from '@prisma/client';
+import { Trimester } from '@prisma/client';
+import prisma from './prismaClient';
 import { parse, isValid } from 'date-fns';
 
-const prisma = new PrismaClient();
 
 export async function createAssessment(lecturerId: string, assignmentName: string, description: string, dueDate: string, term: string, courseId: string) {
 
