@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { SubmissionType } from '@prisma/client';
 import prisma from '../prismaClient';
 
 export const homepage = async (req: Request, res: Response): Promise<void> => {
@@ -11,48 +12,46 @@ export const submitAssignment = async (req: Request, res: Response): Promise<voi
 	const userEmail = req.userEmail;
 
 	try {
-		const zid = await prisma.user.findFirst({
-			where: { email: userEmail },
-			select: { zid: true },
-		});
-
-		if (!zid) {
-			res.status(404).json({ error: 'You are not on the system' });
-			return;
-		}
-
-		const courseOfferingId = await prisma.assignment.findFirst({
+		const data = await prisma.assignment.findUnique({
 			where: { id: parseInt(assignmentId) },
-			select: { courseOfferingId: true },
-		});
+			select: {
+				courseOffering: {
+					select: {
+						penaltyStrategy: true, 
+						enrolledStudents: {
+							where: {
+								email: userEmail,
+							},
+						},
+					},
+				},
+				isGroupAssignment: true,
+			}
+		})
 
-		if (!assignment) {
+		if (!data) {
 			res.status(404).json({ error: 'Assignment not found' });
 			return;
 		}
-		
 
-		if (!assignment) {
-			res.status(404).json({ error: 'Assignment not found' });
+		if (data.isGroupAssignment) {
+			res.status(400).json({ error: 'Group assignment submission not supported' });
 			return;
 		}
 
-		const submissionTime = new Date();
-		const timeDiff = new Date(assignment.dueDate).getTime() - submissionTime.getTime();
-		const daysLate = Math.ceil(timeDiff / (1000 * 3600 * 24));
-
-		let latePenalty = 0;
-		if (daysLate > 0) {
-			latePenalty = Math.min(daysLate * 5, 25);
+		if (!data.courseOffering.enrolledStudents.length) {
+			res.status(403).json({ error: 'You are not enrolled in this course' });
+			return;
 		}
 
+		const studentId = data.courseOffering.enrolledStudents[0].zid;
 
 		const submission = await prisma.submission.create({
 			data: {
-				groupId: group.id,
+				assignmentId: parseInt(assignmentId),
+				studentId,
 				filePath,
-				latePenalty,
-				submissionTime,
+				submissionType: SubmissionType.Individual,
 			},
 		});
 
