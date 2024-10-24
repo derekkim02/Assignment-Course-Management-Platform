@@ -27,6 +27,7 @@ describe('updateAssessment', () => {
       'Assignment 1',
       'Description of Assignment 1',
       '11/10/2024',
+      false,
       '24T3',
       '1'
     );
@@ -41,6 +42,8 @@ describe('updateAssessment', () => {
       'Assignment 2',
       'Description of Assignment 2',
       '12/10/2024',
+      true,
+      '24T3',
       '1'
     );
 
@@ -62,6 +65,8 @@ describe('updateAssessment', () => {
       'Assignment 2',
       'Description of Assignment 2',
       '12/10/2024',
+      false,
+      '24T3',
       '1'
     )).rejects.toThrow('Assignment not found');
 

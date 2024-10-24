@@ -1,9 +1,8 @@
 import {describe, expect, beforeAll, afterEach, afterAll} from '@jest/globals';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../prismaClient';
 import { createAssessment } from '../assessments';
 import { resetDatabase, populateSampleDatabase } from './utils';
 
-export const prisma = new PrismaClient();
 
 beforeAll(async () => {
   await resetDatabase();
@@ -28,6 +27,7 @@ describe('createAssessment', () => {
       'Assignment 1',
       'Description of Assignment 1',
       '11/10/2024',
+      false,
       '24T3',
       '1'
     );
@@ -37,9 +37,6 @@ describe('createAssessment', () => {
     expect(newAssessment.name).toBe('Assignment 1');
     expect(newAssessment.description).toBe('Description of Assignment 1');
     //expect(new Date(newAssessment.dueDate).toISOString()).toBe('2024-11-10T13:00:00.000Z');
-    expect(newAssessment.termYear).toBe(24);
-    expect(newAssessment.termTerm).toBe('T3');
-    expect(newAssessment.courseId).toBe(1);
   });
 
   it('should throw an error when the lecturer is not assigned to the course', async () => {
@@ -80,6 +77,7 @@ describe('createAssessment', () => {
       'Assignment 1',
       'Description of Assignment 1',
       '11/10/2024',
+      false,
       '23T3',
       course.id.toString()
     )

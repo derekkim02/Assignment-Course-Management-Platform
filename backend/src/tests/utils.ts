@@ -38,7 +38,6 @@ export async function populateSampleDatabase(prisma: PrismaClient) {
   // Create a course
   const course = await prisma.course.create({
     data: {
-      id: 1,
       name: 'Computer Science Project',
       code: 'COMP3900',
       description: 'Capstone Project',
@@ -46,12 +45,12 @@ export async function populateSampleDatabase(prisma: PrismaClient) {
   });
 
   // Assign the lecturer to the course
-  await prisma.teachingAssignment.create({
+  await prisma.courseOffering.create({
     data: {
-      lecturerId: lecturer.zid,
       courseId: course.id,
       termYear: term.year,
       termTerm: term.term,
+      lecturerId: lecturer.zid
     },
   });
 }
