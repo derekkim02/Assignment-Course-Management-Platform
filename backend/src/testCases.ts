@@ -22,22 +22,44 @@ import prisma from "./prismaClient";
 
 // }
 
-export async function createTestCase(lecturerId: string, assignmentId: string, courseId: string, input: string, output: string) {
+export async function createTestCase(lecturerId: string, assignmentId: string, input: string, output: string) {
   // add permission checks, sanitise inputs and all thhat
-    // Sanitize and validate inputs
-    if (!input || !output) {
-      throw new Error("Invalid input or outputs");
+  const lecturer = await prisma.user.findFirst({
+    where: {
+      zid: parseInt(lecturerId)
     }
-  
-    // Create the test case
-    const testCase = await prisma.testCase.create({
-      data: {
-        input: input,
-        expectedOutput: output, // Assuming outputs is a JSON field in the TestCase model
-        assignmentId: parseInt(assignmentId)
-      }
-    });
-  
-    return testCase;
+  });
+
+  if (!lecturer) {
+    throw new Error("Lecturer not found");
+  }
+
+  // Check that the assignment exists
+  const assignment = await prisma.assignment.findFirst({
+    where: {
+      id: parseInt(assignmentId)
+    }
+  });
+
+  if (!assignment) {
+    throw new Error("Assignment not found");
+  }
+
+
+  // Sanitize and validate inputs
+  if (!input || !output) {
+    throw new Error("Invalid input or outputs");
+  }
+
+  // Create the test case
+  const testCase = await prisma.testCase.create({
+    data: {
+      input: input,
+      expectedOutput: output,
+      assignmentId: parseInt(assignmentId)
+    }
+  });
+
+  return testCase;
 
 }
