@@ -1,6 +1,6 @@
 import express from 'express';
 import { verifyToken } from '../jwtUtils';
-import { createAssignment, updateAssignment } from '../controllers/lecturerController';
+import { createAssignment, createTest, updateAssignment } from '../controllers/lecturerController';
 
 const router = express.Router();
 router.use(verifyToken);
@@ -19,6 +19,9 @@ router.delete('/courses/:courseId/assignments/:assignmentId', );
 
 // View assignment details
 router.get('/courses/:courseId/assignments/:assignmentId/view', );
+
+// Create test case for an assignment
+router.post('/courses/:courseId/assignments/:assignmentId/testcases', createTest);
 
 // View all submissions for an assignment
 router.get('/courses/:courseId/assignments/:assignmentId/submissions', );
