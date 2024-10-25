@@ -1,19 +1,19 @@
+import { promises as fs } from 'fs';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
 const execPromise = promisify(exec);
 
-
 class AutomarkService {
     private expectedOutput: File;
 	private inputStream: File;
-	private filePath: String;
+	private directoryPath: String;
 
-    constructor(expectedOutput: File, inputStream: File, filePath: String) {
+    constructor(expectedOutput: String, inputStream: String, directoryPath: String) {
         // Initialization code here
         this.expectedOutput = expectedOutput;
 		this.inputStream = inputStream;
-		this.filePath = filePath;
+		this.directoryPath = directoryPath;
     }
 
     async automark(): Promise<number> {
@@ -21,8 +21,11 @@ class AutomarkService {
             // Read the input stream
             const inputContent = this.inputStream.text();
 
+            // Read files from the directory
+            const files = await fs.readdir(this.directoryPath);
+
             // Construct the command to run the executable with the input content
-            const command = `${this.filePath} ${inputContent}`;
+            const command = `${this.directoryPath} ${inputContent}`;
 
             // Run the input content on the command line
             const { stdout, stderr } = await execPromise(command);
@@ -39,12 +42,13 @@ class AutomarkService {
             const expectedLines = expectedContent.split('\n');
             const outputLines = stdout.split('\n');
 
-            for (let i = 0; i < expectedLines.length; i++) {
+            for (let i = 0; i < outputLines.length; i++) {
                 if (expectedLines[i] !== outputLines[i]) {
                     console.error(`Automark failed: Line ${i + 1} does not match.`);
-                    return -1;
                 }
             }
+
+
 
             // Maybe store in a string or an array? the ExpectedLines and the IncorrectLines
 
