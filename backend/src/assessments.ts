@@ -2,6 +2,7 @@ import { Trimester } from '@prisma/client';
 import prisma from './prismaClient';
 import { parse, isValid } from 'date-fns';
 
+// function to check if provided values are valid
 export async function validateAssessmentData(termYear: string, termTrimester: Trimester, lecturerId: string, dueDate: string, courseId: string) {
   // Check that the term exists
   const termExists = await prisma.term.findFirst({
