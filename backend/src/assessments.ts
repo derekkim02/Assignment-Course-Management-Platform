@@ -137,6 +137,45 @@ export async function updateAssessment(lecturerId: string, assignmentId: string,
   return updatedAssignment;
 }
 
+// rethink how permission/error checking is handled.
+// just basic functions rn
+
+// Returns assignment object from database
+export async function getAssessment(assignmentId: string) {
+  const assignment = await prisma.assignment.findFirst({
+    where: {
+      id: parseInt(assignmentId)
+    }
+  });
+
+  if (!assignment) {
+    throw new Error("Assignment not found");
+  }
+
+  return assignment;
+}
+
+// Deletes assignment from database
+export async function deleteAssessment(assignmentId: string) {
+  const assignment = await prisma.assignment.findFirst({
+    where: {
+      id: parseInt(assignmentId)
+    }
+  });
+
+  if (!assignment) {
+    throw new Error("Assignment not found");
+  }
+
+  await prisma.assignment.delete({
+    where: {
+      id: parseInt(assignmentId)
+    }
+  });
+
+  return assignment;
+}
+
 // export async function submitAssignment(groupId: number, filePath: string) {
 
 // 	// Check if the group exists
