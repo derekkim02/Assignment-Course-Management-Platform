@@ -12,11 +12,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 		// Validate username and password
 		if (user && user.password === password) {
-			const isAdmin = await prisma.admin.findUnique({
-				where: { zid: user.zid }
-			});
-
-			const token = generateToken(email, Boolean(isAdmin));
+			const token = generateToken(email, user.isAdmin);
 			res.status(200).json({ token });
 		} else {
 			res.status(400).json({ error: 'Invalid username or password'});
@@ -36,21 +32,19 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
 	try {
 		const userCount = await prisma.user.count();
+		let adminUser = false;
+		if (userCount === 0) {
+			adminUser = true;
+		}
 		const user = await prisma.user.create({
 			data: {
 				firstName: firstName,
 				lastName: lastName,
 				email: email,
-				password: password
+				password: password,
+				isAdmin: adminUser
 			}
 		});
-		if (userCount === 0) {
-			await prisma.admin.create({
-				data: {
-					zid: user.zid
-				}
-			});
-		}
 		res.status(201).json({ message: 'Account created' });
 	} catch (e) {
 		if (e instanceof Prisma.PrismaClientKnownRequestError) {
