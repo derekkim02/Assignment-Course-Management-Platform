@@ -2,7 +2,6 @@ import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Should this be promisified?
 export function automark(expectedOutput: string, shellCommands: string, directoryPath: string, inputStream: Array<string>) {
     return new Promise((resolve, reject) => {
         let incorrectLines = "";
