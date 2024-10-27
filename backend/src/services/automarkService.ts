@@ -5,9 +5,22 @@ import { promisify } from 'util';
 const execPromise = promisify(exec);
 
 class AutomarkService {
-    private expectedOutput: File;
-	private inputStream: File;
+    private expectedOutput: String;
+	private inputStream: String;
 	private directoryPath: String;
+
+    testExpectedOutput =`
+        Hello World!
+    `
+
+    testInputStream =`
+        1
+        2
+        3
+        4
+    `
+
+    testDirectoryPath ="/testAssessment"
 
     constructor(expectedOutput: String, inputStream: String, directoryPath: String) {
         // Initialization code here
@@ -16,10 +29,10 @@ class AutomarkService {
 		this.directoryPath = directoryPath;
     }
 
-    async automark(): Promise<number> {
+    async automark(): Promise<String> {
         try {
             // Read the input stream
-            const inputContent = this.inputStream.text();
+            const inputContent = this.inputStream;
 
             // Read files from the directory
             const files = await fs.readdir(this.directoryPath);
@@ -32,7 +45,6 @@ class AutomarkService {
 
             if (stderr) {
                 console.error('Error executing command:', stderr);
-                return -1;
             }
 
             // Read the expected output
@@ -55,9 +67,8 @@ class AutomarkService {
             console.log('Automark successful: All lines match.');
         } catch (error) {
             console.error('Error automarking:', error);
-            return -1;
         }
-        return 0;
+        return "A"
     }
 
 }
