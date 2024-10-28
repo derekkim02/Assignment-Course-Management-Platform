@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Layout, Typography, List, Card, Button, Modal, Form, Input, DatePicker, InputNumber } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import dayjs, { Dayjs } from 'dayjs';
+import { useEnrollment } from '../../../queries';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -14,6 +15,10 @@ interface Assignment {
 }
 
 const CourseDetails: React.FC = () => {
+  const courseId = useParams<{ courseId: string }>();
+
+  const { data: enrollment, isLoading: isLoadingCourses, refetch: refetchCourses } = useEnrollment('student');
+
   const [courseName, setCourseName] = useState<string>('Dummy Course Name');
   const [courseDescription, setCourseDescription] = useState<string>('This is a brief description of the dummy course.');
   const [assignments, setAssignments] = useState<Assignment[]>([

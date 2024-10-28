@@ -1,0 +1,122 @@
+import { Request, Response } from 'express';
+import prisma from '../prismaClient';
+import { Trimester } from '@prisma/client';
+
+export const changeAdminRole = async (req: Request, res: Response): Promise<void> => {
+  const { userId } = req.params;
+  const { isAdmin } = req.body;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { zid: parseInt(userId) }
+    });
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    if (isAdmin) {
+      await prisma.admin.create({
+        data: {
+          zid: user.zid
+        }
+      });
+    } else {
+      const adminCount = await prisma.admin.count();
+      if (adminCount === 1) {
+        res.status(400).json({ error: 'Cannot demote the last admin user' });
+        return;
+      }
+      await prisma.admin.delete({
+        where: {
+          zid: user.zid
+        }
+      });
+    }
+    res.json({ message: 'User role updated successfully' });
+  } catch (error) {
+    console.error('Error updating user role:', error);
+    res.status(500).json({ error: 'Failed to update user role' });
+  }
+}
+
+export const createEnrollment = async (req: Request, res: Response): Promise<void> => {
+  function mapTermToTrimester(term: number): Trimester {
+    switch (term) {
+      case 0:
+        return Trimester.T0;
+      case 1:
+        return Trimester.T1;
+      case 2:
+        return Trimester.T2;
+      case 3:
+        return Trimester.T3;
+      default:
+        return Trimester.T0;
+    }
+  }
+
+  const { lecturerId, courseId, termYear, termTerm } = req.body;
+  try {
+    const course = await prisma.course.findUnique({
+      where: { id: courseId }
+    });
+
+    if (!course) {
+      res.status(404).json({ error: 'Course not found' });
+      return;
+    }
+
+    await prisma.term.upsert({
+      where: {
+        year_term: {
+          year: termYear,
+          term: mapTermToTrimester(termTerm)
+        }
+      },
+      update: {},
+      create: {
+        year: termYear,
+        term: mapTermToTrimester(termTerm)
+      }
+    });
+
+    await prisma.teachingAssignment.create({
+      data: {
+        lecturerId,
+        courseId,
+        termYear,
+        termTerm: mapTermToTrimester(termTerm)
+      }
+    });
+    res.json({ message: 'Course offering created successfully' });
+  } catch (error) {
+    console.error('Error creating course offering:', error);
+    res.status(500).json({ error: 'Failed to create course offering' });
+  }
+}
+
+
+export const createCourse = async (req: Request, res: Response): Promise<void> => {
+  const { name, code, description } = req.body;
+  try {
+    const newCourse = await prisma.course.create({
+      data: {
+        name,
+        code,
+        description
+      }
+    });
+    res.json(newCourse);
+  } catch (e) {
+    res.status(400).json({ error: `Failed to create course ${e}` });
+  }
+}
+
+export const getCourses = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const courses = await prisma.course.findMany();
+    res.json(courses);
+  } catch {
+    res.status(500).json({ error: 'Failed to fetch courses' });
+  }
+};

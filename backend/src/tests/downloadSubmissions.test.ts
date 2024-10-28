@@ -88,9 +88,9 @@ describe('submitAssessment', () => {
     // Verify the results
     expect(submit1.filePath).toBe('filePath');
     expect(submissions).toBeDefined();
-    expect(submissions.at(0)?.submissionTime).toBe(submit2.submissionTime)
-    expect(submissions.at(1)?.submissionTime).toBe(submit1.submissionTime)
-    expect(submissions.at(1)?.groupId).toBe(group.id);
+    expect(submissions[0].submissionTime).toBe(submit2.submissionTime)
+    expect(submissions[1].submissionTime).toBe(submit1.submissionTime)
+    expect(submissions[1].groupId).toBe(group.id);
   });
 
   it('should throw an error when the group does not exist', async () => {
