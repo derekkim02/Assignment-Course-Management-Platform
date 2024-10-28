@@ -13,9 +13,8 @@ export const createAssignment =  async (req: Request, res: Response): Promise<vo
 }
 
 export const viewSubmission =  async (req: Request, res: Response): Promise<void> => {
-	const { submissionId } = req.body;
-
 	try {
+    const { submissionId } = req.body;
 	  const submission = await prisma.submission.findUnique({where: {id: parseInt(submissionId)}});
 
     if (!submission) {
@@ -47,10 +46,9 @@ export const getStudents =  async (res: Response): Promise<void> => {
 }
 
 export const searchStudentById =  async (req: Request, res: Response): Promise<void> => {
-	const { studentId } = req.body;
-
 	try {
-		const student = await prisma.user.findMany({
+    const { studentId } = req.body;
+		const student = await prisma.user.findUnique({
 		  where: {
 			zid: studentId,
 		  },
