@@ -1,9 +1,13 @@
 import { Trimester } from '@prisma/client';
 import prisma from './prismaClient';
 import { parse, isValid } from 'date-fns';
+import { Request } from 'express';
+import { getUserFromToken } from './jwtUtils';
 
 // function to check if provided values are valid
-export async function validateAssessmentData(termYear: string, termTrimester: Trimester, lecturerId: string, dueDate: string, courseId: string) {
+export async function validateAssessmentData(req: Request, termYear: string, termTrimester: Trimester, dueDate: string, courseId: string) {
+  const user = await getUserFromToken(req);
+  const lecturerId = user.zid.toString();
   // Check that the term exists
   const termExists = await prisma.term.findFirst({
     where: {
@@ -69,7 +73,7 @@ export async function validateAssessmentData(termYear: string, termTrimester: Tr
   };
 }
 
-export async function createAssessment(lecturerId: string, assignmentName: string, description: string, dueDate: string, isGroupAssignment: boolean, term: string, courseId: string) {
+export async function createAssessment(req: Request, assignmentName: string, description: string, dueDate: string, isGroupAssignment: boolean, term: string, courseId: string) {
   // Check that the term is given in the format '24T3'
   if (term.length !== 4) {
     throw new Error("Invalid term");
@@ -78,7 +82,7 @@ export async function createAssessment(lecturerId: string, assignmentName: strin
   const termYear = term.slice(0, 2);
   const termTrimester = term.slice(2) as Trimester;
 
-  const { parsedDate, teachingAssignmentId } = await validateAssessmentData(termYear, termTrimester, lecturerId, dueDate, courseId);
+  const { parsedDate, teachingAssignmentId } = await validateAssessmentData(req, termYear, termTrimester, dueDate, courseId);
 
   const newAssignment = await prisma.assignment.create({
     data: {
@@ -100,7 +104,7 @@ export async function createAssessment(lecturerId: string, assignmentName: strin
   return newAssignment;
 }
 
-export async function updateAssessment(lecturerId: string, assignmentId: string, assignmentName: string, description: string, dueDate: string, isGroupAssignment: boolean, term: string, courseId: string) {
+export async function updateAssessment(req: Request, assignmentId: string, assignmentName: string, description: string, dueDate: string, isGroupAssignment: boolean, term: string, courseId: string) {
   // Check that the term is given in the format '24T3'
   if (term.length !== 4) {
     throw new Error("Invalid term");
@@ -109,7 +113,7 @@ export async function updateAssessment(lecturerId: string, assignmentId: string,
   const termYear = term.slice(0, 2);
   const termTrimester = term.slice(2) as Trimester;
 
-  const { parsedDate } = await validateAssessmentData(termYear, termTrimester, lecturerId, dueDate, courseId);
+  const { parsedDate } = await validateAssessmentData(req, termYear, termTrimester, dueDate, courseId);
 
   // Check that the assignment exists
   const assignment = await prisma.assignment.findFirst({
