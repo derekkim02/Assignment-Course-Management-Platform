@@ -23,7 +23,7 @@ describe('updateAssessment', () => {
 
     // Call the createAssessment function
     const newAssessment = await createAssessment(
-      '1234567',
+      1234567,
       'Assignment 1',
       'Description of Assignment 1',
       '11/10/2024',
@@ -37,7 +37,7 @@ describe('updateAssessment', () => {
 
     // Call the updateAssessment function
     const updatedAssessment = await updateAssessment(
-      '1234567',
+      1234567,
       newAssessment.id.toString(),
       'Assignment 2',
       'Description of Assignment 2',
@@ -60,7 +60,7 @@ describe('updateAssessment', () => {
 
     // Call the updateAssessment function
     await expect( updateAssessment(
-      '1234567',
+      1234567,
       "1",
       'Assignment 2',
       'Description of Assignment 2',

@@ -23,7 +23,7 @@ describe('createTestCase', () => {
 
     // Call the createAssessment function
     const newAssessment = await createAssessment(
-      '1234567',
+      1234567,
       'Assignment 1',
       'Description of Assignment 1',
       '11/10/2024',

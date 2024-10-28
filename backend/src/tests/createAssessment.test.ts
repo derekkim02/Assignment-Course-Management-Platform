@@ -23,7 +23,7 @@ describe('createAssessment', () => {
 
     // Call the createAssessment function
     const newAssessment = await createAssessment(
-      '1234567',
+      1234567,
       'Assignment 1',
       'Description of Assignment 1',
       '11/10/2024',
@@ -73,7 +73,7 @@ describe('createAssessment', () => {
 
     // Call the createAssessment function
     await expect ( createAssessment(
-      lecturer.zid.toString(),
+      lecturer.zid,
       'Assignment 1',
       'Description of Assignment 1',
       '11/10/2024',
