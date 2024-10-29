@@ -21,7 +21,7 @@ export const getEnrollment = async (req: Request, res: Response): Promise<void> 
   try {
     const { courseId, termYear, termTerm } = req.params;
 
-    const enrollment = await prisma.teachingAssignment.findFirst({
+    const courseOffering = await prisma.courseOffering.findFirst({
       where: {
         courseId: parseInt(courseId),
         termYear: parseInt(termYear),
@@ -30,36 +30,31 @@ export const getEnrollment = async (req: Request, res: Response): Promise<void> 
       include: {
         course: true,
         lecturer: true,
+        tutors: true,
+        enrolledStudents: true,
+        assignments: true,
       }
     });
 
-    if (!enrollment) {
-      res.status(404).json({ error: 'Enrollment not found' });
+    if (!courseOffering) {
+      res.status(404).json({ error: 'Course offering not found' });
       return;
     }
 
-    const assignments = await prisma.assignment.findMany({
-      where: {
-        courseId: parseInt(courseId),
-        termYear: parseInt(termYear),
-        termTerm: termTerm as Trimester
-      },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        dueDate: true,
-      }
-    });
-
     const response = {
-      ...enrollment,
-      assignments
+      ...courseOffering,
+      assignments: courseOffering.assignments.map(assignment => ({
+        id: assignment.id,
+        name: assignment.name,
+        description: assignment.description,
+        dueDate: assignment.dueDate,
+        isGroupAssignment: assignment.isGroupAssignment,
+      }))
     };
 
     res.json(response);
   } catch (e) {
-    console.error('Error fetching enrollment:', e);
-    res.status(500).json({ error: 'Failed to fetch enrollment' });
+    console.error('Error fetching course offering:', e);
+    res.status(500).json({ error: 'Failed to fetch course offering' });
   }
 }
