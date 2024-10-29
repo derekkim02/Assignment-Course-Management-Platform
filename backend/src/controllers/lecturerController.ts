@@ -12,6 +12,12 @@ export const createAssignment =  async (req: Request, res: Response): Promise<vo
   }
 }
 
+/**
+ * Retrieves a submission by its ID.
+ * @param {Request} req - The request object containing the submission ID in the body.
+ * @param {Response} res - The response object used to send the submission data or an error message.
+ * @returns {Promise<void>} - A promise that resolves to void.
+ */
 export const viewSubmission =  async (req: Request, res: Response): Promise<void> => {
   try {
     const { submissionId } = req.body;
@@ -27,24 +33,45 @@ export const viewSubmission =  async (req: Request, res: Response): Promise<void
   }
 }
 
-export const getStudents =  async (res: Response): Promise<void> => {
+/**
+ * Retrieves students enrolled in a specific course offering.
+ * @param {Request} req - The request object containing the course ID, term year, and term term in the body.
+ * @param {Response} res - The response object used to send the list of enrolled students or an error message.
+ * @returns {Promise<void>} - A promise that resolves to void.
+ */
+export const getStudentsInCourse =  async (req: Request, res: Response): Promise<void> => {
   try {
-    const students = await prisma.user.findMany({
-    where: {
-      isAdmin: false,
-    },
+    const { courseId, termYear, termTerm } = req.body;
+    const courseOffering = await prisma.courseOffering.findUnique({
+      where: {
+        courseId_termYear_termTerm: {
+          courseId: courseId,
+          termYear: termYear,
+          termTerm: termTerm,
+        },
+      },
+      include: {
+        enrolledStudents: true,
+      },
     });
 
-    if (!students) {
-      res.status(404).json({ error: 'Students table not found' });
+    if (!courseOffering) {
+      res.status(404).json({ error: 'Course not found' });
       return;
     }
-    res.json(students);
+
+    res.json(courseOffering.enrolledStudents);
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
   }
 }
 
+/**
+ * Searches for a student by their ID.
+ * @param {Request} req - The request object containing the student ID in the body.
+ * @param {Response} res - The response object used to send the student data or an error message.
+ * @returns {Promise<void>} - A promise that resolves to void.
+ */
 export const searchStudentById =  async (req: Request, res: Response): Promise<void> => {
   try {
     const { studentId } = req.body;
@@ -55,8 +82,8 @@ export const searchStudentById =  async (req: Request, res: Response): Promise<v
     });
 
     if (!student) {
-    res.status(404).json({ error: 'Student not found' });
-    return;
+      res.status(404).json({ error: 'Student not found' });
+      return;
     }
     res.json(student);
   } catch (error) {

@@ -1,6 +1,6 @@
 import express from 'express';
 import { verifyToken } from '../jwtUtils';
-import { createAssignment, searchStudentById, getStudents, viewSubmission } from '../controllers/lecturerController';
+import { createAssignment, searchStudentById, getStudentsInCourse, viewSubmission } from '../controllers/lecturerController';
 
 const router = express.Router();
 router.use(verifyToken);
@@ -26,8 +26,8 @@ router.get('/courses/:courseId/assignments/:assignmentId/submissions', );
 // View a submission's content
 router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/view', viewSubmission);
 
-// Search for students
-router.get('/students', getStudents);
+// Search for students in a specific course
+router.get('/students', getStudentsInCourse);
 
 // Look at student details
 router.get('/students/:studentId', searchStudentById);
