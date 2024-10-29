@@ -7,46 +7,19 @@ export const homepage = async (req: Request, res: Response): Promise<void> => {
 }
 
 export const submitAssignment = async (req: Request, res: Response): Promise<void> => {
-	const { assignmentId } = req.params;
-	const { filePath } = req.body;
-	const userEmail = req.userEmail;
-
 	try {
-		const data = await prisma.assignment.findUnique({
-			where: { id: parseInt(assignmentId) },
-			select: {
-				courseOffering: {
-					select: {
-						penaltyStrategy: true, 
-						enrolledStudents: {
-							where: {
-								email: userEmail,
-							},
-						},
-					},
-				},
-				isGroupAssignment: true,
-			}
-		})
-
-		if (!data) {
-			res.status(404).json({ error: 'Assignment not found' });
+		const { assignmentId } = req.params;
+		const studentId = req.zid;
+		
+		if (!req.file) {
+			res.status(400).json({ error: 'No file uploaded' });
 			return;
 		}
 
-		if (data.isGroupAssignment) {
-			res.status(400).json({ error: 'Group assignment submission not supported' });
-			return;
-		}
+		const filePath = req.file.path;
 
-		if (!data.courseOffering.enrolledStudents.length) {
-			res.status(403).json({ error: 'You are not enrolled in this course' });
-			return;
-		}
 
-		const studentId = data.courseOffering.enrolledStudents[0].zid;
-
-		const submission = await prisma.submission.create({
+		await prisma.submission.create({
 			data: {
 				assignmentId: parseInt(assignmentId),
 				studentId,
@@ -54,6 +27,8 @@ export const submitAssignment = async (req: Request, res: Response): Promise<voi
 				submissionType: SubmissionType.Individual,
 			},
 		});
+
+		//TODO: fetch file
 
 	} catch {
 		res.status(500).json({ error: 'Failed to submit assignment' });

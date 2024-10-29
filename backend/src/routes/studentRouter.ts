@@ -1,6 +1,8 @@
 import express from 'express';
 import { homepage, submitAssignment, viewMarks, viewAssignment } from '../controllers/studentController';
 import { verifyToken } from '../jwtUtils';
+import { uploadSubmission } from '../middleware/multer';
+import { validateSingleSubmission } from '../middleware/submission';
 
 const router = express.Router();
 router.use(verifyToken);
@@ -9,7 +11,7 @@ router.use(verifyToken);
 router.get('/homepage', homepage);
 
 // Submit an assignment
-router.post('/assignments/:assignmentId/submit', submitAssignment);
+router.post('/assignments/:assignmentId/submit', validateSingleSubmission, uploadSubmission, submitAssignment);
 
 // Submit group assignment
 router.post('/assignments/group/submit', );
