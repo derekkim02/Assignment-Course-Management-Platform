@@ -92,6 +92,7 @@ model Assignment {
   description        String
   dueDate            DateTime
   isGroupAssignment  Boolean
+  defaultShCmd       String
   autoTestExecutable String?
 
   courseOfferingId   Int
