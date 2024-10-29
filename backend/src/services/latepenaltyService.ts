@@ -4,7 +4,7 @@ class LatePenaltyService {
 	private dueDate: Date;
 	private submissionTime: Date;
 	private penaltyStrategy: PenaltyStrategy;
-	
+
 	constructor(dueDate: Date, submissionTime: Date, penaltyStrategy: PenaltyStrategy) {
 		this.dueDate = dueDate;
 		this.submissionTime = submissionTime;
