@@ -15,20 +15,30 @@ export const changeAdminRole = async (req: Request, res: Response): Promise<void
     }
 
     if (isAdmin) {
-      await prisma.admin.create({
+      await prisma.user.update({
+        where: {
+          zid: parseInt(userId)
+        },
         data: {
-          zid: user.zid
+          isAdmin: true
         }
       });
     } else {
-      const adminCount = await prisma.admin.count();
+      const adminCount = await prisma.user.count({
+        where: {
+          isAdmin: true,
+        },
+      });
       if (adminCount === 1) {
         res.status(400).json({ error: 'Cannot demote the last admin user' });
         return;
       }
-      await prisma.admin.delete({
+      await prisma.user.update({
         where: {
-          zid: user.zid
+          zid: parseInt(userId)
+        },
+        data: {
+          isAdmin: false
         }
       });
     }
@@ -80,12 +90,12 @@ export const createEnrollment = async (req: Request, res: Response): Promise<voi
       }
     });
 
-    await prisma.teachingAssignment.create({
+    await prisma.courseOffering.create({
       data: {
-        lecturerId,
         courseId,
         termYear,
-        termTerm: mapTermToTrimester(termTerm)
+        termTerm: mapTermToTrimester(termTerm),
+        lecturerId,
       }
     });
     res.json({ message: 'Course offering created successfully' });
