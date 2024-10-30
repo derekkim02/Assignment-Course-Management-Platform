@@ -4,6 +4,14 @@ import { courseFetchStrategies } from '../utils';
 import prisma from '../prismaClient';
 import { Trimester } from '@prisma/client';
 
+/**
+ * Retrieves the list of courses a user is enrolled in based on their role.
+ *
+ * @param {Request} req - The request object containing the user's token and role.
+ * @param {Response} res - The response object used to send back the list of courses.
+ * @returns {Promise<void>} - A promise that resolves when the courses are fetched and sent in the response.
+ *
+ */
 export const getEnrollments = async (req: Request, res: Response): Promise<void> => {
   try {
     const user = await getUserFromToken(req);
@@ -17,6 +25,14 @@ export const getEnrollments = async (req: Request, res: Response): Promise<void>
   }
 }
 
+/**
+ * Retrieves the details of a specific course offering based on course ID, term year, and term term.
+ *
+ * @param {Request} req - The request object containing the course ID, term year, and term term.
+ * @param {Response} res - The response object used to send back the course offering details.
+ * @returns {Promise<void>} - A promise that resolves when the course offering details are fetched and sent in the response.
+ *
+ */
 export const getEnrollment = async (req: Request, res: Response): Promise<void> => {
   try {
     const { courseId, termYear, termTerm } = req.params;

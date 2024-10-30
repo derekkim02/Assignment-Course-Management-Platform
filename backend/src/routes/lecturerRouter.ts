@@ -1,6 +1,6 @@
 import express from 'express';
 import { verifyToken } from '../jwtUtils';
-import { createAssignment, createTest, updateAssignment } from '../controllers/lecturerController';
+import { createAssignment, searchStudentById, getStudentsInCourse, viewSubmission, createTest, updateAssignment } from '../controllers/lecturerController';
 
 const router = express.Router();
 router.use(verifyToken);
@@ -27,13 +27,13 @@ router.post('/courses/:courseId/assignments/:assignmentId/testcases', createTest
 router.get('/courses/:courseId/assignments/:assignmentId/submissions', );
 
 // View a submission's content
-router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/view', );
+router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/view', viewSubmission);
 
-// Search for students
-router.get('/students', );
+// Search for students in a specific course
+router.get('/students', getStudentsInCourse);
 
 // Look at student details
-router.get('/students/:studentId', );
+router.get('/students/:studentId', searchStudentById);
 
 // Start auto-marking for every submission in the course
 router.post('/courses/:courseId/assignments/:assignmentId/mark', );
