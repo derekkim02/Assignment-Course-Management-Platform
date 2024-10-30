@@ -34,14 +34,14 @@ export async function downloadSubmissions(groupId: number, assignmentId: number)
         where: {
           groupId: groupId,
           group: {
-            assignment: {
+            submissions: {
               id: assignmentId,
-            },
+            }
           },
         },
         include: {
           group: true, // Include the group details if needed
-          mark: true,  // Include the mark details if needed
+          marks: true,  // Include the mark details if needed
         }, orderBy: {
             submissionTime: 'desc'
         }

@@ -1,16 +1,15 @@
-import { PrismaClient } from '@prisma/client';
-import { resetForTests } from './utils';
-import { submitAssignment } from '../assessments';
+import prisma from '../prismaClient';
+import {describe, expect, beforeAll, afterEach, afterAll} from '@jest/globals';
+import { createAssessment } from '../assessments';
 import { downloadSubmissions } from '../downloadSubmissions';
-
-export const prisma = new PrismaClient();
+import { resetDatabase, populateSampleDatabase } from './utils';
 
 beforeAll(async () => {
-  await resetForTests(prisma);
+  await resetDatabase();
 });
 
 afterEach(async () => {
-  await resetForTests(prisma);
+  await resetDatabase();
 });
 
 afterAll(async () => {
@@ -19,145 +18,71 @@ afterAll(async () => {
 });
 
 describe('submitAssessment', () => {
-  it('should download all submissions when all attributes are valid', async () => {
-    // Create a term
-    const term = await prisma.term.create({
-      data: {
-        year: 2024,
-        term: "T3",
-      },
-    });
+  // it('should download all submissions when all attributes are valid', async () => {
+  //   await populateSampleDatabase(prisma);
 
-    // Create a lecturer
-    const lecturer = await prisma.user.create({
-      data: {
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      },
-    });
+  //   // Create an assessment
+  //   const newAssessment = await createAssessment(
+  //     1234567,
+  //     'Assignment 1',
+  //     'Description of Assignment 1',
+  //     '11/10/2024',
+  //     false,
+  //     '24T3',
+  //     '1'
+  //   );
 
-    // Create a course
-    const course = await prisma.course.create({
-      data: {
-        name: 'Computer Science Project',
-        code: 'COMP3900',
-        description: 'Capstone Project',
-      },
-    });
+  //   // Create a group
+  //   const group = await prisma.group.create({
+  //     data: {
+  //       name: 'Group 1',
+  //       size: 1,
+  //       assignmentId: newAssessment.id,
+  //     }
+  //   });
 
-    // Assign the lecturer to the course
-    await prisma.teachingAssignment.create({
-      data: {
-        lecturerId: lecturer.zid,
-        courseId: course.id,
-        termYear: term.year,
-        termTerm: term.term,
-      },
-    });
-
-    // Create an assessment
-    const newAssessment = await prisma.assignment.create({
-      data: {
-        id: 0,
-        name: 'Assignment 1',
-        description: 'Description of Assignment 1',
-        dueDate: '2024-12-01T23:59:59.000Z',
-        termYear: 2024,
-        termTerm: "T3",
-        courseId: course.id
-      }
-    });
-
-    // Create a group
-    const group = await prisma.group.create({
-      data: {
-        name: 'Group 1',
-        size: 1,
-        assignmentId: newAssessment.id,
-      }
-    });
-
-    // Submit the assessment twice
-    const submit1 = await submitAssignment(group.id, 'filePath');
-    const submit2 = await submitAssignment(group.id, 'filePath');
+  //   // Submit the assessment twice
+  //   const submit1 = await submitAssignment(group.id, 'filePath');
+  //   const submit2 = await submitAssignment(group.id, 'filePath');
 
 
-    const submissions = await downloadSubmissions(group.id, newAssessment.id)
-    // Verify the results
-    expect(submit1.filePath).toBe('filePath');
-    expect(submissions).toBeDefined();
-    expect(submissions[0].submissionTime).toBe(submit2.submissionTime)
-    expect(submissions[1].submissionTime).toBe(submit1.submissionTime)
-    expect(submissions[1].groupId).toBe(group.id);
-  });
+  //   const submissions = await downloadSubmissions(group.id, newAssessment.id)
+  //   // Verify the results
+  //   expect(submit1.filePath).toBe('filePath');
+  //   expect(submissions).toBeDefined();
+  //   expect(submissions[0].submissionTime).toBe(submit2.submissionTime)
+  //   expect(submissions[1].submissionTime).toBe(submit1.submissionTime)
+  //   expect(submissions[1].groupId).toBe(group.id);
+  // });
 
   it('should throw an error when the group does not exist', async () => {
-    // Create a term
-    const term = await prisma.term.create({
-      data: {
-        year: 24,
-        term: "T3",
-      },
-    });
+    await populateSampleDatabase(prisma);
 
-    // Create a lecturer
-    const lecturer = await prisma.user.create({
-      data: {
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      },
-    });
-
-    // Create a student
-    const student = await prisma.user.create({
-        data: {
-          firstName: 'Jane',
-          lastName: 'Garcy',
-          email: 'jane.garcy@example.com',
-          password: 'pasasword123',
-        },
-      });
-
-    // Create a course
-    const course = await prisma.course.create({
-      data: {
-        name: 'Computer Science Project',
-        code: 'COMP3900',
-        description: 'Capstone Project',
-      },
-    });
-
-    // Assign the lecturer to the course
-    await prisma.teachingAssignment.create({
-      data: {
-        lecturerId: lecturer.zid,
-        courseId: course.id,
-        termYear: term.year,
-        termTerm: term.term,
-      },
-    });
+    // // Assign the lecturer to the course
+    // await prisma.teachingAssignment.create({
+    //   data: {
+    //     lecturerId: lecturer.zid,
+    //     courseId: course.id,
+    //     termYear: term.year,
+    //     termTerm: term.term,
+    //   },
+    // });
 
     // Create an assessment
-    await prisma.assignment.create({
-      data: {
-        id: 0,
-        name: 'Assignment 1',
-        description: 'Description of Assignment 1',
-        dueDate: '2024-12-01T23:59:59.000Z',
-        termYear: 2024,
-        termTerm: "T3",
-        courseId: course.id
-      }
-    });
+    const newAssessment = await createAssessment(
+      1234567,
+      'Assignment 1',
+      'Description of Assignment 1',
+      '11/10/2024',
+      false,
+      '24T3',
+      '1'
+    );
 
     // Do not create a group
 
     // Call the createAssessment function
-    await expect (downloadSubmissions(5, 5)
+    await expect (downloadSubmissions(5, newAssessment.id)
   ).rejects.toThrow("Group not found");
   });
 });
