@@ -1,6 +1,5 @@
 import { spawn } from 'child_process';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
 export function automark(expectedOutput: string, shellCommands: string, directoryPath: string, inputStream: Array<string>) {
     return new Promise((resolve, reject) => {
@@ -67,8 +66,6 @@ function main() {
             const testExpectedOutput =`Hello, World!\nThis is a test\nThis is for whitespace error correction.\n`
 
             const testShellCommands =`python3 main.py`
-
-            const __filename = fileURLToPath(import.meta.url);
             const __dirname = path.dirname(__filename);
             const testDirectoryPath = path.join(__dirname, '../services/testStudentFolder');
 

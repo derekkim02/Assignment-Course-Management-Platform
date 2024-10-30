@@ -23,7 +23,14 @@ export const validateSingleSubmission = async (
 						},
 					},
 				},
+				defaultShCmd: true,
 				isGroupAssignment: true,
+				testCases: {
+					select: {
+						input: true,
+						expectedOutput: true,
+					},
+				},
 			},
 		});
 
@@ -41,8 +48,11 @@ export const validateSingleSubmission = async (
 			res.status(403).json({ error: 'You are not enrolled in this course' });
 			return;
 		}
-
-		req.zid = data.courseOffering.enrolledStudents[0].zid;
+		req.submissionInfo = {
+			zid: data.courseOffering.enrolledStudents[0].zid,
+			shCmd: data.defaultShCmd,
+			testCases: data.testCases
+		};
 		next();
 	} catch {
 		res.status(500).json({ error: 'Internal server error' });

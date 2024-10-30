@@ -6,17 +6,21 @@ import e from "express";
 const submissionStorage = multer.diskStorage({
   destination: async (req, _file, cb) =>{
     const { assignmentId } = req.params;
-    const uploadPath = path.join(__dirname, "..", "uploads", assignmentId);
+    const uploadPath = path.join(__dirname, "..", "..", "app", "uploads", assignmentId);
 
     await fs.promises.mkdir(uploadPath, { recursive: true });
     cb(null, uploadPath);
   },
   filename: async (req, file, cb) => {
-    const userId = req.zid;
+    if (!req.submissionInfo) {
+      cb(new Error("Missing submission information"), "");
+      return;
+    }
+    const userId = req.submissionInfo.zid; 
 
     const filename = userId + "-" + Date.now() + path.extname(file.originalname);
 	  cb(null, filename);
-  },
+  }
 });
 
 const submissionFilter = async (

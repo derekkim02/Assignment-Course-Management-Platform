@@ -11,6 +11,11 @@ interface TestCase {
 	expectedOutput: string;
 }
 
+interface TestResult {
+	passed: boolean;
+	message: string;
+}
+
 interface SubmissionInfo {
 	zid: number;
 	shCmd: string;
