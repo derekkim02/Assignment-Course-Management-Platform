@@ -5,24 +5,24 @@ const fetchCoursesForMarker = async (user: User) => {
   return await prisma.course.findMany({
     where: {
       OR: [
-        { teachingAssignments: { some: { lecturerId: user.zid } } },
-        { markingAssignments: { some: { markerId: user.zid } } }
+        { courseOfferings: { some: { lecturerId: user.zid } } },
+        { courseOfferings: { some: { tutors: { some: { zid: user.zid } } } } }
       ]
     },
     select: {
       id: true,
       code: true,
       name: true,
-      teachingAssignments: {
+      courseOfferings: {
         select: {
           termYear: true,
-          termTerm: true
-        }
-      },
-      markingAssignments: {
-        select: {
-          termYear: true,
-          termTerm: true
+          termTerm: true,
+          lecturerId: true,
+          tutors: {
+            select: {
+              zid: true
+            }
+          }
         }
       }
     }
@@ -33,23 +33,21 @@ const fetchCoursesForStudent = async (user: User) => {
   return await prisma.course.findMany({
     where: {
       OR: [
-        { teachingAssignments: { some: { lecturerId: user.zid } } },
-        { markingAssignments: { some: { markerId: user.zid } } }
+        { courseOfferings: { some: { enrolledStudents: { some: { zid: user.zid } } } } },
       ]
     },
     select: {
       code: true,
       name: true,
-      teachingAssignments: {
+      courseOfferings: {
         select: {
           termYear: true,
-          termTerm: true
-        }
-      },
-      markingAssignments: {
-        select: {
-          termYear: true,
-          termTerm: true
+          termTerm: true,
+          enrolledStudents: {
+            select: {
+              zid: true
+            }
+          },
         }
       }
     }

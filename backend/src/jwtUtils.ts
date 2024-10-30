@@ -43,11 +43,7 @@ export const checkIgiveAdmin = async (req: Request, res: Response, next: NextFun
 		return;
 	  }
 
-	  const isAdmin = await prisma.admin.findUnique({
-		where: { zid: user.zid }
-	  });
-
-	  if (!isAdmin) {
+	  if (!user.isAdmin) {
 		res.status(403).json({ message: 'Access denied. Admins only.' });
 		return;
 	  }
