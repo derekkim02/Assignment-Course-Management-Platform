@@ -4,6 +4,14 @@ import { courseFetchStrategies } from '../utils';
 import prisma from '../prismaClient';
 import { Trimester } from '@prisma/client';
 
+/**
+ * Retrieves the list of courses a user is enrolled in based on their role.
+ *
+ * @param {Request} req - The request object containing the user's token and role.
+ * @param {Response} res - The response object used to send back the list of courses.
+ * @returns {Promise<void>} - A promise that resolves when the courses are fetched and sent in the response.
+ *
+ */
 export const getEnrollments = async (req: Request, res: Response): Promise<void> => {
   try {
     const user = await getUserFromToken(req);
@@ -17,11 +25,19 @@ export const getEnrollments = async (req: Request, res: Response): Promise<void>
   }
 }
 
+/**
+ * Retrieves the details of a specific course offering based on course ID, term year, and term term.
+ *
+ * @param {Request} req - The request object containing the course ID, term year, and term term.
+ * @param {Response} res - The response object used to send back the course offering details.
+ * @returns {Promise<void>} - A promise that resolves when the course offering details are fetched and sent in the response.
+ *
+ */
 export const getEnrollment = async (req: Request, res: Response): Promise<void> => {
   try {
     const { courseId, termYear, termTerm } = req.params;
 
-    const enrollment = await prisma.teachingAssignment.findFirst({
+    const courseOffering = await prisma.courseOffering.findFirst({
       where: {
         courseId: parseInt(courseId),
         termYear: parseInt(termYear),
@@ -30,36 +46,31 @@ export const getEnrollment = async (req: Request, res: Response): Promise<void> 
       include: {
         course: true,
         lecturer: true,
+        tutors: true,
+        enrolledStudents: true,
+        assignments: true,
       }
     });
 
-    if (!enrollment) {
-      res.status(404).json({ error: 'Enrollment not found' });
+    if (!courseOffering) {
+      res.status(404).json({ error: 'Course offering not found' });
       return;
     }
 
-    const assignments = await prisma.assignment.findMany({
-      where: {
-        courseId: parseInt(courseId),
-        termYear: parseInt(termYear),
-        termTerm: termTerm as Trimester
-      },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        dueDate: true,
-      }
-    });
-
     const response = {
-      ...enrollment,
-      assignments
+      ...courseOffering,
+      assignments: courseOffering.assignments.map(assignment => ({
+        id: assignment.id,
+        name: assignment.name,
+        description: assignment.description,
+        dueDate: assignment.dueDate,
+        isGroupAssignment: assignment.isGroupAssignment,
+      }))
     };
 
     res.json(response);
   } catch (e) {
-    console.error('Error fetching enrollment:', e);
-    res.status(500).json({ error: 'Failed to fetch enrollment' });
+    console.error('Error fetching course offering:', e);
+    res.status(500).json({ error: 'Failed to fetch course offering' });
   }
 }

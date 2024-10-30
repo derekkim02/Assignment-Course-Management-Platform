@@ -1,15 +1,60 @@
 import { Request, Response } from "express";
-import { createAssessment } from "../assessments";
+import { createAssessment, updateAssessment } from "../assessments";
+import { createTestCase } from "../testCases";
+import { getUserFromToken } from "../jwtUtils";
 import prisma from '../prismaClient';
 
+/**
+ * Creates a new assignment.
+ * @param {Request} req - The request object containing the assignment details in the body.
+ * @param {Response} res - The response object used to send the created assignment or an error message.
+ * @returns {Promise<void>} - A promise that resolves to void.
+ */
 export const createAssignment =  async (req: Request, res: Response): Promise<void> => {
-  const {lecturerId, title, description, dueDate, term, courseID, } = req.body;
-  try {
-    const newAssignment = await createAssessment(lecturerId, title, description, dueDate, term, courseID);
-    res.json(newAssignment);
-  } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
-  }
+	const user = await getUserFromToken(req);
+	const lecturerId = user.zid;
+	const { title, description, dueDate, isGroupAssignment, term, courseID } = req.body;
+	try {
+	  const newAssignment = await createAssessment(lecturerId, title, description, dueDate, isGroupAssignment, term, courseID);
+	  res.json(newAssignment);
+	} catch (error) {
+	  res.status(400).json({ error: (error as Error).message });
+	}
+}
+
+/**
+ * Updates an existing assignment.
+ * @param {Request} req - The request object containing the assignment ID in the params and the updated assignment details in the body.
+ * @param {Response} res - The response object used to send the updated assignment or an error message.
+ * @returns {Promise<void>} - A promise that resolves to void.
+ */
+export const updateAssignment = async (req: Request, res: Response): Promise<void> => {
+	const user = await getUserFromToken(req);
+	const lecturerId = user.zid;
+	const { assignmentId } = req.params
+	const { title, description, dueDate, isGroupAssignment, term, courseID } = req.body;
+	try {
+	  const updatedAssignment = await updateAssessment(lecturerId, assignmentId, title, description, dueDate, isGroupAssignment, term, courseID);
+	  res.json(updatedAssignment);
+	} catch (error) {
+	  res.status(400).json({ error: (error as Error).message });
+	}
+}
+
+/**
+ * Creates a new test case for an assignment.
+ * @param {Request} req - The request object containing the lecturer ID, assignment ID, input, and output in the body.
+ * @param {Response} res - The response object used to send the created test case or an error message.
+ * @returns {Promise<void>} - A promise that resolves to void.
+ */
+export const createTest = async (req: Request, res: Response): Promise<void> => {
+	const { lecturerId, assignmentId, input, output } = req.body;
+	try {
+	  const newTestCase = await createTestCase(lecturerId, assignmentId, input, output);
+	  res.json(newTestCase);
+	} catch (error) {
+	  res.status(400).json({ error: (error as Error).message });
+	}
 }
 
 /**
@@ -38,6 +83,7 @@ export const viewSubmission =  async (req: Request, res: Response): Promise<void
  * @param {Request} req - The request object containing the course ID, term year, and term term in the body.
  * @param {Response} res - The response object used to send the list of enrolled students or an error message.
  * @returns {Promise<void>} - A promise that resolves to void.
+ *
  */
 export const getStudentsInCourse =  async (req: Request, res: Response): Promise<void> => {
   try {
@@ -71,6 +117,7 @@ export const getStudentsInCourse =  async (req: Request, res: Response): Promise
  * @param {Request} req - The request object containing the student ID in the body.
  * @param {Response} res - The response object used to send the student data or an error message.
  * @returns {Promise<void>} - A promise that resolves to void.
+ *
  */
 export const searchStudentById =  async (req: Request, res: Response): Promise<void> => {
   try {

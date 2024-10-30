@@ -1,6 +1,6 @@
 import express from 'express';
 import { verifyToken } from '../jwtUtils';
-import { createAssignment, searchStudentById, getStudentsInCourse, viewSubmission } from '../controllers/lecturerController';
+import { createAssignment, searchStudentById, getStudentsInCourse, viewSubmission, createTest, updateAssignment } from '../controllers/lecturerController';
 
 const router = express.Router();
 router.use(verifyToken);
@@ -12,13 +12,16 @@ router.get('/homepage', );
 router.post('/courses/:courseId/assignments', createAssignment);
 
 // Change assignment details
-router.put('/courses/:courseId/assignments/:assignmentId', );
+router.put('/courses/:courseId/assignments/:assignmentId', updateAssignment );
 
 // Delete assignment
 router.delete('/courses/:courseId/assignments/:assignmentId', );
 
 // View assignment details
 router.get('/courses/:courseId/assignments/:assignmentId/view', );
+
+// Create test case for an assignment
+router.post('/courses/:courseId/assignments/:assignmentId/testcases', createTest);
 
 // View all submissions for an assignment
 router.get('/courses/:courseId/assignments/:assignmentId/submissions', );
