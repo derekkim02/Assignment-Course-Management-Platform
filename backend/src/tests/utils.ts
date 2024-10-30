@@ -32,6 +32,7 @@ export async function populateSampleDatabase(prisma: PrismaClient) {
       lastName: 'Doe',
       email: 'john.doe@example.com',
       password: 'password123',
+      isAdmin: true,
     },
   });
 
@@ -51,6 +52,26 @@ export async function populateSampleDatabase(prisma: PrismaClient) {
       termYear: term.year,
       termTerm: term.term,
       lecturerId: lecturer.zid
+    },
+  });
+
+  await prisma.assignment.create({
+    data: {
+      id: 1,
+      name: 'Assignment 1',
+      description: 'Description of ass1',
+      dueDate: new Date,
+      isGroupAssignment: false,
+      autoTestExecutable: null,
+      courseOfferingId: 1,
+    },
+  });
+
+  await prisma.group.create({
+    data: {
+      id: 1,
+      name: 'Group 1',
+      size: 1,
     },
   });
 }

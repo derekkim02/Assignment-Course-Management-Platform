@@ -1,6 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from './prismaClient';
+import { populateSampleDatabase, resetDatabase } from './tests/utils';
+// import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient()
 /**
  * Returns submission details of a given assignment and group
  * @param groupId number
@@ -33,11 +35,7 @@ export async function downloadSubmissions(groupId: number, assignmentId: number)
     const submissions = await prisma.submission.findMany({
         where: {
           groupId: groupId,
-          group: {
-            submissions: {
-              id: assignmentId,
-            }
-          },
+          assignmentId: assignmentId,
         },
         include: {
           group: true, // Include the group details if needed
@@ -53,4 +51,10 @@ export async function downloadSubmissions(groupId: number, assignmentId: number)
       return submissions;
 }
 
-downloadSubmissions(1, 1);
+// async function test() {
+//   populateSampleDatabase(prisma)
+//   downloadSubmissions(1, 1);
+//   resetDatabase();
+// }
+
+// test()

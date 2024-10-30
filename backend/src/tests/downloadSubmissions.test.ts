@@ -18,28 +18,27 @@ afterAll(async () => {
 });
 
 describe('submitAssessment', () => {
-  // it('should download all submissions when all attributes are valid', async () => {
-  //   await populateSampleDatabase(prisma);
+  it('should download all submissions when all attributes are valid', async () => {
+    await populateSampleDatabase(prisma);
 
-  //   // Create an assessment
-  //   const newAssessment = await createAssessment(
-  //     1234567,
-  //     'Assignment 1',
-  //     'Description of Assignment 1',
-  //     '11/10/2024',
-  //     false,
-  //     '24T3',
-  //     '1'
-  //   );
+    // Create an assessment
+    const newAssessment = await createAssessment(
+      1234567,
+      'Assignment 1',
+      'Description of Assignment 1',
+      '11/10/2024',
+      false,
+      '24T3',
+      '1'
+    );
 
-  //   // Create a group
-  //   const group = await prisma.group.create({
-  //     data: {
-  //       name: 'Group 1',
-  //       size: 1,
-  //       assignmentId: newAssessment.id,
-  //     }
-  //   });
+    // Create a group
+    const group = await prisma.group.create({
+      data: {
+        name: 'Group 1',
+        size: 1,
+      }
+    });
 
   //   // Submit the assessment twice
   //   const submit1 = await submitAssignment(group.id, 'filePath');
@@ -53,7 +52,7 @@ describe('submitAssessment', () => {
   //   expect(submissions[0].submissionTime).toBe(submit2.submissionTime)
   //   expect(submissions[1].submissionTime).toBe(submit1.submissionTime)
   //   expect(submissions[1].groupId).toBe(group.id);
-  // });
+  });
 
   it('should throw an error when the group does not exist', async () => {
     await populateSampleDatabase(prisma);

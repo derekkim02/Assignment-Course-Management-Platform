@@ -1,5 +1,5 @@
 import express from 'express';
-import { homepage, submitAssignment, viewMarks, viewAssignment } from '../controllers/studentController';
+import { homepage, submitAssignment, viewMarks, viewAssignment, getSubmissions } from '../controllers/studentController';
 import { verifyToken } from '../jwtUtils';
 
 const router = express.Router();
@@ -24,6 +24,6 @@ router.get('/courses/:courseId/assignments', );
 router.get('/courses', );
 
 // Fetch submissions for an assignment
-router.get('');
+router.get('/courses/:courseId/assignments/:assignmentId', getSubmissions);
 
 export default router;
