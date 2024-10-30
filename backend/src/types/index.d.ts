@@ -17,7 +17,7 @@ interface TestResult {
 }
 
 interface SubmissionInfo {
-	zid: number;
+	submitterId: number;
 	shCmd: string;
 	testCases: TestCase[];
 }

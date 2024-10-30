@@ -117,7 +117,7 @@ model Submission {
   groupId            Int?
   group              Group?              @relation(fields: [groupId], references: [id])
 
-  marks              Mark[]
+  mark               Mark?
   
 }
 

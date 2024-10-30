@@ -8,6 +8,14 @@ export const homepage = async (req: Request, res: Response): Promise<void> => {
 }
 
 export const submitAssignment = async (req: Request, res: Response): Promise<void> => {
+	return handleAssignmentSubmission(req, res, false);
+}
+
+export const submitGroupAssignment = async (req: Request, res: Response): Promise<void> => {
+	return handleAssignmentSubmission(req, res, true);
+}
+
+const handleAssignmentSubmission = async (req: Request, res: Response, isGroupAssignment: boolean): Promise<void> => {
 	try {
 		const { assignmentId } = req.params;
 		
@@ -21,15 +29,16 @@ export const submitAssignment = async (req: Request, res: Response): Promise<voi
 			return;
 		}
 
-		const { zid, shCmd, testCases } = req.submissionInfo;
+		const { submitterId, shCmd, testCases } = req.submissionInfo;
+		const submitterIdKey = isGroupAssignment ? 'groupId' : 'studentId';
 
 		const filePath = req.file.path;
 		await prisma.submission.create({
 			data: {
 				assignmentId: parseInt(assignmentId),
-				studentId: zid,
+				[submitterIdKey]: submitterId,
 				filePath,
-				submissionType: SubmissionType.Individual,
+				submissionType: isGroupAssignment ? SubmissionType.Group : SubmissionType.Individual,
 			},
 		});
 
@@ -44,7 +53,6 @@ export const submitAssignment = async (req: Request, res: Response): Promise<voi
 		}
 
 		res.status(200).json(response);
-		
 	} catch (e) {
 		res.status(500).json({ error: (e as Error).message });
 	}

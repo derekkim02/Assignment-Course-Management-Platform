@@ -16,9 +16,9 @@ const submissionStorage = multer.diskStorage({
       cb(new Error("Missing submission information"), "");
       return;
     }
-    const userId = req.submissionInfo.zid; 
+    const submitterId = req.submissionInfo.submitterId; 
 
-    const filename = userId + "-" + Date.now() + path.extname(file.originalname);
+    const filename = submitterId + "-" + Date.now() + path.extname(file.originalname);
 	  cb(null, filename);
   }
 });
