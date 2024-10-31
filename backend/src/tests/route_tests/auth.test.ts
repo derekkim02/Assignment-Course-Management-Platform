@@ -15,7 +15,6 @@ describe('POST api/auth/login', () => {
 			.expect(400)
 			.expect('Content-Type', /json/)
 			.expect({ error: 'Invalid email or password' });
-	}
-	);
+	});
 });
 
