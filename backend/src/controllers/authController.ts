@@ -92,7 +92,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 		if (userCount === 0) {
 			adminUser = true;
 		}
-		const user = await prisma.user.create({
+		await prisma.user.create({
 			data: {
 				firstName: firstName,
 				lastName: lastName,

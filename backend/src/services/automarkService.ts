@@ -1,10 +1,14 @@
 import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
-import tar from 'tar';
+import { extract } from 'tar';
+import { fileURLToPath } from 'url';
 
 class AutomarkService {
-    public static testEnvDir = path.join(__dirname, "..", "..", "app", "test_env");
+    private static __filename = fileURLToPath(import.meta.url);
+    private static __dirname = path.dirname(AutomarkService.__filename);
+
+    public static testEnvDir = path.join(AutomarkService.__dirname, "..", "..", "app", "test_env");
 
     private testCases: TestCase[];
 	private shellCommands: string;
@@ -47,7 +51,7 @@ class AutomarkService {
     // This function must be called first to run the test cases
     private async extractFiles(): Promise<void> {
         await fs.promises.mkdir(this.testDirectory, { recursive: true });
-        await tar.extract({
+        await extract({
             file: this.submissionPath,
             cwd: this.testDirectory,
             gzip: true,

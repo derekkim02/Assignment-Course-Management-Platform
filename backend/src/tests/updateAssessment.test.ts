@@ -1,4 +1,4 @@
-import {describe, expect, beforeAll, afterEach, afterAll} from '@jest/globals';
+import {describe, expect, beforeAll, afterEach, afterAll, it} from '@jest/globals';
 import prisma from '../prismaClient';
 import { createAssessment, updateAssessment } from '../assessments';
 import { resetDatabase, populateSampleDatabase } from './utils';

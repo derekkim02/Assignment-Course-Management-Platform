@@ -2,9 +2,13 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import e from "express";
+import { fileURLToPath } from "url";
 
 const submissionStorage = multer.diskStorage({
   destination: async (req, _file, cb) =>{
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+
     const { assignmentId } = req.params;
     const uploadPath = path.join(__dirname, "..", "..", "app", "uploads", assignmentId);
 
