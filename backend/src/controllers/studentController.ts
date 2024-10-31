@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { SubmissionType } from '@prisma/client';
 import prisma from '../prismaClient';
-import AutomarkService from 'services/automarkService';
+import AutomarkService from '../services/automarkService';
 
 export const homepage = async (req: Request, res: Response): Promise<void> => {
 	res.json({ user: { name: 'John Doe' } });
