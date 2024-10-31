@@ -29,7 +29,8 @@ describe('updateAssessment', () => {
       '11/10/2024',
       false,
       '24T3',
-      '1'
+      '1',
+      'bash python3 main.py'
     );
 
     // Verify that the assessment exists in the database.
@@ -44,7 +45,7 @@ describe('updateAssessment', () => {
       '12/10/2024',
       true,
       '24T3',
-      '1'
+      '1',
     );
 
     expect(updatedAssessment).toBeDefined();

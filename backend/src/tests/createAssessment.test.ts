@@ -29,7 +29,8 @@ describe('createAssessment', () => {
       '11/10/2024',
       false,
       '24T3',
-      '1'
+      '1',
+      'bash python3 main.py'
     );
 
     // Verify the results
@@ -79,7 +80,8 @@ describe('createAssessment', () => {
       '11/10/2024',
       false,
       '23T3',
-      course.id.toString()
+      course.id.toString(),
+      'bash python3 main.py'
     )
   ).rejects.toThrow('Permission error: You are not assigned to this course');
   });

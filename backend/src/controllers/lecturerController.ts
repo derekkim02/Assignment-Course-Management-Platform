@@ -13,9 +13,9 @@ import prisma from '../prismaClient';
 export const createAssignment =  async (req: Request, res: Response): Promise<void> => {
 	const user = await getUserFromToken(req);
 	const lecturerId = user.zid;
-	const { title, description, dueDate, isGroupAssignment, term, courseID } = req.body;
+	const { title, description, dueDate, isGroupAssignment, term, courseID, defaultShCmd } = req.body;
 	try {
-	  const newAssignment = await createAssessment(lecturerId, title, description, dueDate, isGroupAssignment, term, courseID);
+	  const newAssignment = await createAssessment(lecturerId, title, description, dueDate, isGroupAssignment, term, courseID, defaultShCmd);
 	  res.json(newAssignment);
 	} catch (error) {
 	  res.status(400).json({ error: (error as Error).message });

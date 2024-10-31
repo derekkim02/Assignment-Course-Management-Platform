@@ -71,7 +71,16 @@ export async function validateAssessmentData(lecturerId: number, termYear: strin
   };
 }
 
-export async function createAssessment(lecturerId: number, assignmentName: string, description: string, dueDate: string, isGroupAssignment: boolean, term: string, courseId: string) {
+export async function createAssessment(
+  lecturerId: number,
+  assignmentName: string,
+  description: string,
+  dueDate: string,
+  isGroupAssignment: boolean,
+  term: string,
+  courseId: string,
+  defaultShCmd: string
+) {
   // Check that the term is given in the format '24T3'
   if (term.length !== 4) {
     throw new Error("Invalid term");
@@ -90,6 +99,7 @@ export async function createAssessment(lecturerId: number, assignmentName: strin
       isGroupAssignment: isGroupAssignment,
       autoTestExecutable: '',
       courseOfferingId: teachingAssignmentId,
+      defaultShCmd: defaultShCmd,
       submissions: {
         create: []
       },

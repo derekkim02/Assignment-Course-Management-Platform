@@ -29,7 +29,8 @@ describe('createTestCase', () => {
       '11/10/2024',
       false,
       '24T3',
-      '1'
+      '1',
+      'bash python3 main.py'
     );
 
     // Verify that the assessment exists in the database.
