@@ -19,6 +19,7 @@ router.get('/homepage', homepage);
  * @route POST /assignments/:assignmentId/submit
  * @description Submit an student assignment. This route is used to submit an individual assignment.
  * @param {string} assignmentId - Unique identifier of the assignment
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @body {file} submission - The submission file
  * @consumes multipart/form-data
  * @returns {object} 200 - Submission results
@@ -35,6 +36,7 @@ router.post('/assignments/:assignmentId/submit', validateSingleSubmission, uploa
  * @route POST /assignments/:assignmentId/group/submit
  * @description Submit a group assignment. This route is used to submit a group assignment.
  * @param {string} assignmentId - Unique identifier of the assignment
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @body {file} submission - The submission file
  * @body {groupId} group - The group identifier
  * @consumes multipart/form-data
