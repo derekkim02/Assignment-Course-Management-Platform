@@ -18,7 +18,7 @@ export const getEnrollments = async (req: Request, res: Response): Promise<void>
     const role = req.query.role as string;
     const courses = await courseFetchStrategies[role](user);
 
-    res.json(courses);
+    res.status(200).json(courses);
   } catch (e) {
     console.error('Error fetching courses:', e);
     res.status(500).json({ error: 'Failed to fetch courses' });
@@ -68,7 +68,7 @@ export const getEnrollment = async (req: Request, res: Response): Promise<void> 
       }))
     };
 
-    res.json(response);
+    res.status(200).json(response);
   } catch (e) {
     console.error('Error fetching course offering:', e);
     res.status(500).json({ error: 'Failed to fetch course offering' });

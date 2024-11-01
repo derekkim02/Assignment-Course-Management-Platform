@@ -16,7 +16,7 @@ export const createAssignment =  async (req: Request, res: Response): Promise<vo
 	const { title, description, dueDate, isGroupAssignment, term, courseID, defaultShCmd } = req.body;
 	try {
 	  const newAssignment = await createAssessment(lecturerId, title, description, dueDate, isGroupAssignment, term, courseID, defaultShCmd);
-	  res.json(newAssignment);
+	  res.status(201).json(newAssignment);
 	} catch (error) {
 	  res.status(400).json({ error: (error as Error).message });
 	}
@@ -35,7 +35,7 @@ export const updateAssignment = async (req: Request, res: Response): Promise<voi
 	const { title, description, dueDate, isGroupAssignment, term, courseID } = req.body;
 	try {
 	  const updatedAssignment = await updateAssessment(lecturerId, assignmentId, title, description, dueDate, isGroupAssignment, term, courseID);
-	  res.json(updatedAssignment);
+	  res.status(201).json(updatedAssignment);
 	} catch (error) {
 	  res.status(400).json({ error: (error as Error).message });
 	}
@@ -51,7 +51,7 @@ export const createTest = async (req: Request, res: Response): Promise<void> => 
 	const { lecturerId, assignmentId, input, output } = req.body;
 	try {
 	  const newTestCase = await createTestCase(lecturerId, assignmentId, input, output);
-	  res.json(newTestCase);
+	  res.status(201).json(newTestCase);
 	} catch (error) {
 	  res.status(400).json({ error: (error as Error).message });
 	}
@@ -72,7 +72,7 @@ export const viewSubmission =  async (req: Request, res: Response): Promise<void
       res.status(404).json({ error: 'Submission not found' });
       return;
     }
-    res.json(submission);
+    res.status(200).json(submission);
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
   }
@@ -106,7 +106,7 @@ export const getStudentsInCourse =  async (req: Request, res: Response): Promise
       return;
     }
 
-    res.json(courseOffering.enrolledStudents);
+    res.status(200).json(courseOffering.enrolledStudents);
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
   }
@@ -132,7 +132,7 @@ export const searchStudentById =  async (req: Request, res: Response): Promise<v
       res.status(404).json({ error: 'Student not found' });
       return;
     }
-    res.json(student);
+    res.status(200).json(student);
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
   }
