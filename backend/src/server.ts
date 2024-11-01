@@ -1,19 +1,3 @@
-// Example functions
-
-// async function main() {
-//   // Example query
-//   const allUsers = await prisma.user.findMany();
-//   console.log(allUsers);
-// }
-
-// main()
-//   .catch(e => {
-//     throw e;
-//   })
-//   .finally(async () => {
-//     await prisma.$disconnect();
-//   });
-
 import express from 'express';
 import cors from 'cors';
 import authRouter from './routes/authRouter';
