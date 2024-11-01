@@ -1,5 +1,5 @@
 import express from 'express';
-import { verifyToken } from '../jwtUtils';
+import { verifyToken } from '../middleware/jwt';
 
 const router = express.Router();
 router.use(verifyToken);

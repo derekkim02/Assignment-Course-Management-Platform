@@ -2,7 +2,7 @@ import { Trimester, User } from '@prisma/client';
 import prisma from './prismaClient';
 import { parse, isValid } from 'date-fns';
 import { Request } from 'express';
-import { getUserFromToken } from './jwtUtils';
+import { getUserFromToken } from './middleware/jwt';
 
 // function to check if provided values are valid
 export async function validateAssessmentData(lecturerId: number, termYear: string, termTrimester: Trimester, dueDate: string, courseId: string) {

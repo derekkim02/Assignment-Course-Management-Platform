@@ -5,7 +5,7 @@
 
 import express from 'express';
 import { homepage, submitAssignment, submitGroupAssignment, viewMarks, viewAssignment } from '../controllers/studentController';
-import { verifyToken } from '../jwtUtils';
+import { verifyToken } from '../middleware/jwt';
 import { uploadSubmission } from '../middleware/multer';
 import { validateSingleSubmission, validateGroupSubmission } from '../middleware/submission';
 

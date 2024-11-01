@@ -1,5 +1,5 @@
 import express from 'express';
-import { verifyToken } from '../jwtUtils';
+import { verifyToken } from '../middleware/jwt';
 import { createAssignment, searchStudentById, getStudentsInCourse, viewSubmission, createTest, updateAssignment } from '../controllers/lecturerController';
 
 const router = express.Router();

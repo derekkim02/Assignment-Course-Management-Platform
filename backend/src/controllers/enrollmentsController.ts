@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getUserFromToken } from '../jwtUtils';
+import { getUserFromToken } from '../middleware/jwt';
 import { courseFetchStrategies } from '../utils';
 import prisma from '../prismaClient';
 import { Trimester } from '@prisma/client';

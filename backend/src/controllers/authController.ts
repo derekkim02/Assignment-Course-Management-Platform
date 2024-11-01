@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { Request, Response } from 'express';
-import { generateToken } from '../jwtUtils';
+import { generateToken } from '../middleware/jwt';
 import prisma from '../prismaClient';
 
 /**

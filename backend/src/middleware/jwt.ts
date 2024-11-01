@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import prisma from './prismaClient';
+import prisma from '../prismaClient';
 import { User } from '@prisma/client';
 
 const secretKey = process.env.JWT_SECRET || 'capstone-arat-project';

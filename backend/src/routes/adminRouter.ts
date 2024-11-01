@@ -1,6 +1,6 @@
 import express from 'express';
 import { changeAdminRole, createCourse, createEnrollment, getCourses } from '../controllers/adminController';
-import { checkIgiveAdmin, verifyToken } from '../jwtUtils';
+import { checkIgiveAdmin, verifyToken } from '../middleware/jwt';
 
 const router = express.Router();
 
