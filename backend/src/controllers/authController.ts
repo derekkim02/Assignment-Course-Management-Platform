@@ -39,7 +39,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 			const token = generateToken(email, user.isAdmin);
 			res.status(200).json({ token });
 		} else {
-			res.status(400).json({ error: 'Invalid username or password'});
+			res.status(400).json({ error: 'Invalid email or password'});
 		}
 	} catch {
 		res.status(500).json({ error: 'Internal server error' });
@@ -92,7 +92,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 		if (userCount === 0) {
 			adminUser = true;
 		}
-		const user = await prisma.user.create({
+		await prisma.user.create({
 			data: {
 				firstName: firstName,
 				lastName: lastName,

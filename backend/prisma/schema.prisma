@@ -92,6 +92,7 @@ model Assignment {
   description        String
   dueDate            DateTime
   isGroupAssignment  Boolean
+  defaultShCmd       String
   autoTestExecutable String?
 
   courseOfferingId   Int
@@ -104,7 +105,7 @@ model Assignment {
 model Submission {
   id                 Int                 @id @default(autoincrement())
   filePath           String
-  submissionTime     DateTime
+  submissionTime     DateTime            @default(now())
   submissionType     SubmissionType
 
   assignmentId       Int
@@ -116,7 +117,7 @@ model Submission {
   groupId            Int?
   group              Group?              @relation(fields: [groupId], references: [id])
 
-  marks              Mark[]
+  mark               Mark?
   
 }
 
