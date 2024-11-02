@@ -1,5 +1,5 @@
 import express from 'express';
-import { changeAdminRole, createCourse, createEnrollment, getCourses } from '../controllers/adminController';
+import { changeAdminRole, createCourse, createEnrollment, getCourses, getUsers } from '../controllers/adminController';
 import { checkIgiveAdmin, verifyToken } from '../middleware/jwt';
 
 const router = express.Router();
@@ -10,5 +10,6 @@ router.put('/change-role/:userId', changeAdminRole);
 router.post('/course-offerings', createEnrollment);
 router.get('/courses', getCourses);
 router.post('/courses', createCourse);
+router.get('/users', getUsers);
 
 export default router;
