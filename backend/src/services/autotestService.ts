@@ -4,11 +4,11 @@ import fs from 'fs';
 import { extract } from 'tar';
 import { fileURLToPath } from 'url';
 
-class AutomarkService {
+class AutotestService {
     private static __filename = fileURLToPath(import.meta.url);
-    private static __dirname = path.dirname(AutomarkService.__filename);
+    private static __dirname = path.dirname(AutotestService.__filename);
 
-    public static testEnvDir = path.join(AutomarkService.__dirname, "..", "..", "app", "test_env");
+    public static testEnvDir = path.join(AutotestService.__dirname, "..", "..", "app", "test_env");
 
     private testCases: TestCase[];
 	private shellCommands: string;
@@ -22,7 +22,7 @@ class AutomarkService {
         this.submissionPath = submissionPath;
 
         const fileName = this.getSubmissionName();
-        this.testDirectory = path.join(AutomarkService.testEnvDir, fileName + '_test');
+        this.testDirectory = path.join(AutotestService.testEnvDir, fileName + '_test');
     }
 
     public async runTests(): Promise<TestResult[]> {
@@ -112,4 +112,4 @@ class AutomarkService {
 
 }
 
-export default AutomarkService;
+export default AutotestService;
