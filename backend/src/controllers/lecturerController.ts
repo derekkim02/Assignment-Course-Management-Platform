@@ -176,7 +176,7 @@ export const viewLecturedCourses = async (req: Request, res: Response): Promise<
 
 export const viewLecturedCourseDetails = async (req: Request, res: Response): Promise<void> => {
 	try {
-		const courseEnrollmentId = parseInt(req.params.courseEnrollmentId);
+		const courseEnrollmentId = parseInt(req.params.courseId);
 		const data = await prisma.courseOffering.findUnique({
 			where: {
 				id: courseEnrollmentId,
