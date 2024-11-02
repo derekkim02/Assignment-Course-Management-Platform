@@ -60,9 +60,6 @@ router.get('/assignments/:assignmentId/view', viewAssignment);
 // Fetch all upcoming assignments
 router.get('/assignments/new', );
 
-// Fetch all assignments
-router.get('/assignments', );
-
 // Fetch all submitted assignments
 router.get('/assignments/submitted', );
 
