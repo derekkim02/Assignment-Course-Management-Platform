@@ -18,7 +18,6 @@ app.use('/api/student', studentRouter);
 app.use('/api/tutor', tutorRouter);
 app.use('/api/lecturer', lecturerRouter);
 app.use('/api/admin', adminRouter);
-app.use('/api/users', userRouter);
 app.use('/api/enrollments', enrollmentsRouter);
 
 app.listen(port, () => {
