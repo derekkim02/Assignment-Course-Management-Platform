@@ -10,7 +10,7 @@ import RecentSubmissions from '../dashboard/student/RecentSubmissions';
 import CourseDetails from '../dashboard/course/CourseDetails';
 import AssignmentDetails from '../dashboard/course/assignment/AssignmentDetails';
 import StudentList from '../dashboard/marker/StudentList';
-import AdminSettings from '../dashboard/AdminSettings';
+import AdminSettings from '../dashboard/admin/AdminSettings';
 
 const About = () => <div>About Page</div>;
 
@@ -33,7 +33,7 @@ const AppRouter = () => {
         <Route path="/dashboard" element={<ProtectedRoute checkAccess={fullAccess} element={<About/>}/>}/>
         <Route path="/dashboard/calendar" element={<ProtectedRoute checkAccess={fullAccess} element={<Dasbhoard content={<CalendarSection/>}/>}/>}/>
         <Route path="/dashboard/courses" element={<ProtectedRoute checkAccess={fullAccess} element={<Dasbhoard content={<CoursesSection/>}/>}/>}/>
-        <Route path="/dashboard/courses/:courseId" element={<ProtectedRoute checkAccess={fullAccess} element={<Dasbhoard content={<CourseDetails />}/>}/>}/>
+        <Route path="/dashboard/courses/:role/:enrolmentId" element={<ProtectedRoute checkAccess={fullAccess} element={<Dasbhoard content={<CourseDetails />}/>}/>}/>
         <Route path="/dashboard/courses/:courseId/assignments/:assignmentId" element={<Dasbhoard content={<AssignmentDetails/>}/>}/>
         <Route path="/dashboard/submissions" element={<ProtectedRoute checkAccess={fullAccess} element={<Dasbhoard content={<RecentSubmissions/>}/>}/>}/>
         <Route path="/dashboard/student-list" element={<ProtectedRoute checkAccess={() => auth.userRole === 'marker'} element={<Dasbhoard content={<StudentList/>}/>}/>}/>

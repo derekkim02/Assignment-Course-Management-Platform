@@ -158,7 +158,7 @@ export const viewLecturedCourses = async (req: Request, res: Response): Promise<
       res.status(404).json({ error: 'User\'s data does not exist' });
       return;
     }
-    
+
     const response = data.coursesLectured.map(enrolment => ({
 			enrolmentId: enrolment.id,
 			courseName: enrolment.course.name,

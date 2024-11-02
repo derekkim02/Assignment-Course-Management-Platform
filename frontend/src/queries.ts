@@ -16,10 +16,17 @@ const fetchWithAuth = async (url: string, queries: { [key: string]: string }) =>
   return response.json();
 };
 
-export const useUsers = (role: string) => {
+export const useUsers = () => {
   return useQuery({
     queryKey: ['users'],
-    queryFn: () => fetchWithAuth('api/users', { role })
+    queryFn: () => fetchWithAuth('api/admin/users', {})
+  });
+};
+
+export const useAdminCourseOfferings = () => {
+  return useQuery({
+    queryKey: ['adminCourseOfferings'],
+    queryFn: () => fetchWithAuth('api/admin/course-offerings', {})
   });
 };
 
@@ -30,16 +37,30 @@ export const useCourses = (role: string) => {
   });
 };
 
-export const useEnrollments = (role: string) => {
+export const useEnrollments = () => {
   return useQuery({
     queryKey: ['enrollments'],
-    queryFn: () => fetchWithAuth('api/enrollments', { role })
+    queryFn: () => fetchWithAuth('api/student/courses', {})
   });
 };
 
-export const useEnrollment = (enrollmentId: string) => {
+export const useLecturedCourses = () => {
   return useQuery({
-    queryKey: ['course', enrollmentId],
-    queryFn: () => fetchWithAuth(`api/enrollments/${enrollmentId}`, {})
+    queryKey: ['lecturedCourses'],
+    queryFn: () => fetchWithAuth('api/lecturer/courses', {})
+  });
+};
+
+export const useMarkingCourses = () => {
+  return useQuery({
+    queryKey: ['markingCourses'],
+    queryFn: () => fetchWithAuth('api/enrollments', {})
+  });
+};
+
+export const useEnrollment = (role: string, enrolmentId: string) => {
+  return useQuery({
+    queryKey: ['course', enrolmentId],
+    queryFn: () => fetchWithAuth(`api/${role}/courses/${enrolmentId}`, {})
   });
 };

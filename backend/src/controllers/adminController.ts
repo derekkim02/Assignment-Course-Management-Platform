@@ -147,3 +147,27 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ error: `Failed to fetch users (${e})` });
   }
 }
+
+export const getCourseOfferings = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const courseOfferings = await prisma.courseOffering.findMany(
+      {
+        include: {
+          course: true,
+          term: true,
+          lecturer: true
+        }
+      }
+    );
+
+    const response = courseOfferings.map(enrolment => ({
+      courseCode: enrolment.course.code,
+      courseName: enrolment.course.name,
+      term: `${enrolment.term.year}${enrolment.term.term}`,
+		}));
+
+    res.status(200).json(response);
+  } catch (e) {
+    res.status(500).json({ error: `Failed to fetch users (${e})` });
+  }
+}
