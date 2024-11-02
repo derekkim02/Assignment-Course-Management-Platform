@@ -140,19 +140,26 @@ export const searchStudentById =  async (req: Request, res: Response): Promise<v
 
 export const viewLecturedCourses = async (req: Request, res: Response): Promise<void> => {
   try {
-    const data = await prisma.courseOffering.findMany({
+    const data = await prisma.user.findUnique({
       where: {
-        lecturer: {
-          email: req.userEmail
-        }
+        email: req.userEmail
       },
       include: {
-        course: true,
-        term: true,
+        coursesLectured: {
+          include: {
+            course: true,
+            term: true,
+          }
+        }
       }
-    });
+    })
 
-    const response = data.map(enrolment => ({
+    if (!data) {
+      res.status(404).json({ error: 'User\'s data does not exist' });
+      return;
+    }
+    
+    const response = data.coursesLectured.map(enrolment => ({
 			enrolmentId: enrolment.id,
 			courseName: enrolment.course.name,
 			courseCode: enrolment.course.code,
@@ -172,7 +179,10 @@ export const viewLecturedCourseDetails = async (req: Request, res: Response): Pr
 		const courseEnrollmentId = parseInt(req.params.courseEnrollmentId);
 		const data = await prisma.courseOffering.findUnique({
 			where: {
-				id: courseEnrollmentId
+				id: courseEnrollmentId,
+        lecturer: {
+          email: req.userEmail
+        }
 			},
 			include: {
 				term: true,
@@ -183,7 +193,7 @@ export const viewLecturedCourseDetails = async (req: Request, res: Response): Pr
 		});
 
     if (!data) {
-      res.status(404).json({ error: 'Course not found' });
+      res.status(404).json({ error: 'Course not found or you are not the lecturer for this course' });
       return;
     }
 

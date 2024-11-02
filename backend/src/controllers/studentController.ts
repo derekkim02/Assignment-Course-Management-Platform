@@ -64,33 +64,34 @@ export const viewAssignment = async (req: Request, res: Response): Promise<void>
 
 export const viewCourseEnrollments = async (req: Request, res: Response): Promise<void> => {
 	try {
-		const data = await prisma.courseOffering.findMany({
+		const data = await prisma.user.findUnique({
 			where: {
-				enrolledStudents: {
-					some: {
-						email: req.userEmail
-					}
-				}
+				email: req.userEmail
 			},
 			include: {
-				course: {
-					select: {
-						name: true,
-						code: true,
-						description: true,
+				coursesEnrolled: {
+					include: {
+						course: true,
+						term: true,
 					}
-				},
-				term: true,
+				}
 			}
-		});
-		const response = data.map(enrolment => ({
+		})
+
+		if (!data) {
+			res.status(404).json({ error: 'User\'s data does not exist' });
+			return;
+		}
+
+		const response = data.coursesEnrolled.map(enrolment => ({
 			enrolmentId: enrolment.id,
 			courseName: enrolment.course.name,
 			courseCode: enrolment.course.code,
 			courseDescription: enrolment.course.description,
-			term: enrolment.termTerm,
-			year: enrolment.termYear,
+			term: enrolment.term.term,
+			year: enrolment.term.year,
 		}));
+
 		res.status(200).json(response);
 	} catch {
 		res.status(500).json({ error: 'Failed to fetch courses' });
@@ -102,7 +103,12 @@ export const viewCourseEnrollmentDetails = async (req: Request, res: Response): 
 		const courseEnrollmentId = parseInt(req.params.courseId);
 		const data = await prisma.courseOffering.findUnique({
 			where: {
-				id: courseEnrollmentId
+				id: courseEnrollmentId,
+				enrolledStudents: {
+					some: {
+						email: req.userEmail
+					}
+				}
 			},
 			include: {
 				term: true,
@@ -112,7 +118,7 @@ export const viewCourseEnrollmentDetails = async (req: Request, res: Response): 
 		});
 
 		if (!data) {
-			res.status(404).json({ error: 'Course not found' });
+			res.status(404).json({ error: 'Course not found or you are not enrolled in this course' });
 			return;
 		}
 
