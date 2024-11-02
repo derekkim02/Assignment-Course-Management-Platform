@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { SubmissionType } from '@prisma/client';
 import prisma from '../prismaClient';
-import AutomarkService from '../services/automarkService';
+import AutotestService from '../services/autotestService';
 
 export const homepage = async (req: Request, res: Response): Promise<void> => {
 	res.json({ user: { name: 'John Doe' } });
@@ -42,7 +42,7 @@ const handleAssignmentSubmission = async (req: Request, res: Response, isGroupAs
 			},
 		});
 
-		const automarkService = new AutomarkService(testCases, shCmd, filePath);
+		const automarkService = new AutotestService(testCases, shCmd, filePath);
 		const results = await automarkService.runTests();
 		
 		const response = {

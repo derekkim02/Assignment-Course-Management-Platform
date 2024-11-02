@@ -5,7 +5,7 @@
 
 import express from 'express';
 import { homepage, submitAssignment, submitGroupAssignment, viewMarks, viewAssignment } from '../controllers/studentController';
-import { verifyToken } from '../jwtUtils';
+import { verifyToken } from '../middleware/jwt';
 import { uploadSubmission } from '../middleware/multer';
 import { validateSingleSubmission, validateGroupSubmission } from '../middleware/submission';
 
@@ -59,9 +59,6 @@ router.get('/assignments/:assignmentId/view', viewAssignment);
 
 // Fetch all upcoming assignments
 router.get('/assignments/new', );
-
-// Fetch all assignments
-router.get('/assignments', );
 
 // Fetch all submitted assignments
 router.get('/assignments/submitted', );

@@ -42,7 +42,7 @@ export const changeAdminRole = async (req: Request, res: Response): Promise<void
         }
       });
     }
-    res.json({ message: 'User role updated successfully' });
+    res.status(200).json({ message: 'User role updated successfully' });
   } catch (error) {
     console.error('Error updating user role:', error);
     res.status(500).json({ error: 'Failed to update user role' });
@@ -98,7 +98,7 @@ export const createEnrollment = async (req: Request, res: Response): Promise<voi
         lecturerId,
       }
     });
-    res.json({ message: 'Course offering created successfully' });
+    res.status(201).json({ message: 'Course offering created successfully' });
   } catch (error) {
     console.error('Error creating course offering:', error);
     res.status(500).json({ error: 'Failed to create course offering' });
@@ -116,7 +116,7 @@ export const createCourse = async (req: Request, res: Response): Promise<void> =
         description
       }
     });
-    res.json(newCourse);
+    res.status(201).json(newCourse);
   } catch (e) {
     res.status(400).json({ error: `Failed to create course ${e}` });
   }
@@ -125,7 +125,7 @@ export const createCourse = async (req: Request, res: Response): Promise<void> =
 export const getCourses = async (req: Request, res: Response): Promise<void> => {
   try {
     const courses = await prisma.course.findMany();
-    res.json(courses);
+    res.status(200).json(courses);
   } catch {
     res.status(500).json({ error: 'Failed to fetch courses' });
   }
