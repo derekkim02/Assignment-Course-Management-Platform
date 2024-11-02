@@ -4,16 +4,13 @@
  */
 
 import express from 'express';
-import { homepage, submitAssignment, submitGroupAssignment, viewMarks, viewAssignment } from '../controllers/studentController';
+import { submitAssignment, submitGroupAssignment, viewMarks, viewAssignment, viewCourseEnrollments, viewCourseEnrollmentDetails } from '../controllers/studentController';
 import { verifyToken } from '../middleware/jwt';
 import { uploadSubmission } from '../middleware/multer';
 import { validateSingleSubmission, validateGroupSubmission } from '../middleware/submission';
 
 const router = express.Router();
 router.use(verifyToken);
-
-// View student homepage
-router.get('/homepage', homepage);
 
 /**
  * @route POST /assignments/:assignmentId/submit
@@ -63,11 +60,41 @@ router.get('/assignments/new', );
 // Fetch all submitted assignments
 router.get('/assignments/submitted', );
 
-// Fetch all enrolled courses
-router.get('/courses', );
+/**
+ * @route GET /courses
+ * @description Fetch all courses that the student is enrolled in. Contains basic course information.
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object[]} 200 - List of courses
+ * @returns {number} 200.enrolmentId - Unique identifier of the course enrolment
+ * @returns {string} 200.courseCode - Course code
+ * @returns {string} 200.courseName - Course name
+ * @returns {string} 200.courseDescription - Course description
+ * @returns {string} 200.term - Term of the course
+ * @returns {string} 200.year - Year of the course
+ */
+router.get('/courses', viewCourseEnrollments);
 
-// Fetch course details
-router.get('/courses/:courseId', );
+/**
+ * @route GET /courses/:courseId
+ * @description Fetch all course details for a specific course offering.
+ * @param {string} courseId - Unique identifier of the course offering
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object} 200 - Course details
+ * @returns {string} 200.enrolmentId - Unique identifier of the course enrolment
+ * @returns {string} 200.courseCode - Course code
+ * @returns {string} 200.courseName - Course name
+ * @returns {string} 200.courseDescription - Course description
+ * @returns {string} 200.term - Term of the course
+ * @returns {string} 200.year - Year of the course
+ * @returns {object[]} 200.assignments - List of assignments
+ * @returns {string} 200.assignments.assignmentId - Unique identifier of the assignment
+ * @returns {string} 200.assignments.assignmentName - Assignment name
+ * @returns {string} 200.assignments.assignmentDescription - Assignment description
+ * @returns {string} 200.assignments.dueDate - Due date of the assignment
+ * @returns {boolean} 200.assignments.isGroupAssignment - Whether the assignment is a group assignment
+ * @returns {string} 200.assignments.defaultShCmd - Default shell command for the assignment
+ */
+router.get('/courses/:courseId', viewCourseEnrollmentDetails);
 
 
 export default router;

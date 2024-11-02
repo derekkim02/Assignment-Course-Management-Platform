@@ -3,10 +3,6 @@ import { SubmissionType } from '@prisma/client';
 import prisma from '../prismaClient';
 import AutotestService from '../services/autotestService';
 
-export const homepage = async (req: Request, res: Response): Promise<void> => {
-	res.json({ user: { name: 'John Doe' } });
-}
-
 export const submitAssignment = async (req: Request, res: Response): Promise<void> => {
 	return handleAssignmentSubmission(req, res, false);
 }
@@ -64,4 +60,81 @@ export const viewMarks = async (req: Request, res: Response): Promise<void> => {
 
 export const viewAssignment = async (req: Request, res: Response): Promise<void> => {
 	res.json({ assignments: [{ title: 'Assignment 1' }] });
+}
+
+export const viewCourseEnrollments = async (req: Request, res: Response): Promise<void> => {
+	try {
+		const data = await prisma.courseOffering.findMany({
+			where: {
+				enrolledStudents: {
+					some: {
+						email: req.userEmail
+					}
+				}
+			},
+			include: {
+				course: {
+					select: {
+						name: true,
+						code: true,
+						description: true,
+					}
+				},
+				term: true,
+			}
+		});
+		const response = data.map(enrolment => ({
+			enrolmentId: enrolment.id,
+			courseName: enrolment.course.name,
+			courseCode: enrolment.course.code,
+			courseDescription: enrolment.course.description,
+			term: enrolment.termTerm,
+			year: enrolment.termYear,
+		}));
+		res.status(200).json(response);
+	} catch {
+		res.status(500).json({ error: 'Failed to fetch courses' });
+	}
+}
+
+export const viewCourseEnrollmentDetails = async (req: Request, res: Response): Promise<void> => {
+	try {
+		const courseEnrollmentId = parseInt(req.params.courseId);
+		const data = await prisma.courseOffering.findUnique({
+			where: {
+				id: courseEnrollmentId
+			},
+			include: {
+				term: true,
+				course: true,
+				assignments: true,
+			}
+		});
+
+		if (!data) {
+			res.status(404).json({ error: 'Course not found' });
+			return;
+		}
+
+		const response = {
+			enrollmentId: data.id,
+			courseName: data.course.name,
+			courseCode: data.course.code,
+			courseDescription: data.course.description,
+			term: data.term.term,
+			year: data.term.year,
+			assignments: data.assignments.map(assignment => ({
+				assignmentId: assignment.id,
+				assignmentName: assignment.name,
+				description: assignment.description,
+				dueDate: assignment.dueDate,
+				isGroupAssignment: assignment.isGroupAssignment,
+				defaultShCmd: assignment.defaultShCmd,
+			})),
+		}
+
+		res.status(200).json(response);
+	} catch {
+		res.status(500).json({ error: 'Failed to fetch courses' });
+	}
 }
