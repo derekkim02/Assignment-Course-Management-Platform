@@ -5,7 +5,6 @@ import studentRouter from './routes/studentRouter';
 import tutorRouter from './routes/tutorRouter';
 import lecturerRouter from './routes/lecturerRouter';
 import adminRouter from './routes/adminRouter';
-import userRouter from './routes/userRouter';
 import enrollmentsRouter from './routes/enrollmentsRouter';
 
 const app = express();
