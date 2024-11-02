@@ -137,3 +137,91 @@ export const searchStudentById =  async (req: Request, res: Response): Promise<v
     res.status(400).json({ error: (error as Error).message });
   }
 }
+
+export const viewLecturedCourses = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const data = await prisma.user.findUnique({
+      where: {
+        email: req.userEmail
+      },
+      include: {
+        coursesLectured: {
+          include: {
+            course: true,
+            term: true,
+          }
+        }
+      }
+    })
+
+    if (!data) {
+      res.status(404).json({ error: 'User\'s data does not exist' });
+      return;
+    }
+    
+    const response = data.coursesLectured.map(enrolment => ({
+			enrolmentId: enrolment.id,
+			courseName: enrolment.course.name,
+			courseCode: enrolment.course.code,
+			courseDescription: enrolment.course.description,
+			term: enrolment.termTerm,
+			year: enrolment.termYear,
+		}));
+
+    res.status(200).json(response);
+  } catch {
+    res.status(500).json({ error: 'Failed to fetch courses' });
+  }
+}
+
+export const viewLecturedCourseDetails = async (req: Request, res: Response): Promise<void> => {
+	try {
+		const courseEnrollmentId = parseInt(req.params.courseEnrollmentId);
+		const data = await prisma.courseOffering.findUnique({
+			where: {
+				id: courseEnrollmentId,
+        lecturer: {
+          email: req.userEmail
+        }
+			},
+			include: {
+				term: true,
+				course: true,
+				assignments: true,
+        enrolledStudents: true,
+			}
+		});
+
+    if (!data) {
+      res.status(404).json({ error: 'Course not found or you are not the lecturer for this course' });
+      return;
+    }
+
+    const response = {
+			enrollmentId: data.id,
+			courseName: data.course.name,
+			courseCode: data.course.code,
+			courseDescription: data.course.description,
+			term: data.term.term,
+			year: data.term.year,
+			assignments: data.assignments.map(assignment => ({
+				assignmentId: assignment.id,
+				assignmentName: assignment.name,
+				description: assignment.description,
+				dueDate: assignment.dueDate,
+				isGroupAssignment: assignment.isGroupAssignment,
+				defaultShCmd: assignment.defaultShCmd,
+			})),
+      enrolledStudents: data.enrolledStudents.map(student => ({
+        zid: student.zid,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        email: student.email,
+      })),
+		}
+
+    res.status(200).json(response);
+	} catch {
+    res.status(500).json({ error: 'Failed to fetch courses' });
+	}
+}
