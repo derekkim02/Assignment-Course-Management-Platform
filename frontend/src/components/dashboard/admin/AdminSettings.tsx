@@ -169,7 +169,6 @@ const AdminSettings: React.FC = () => {
           isOpen={openModal === 'editCourseOffering'}
           closeModal={() => setOpenModal('')}
           users={users}
-          courses={courses}
         />
 
       </Content>

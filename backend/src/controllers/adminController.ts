@@ -201,7 +201,7 @@ export const getCourseOffering = async (req: Request, res: Response): Promise<vo
       courseName: courseOffering.course.name,
       term: `${courseOffering.term.year}${courseOffering.term.term}`,
       lecturer: courseOffering.lecturer,
-      enrolledStudents: courseOffering.enrolledStudents,
+      students: courseOffering.enrolledStudents,
       tutors: courseOffering.tutors
     }
 

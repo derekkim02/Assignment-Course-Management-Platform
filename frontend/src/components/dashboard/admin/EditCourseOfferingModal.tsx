@@ -11,18 +11,11 @@ interface User {
   email: string;
 }
 
-interface Course {
-  id: number;
-  courseCode: string;
-  courseName: string;
-}
-
 interface EditCourseOfferingModalProps {
   courseId: string;
   isOpen: boolean;
   closeModal: () => void;
   users: User[];
-  courses: Course[];
 }
 
 const EditCourseOfferingModal: React.FC<EditCourseOfferingModalProps> = ({
@@ -30,7 +23,6 @@ const EditCourseOfferingModal: React.FC<EditCourseOfferingModalProps> = ({
   isOpen,
   closeModal,
   users,
-  courses,
 }) => {
   const token = Cookies.get('token') || '';
   const [form] = Form.useForm();
@@ -46,15 +38,16 @@ const EditCourseOfferingModal: React.FC<EditCourseOfferingModalProps> = ({
   useEffect(() => {
     if (courseOffering) {
       form.setFieldsValue({
-        lecturer: courseOffering.lecturer ? [courseOffering.lecturer.zid] : [],
+        lecturer: courseOffering.lecturer ? courseOffering.lecturer.zid : undefined,
         tutors: courseOffering.tutors ? courseOffering.tutors.map((tutor: User) => tutor.zid) : [],
+        students: courseOffering.students ? courseOffering.students.map((student: User) => student.zid) : [],
       });
     }
   }, [courseOffering, form]);
 
-  const handleEditCourseOffering = async (values: { lecturer: number[]; tutors: number[]; students: number[]}) => {
+  const handleEditCourseOffering = async (values: { lecturer: number[]; tutors: number[]; students: number[]; courseId: number; termYear: number; termTerm: number }) => {
     try {
-      const request = {
+      const payload = {
         lecturerId: values.lecturer[0],
         tutorsIds: values.tutors,
         studentIds: values.students,
@@ -66,7 +59,7 @@ const EditCourseOfferingModal: React.FC<EditCourseOfferingModalProps> = ({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(request)
+        body: JSON.stringify(payload)
       });
       message.success('Course offering updated successfully');
       closeModal();
@@ -101,15 +94,18 @@ const EditCourseOfferingModal: React.FC<EditCourseOfferingModalProps> = ({
       onCancel={closeModal}
       footer={null}
     >
-      <Form form={form} onFinish={handleEditCourseOffering}>
+      <Form form={form} onFinish={handleEditCourseOffering} initialValues={{
+        lecturer: courseOffering.lecturer ? courseOffering.lecturer.zid : undefined,
+        tutors: courseOffering.tutors ? courseOffering.tutors.map((tutor: User) => tutor.zid) : [],
+        students: courseOffering.students ? courseOffering.students.map((student: User) => student.zid) : [],
+      }}>
         <Form.Item
           name="lecturer"
           label="Select Lecturer"
           rules={[{ required: true, message: 'Please select at least one lecturer' }]}
-          initialValue={courseOffering.lecturer ? [courseOffering.lecturer.zid] : []}
         >
           <Select
-            placeholder="Select lecturers"
+            placeholder="Select lecturer"
           >
             {users?.map((user: User) => (
               <Select.Option key={user.zid} value={user.zid}>
@@ -122,7 +118,6 @@ const EditCourseOfferingModal: React.FC<EditCourseOfferingModalProps> = ({
         <Form.Item
           name="tutors"
           label="Select Tutors"
-          initialValue={courseOffering.tutors ? courseOffering.tutors.map((tutor: User) => tutor.zid) : []}
         >
           <Select
             mode="multiple"
@@ -139,11 +134,10 @@ const EditCourseOfferingModal: React.FC<EditCourseOfferingModalProps> = ({
         <Form.Item
           name="students"
           label="Select Students"
-          initialValue={courseOffering.students ? courseOffering.students.map((student: User) => student.zid) : []}
         >
           <Select
             mode="multiple"
-            placeholder="Select Students"
+            placeholder="Select students"
           >
             {users?.map((user: User) => (
               <Select.Option key={user.zid} value={user.zid}>

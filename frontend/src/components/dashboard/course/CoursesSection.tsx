@@ -11,6 +11,7 @@ const CoursesSection: React.FC = () => {
       <Content style={{ padding: '20px' }}>
         <CourseExpandable name='Enrolled Courses' useFetch={useEnrollments} role='student'/>
         <CourseExpandable name='Lecturing Courses' useFetch={useLecturedCourses} role='lecturer'/>
+        <CourseExpandable name='Tutoring Courses' useFetch={useLecturedCourses} role='tutor'/>
       </Content>
     </Layout>
   );

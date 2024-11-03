@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Layout, Typography, List, Card, Button, Modal, Form, Input, DatePicker, InputNumber, Spin } from 'antd';
+import { Layout, Typography, List, Card, Button, Modal, Form, Input, DatePicker, Spin } from 'antd';
 import { Link, useParams } from 'react-router-dom';
-import dayjs, { Dayjs } from 'dayjs';
 import { useEnrollment } from '../../../queries';
 
 const { Content } = Layout;
@@ -22,10 +21,7 @@ const CourseDetails: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [form] = Form.useForm();
 
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
-
+  const showModal = () => setIsModalVisible(true);
   const handleCancel = () => {
     setIsModalVisible(false);
     form.resetFields();
@@ -33,10 +29,9 @@ const CourseDetails: React.FC = () => {
 
   const handleOk = () => {
     form.validateFields().then(values => {
-      // Handle form submission
       console.log(values);
-
       setIsModalVisible(false);
+      refetchCourse();
       form.resetFields();
     });
   };
@@ -62,16 +57,31 @@ const CourseDetails: React.FC = () => {
     );
   }
 
+  const bannerStyle = {
+    backgroundColor: '#f0f2f5',
+    border: '1px solid #d9d9d9',
+    borderRadius: '8px',
+    padding: '20px',
+    marginBottom: '20px',
+    width: '100%',
+  }
+
   return (
     <Layout style={{ padding: '20px' }}>
       <Content style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <Title level={2}>{enrollment.courseCode}</Title>
-        <Title level={3}>{enrollment.courseName}</Title>
+        <div style={bannerStyle}>
+          <Title level={1} style={{ textAlign: 'left' }}>{enrollment.courseCode}</Title>
+          <Title level={3} style={{ textAlign: 'left' }}>{enrollment.courseName}</Title>
+
+        </div>
+
         <Paragraph>{enrollment.courseDescription}</Paragraph>
         <Title level={3}>Assignments</Title>
-        <Button type="primary" onClick={showModal} style={{ marginBottom: '20px' }}>
-          Create Assignment
-        </Button>
+        {role === 'lecturer' && (
+          <Button type="primary" onClick={showModal} style={{ marginBottom: '20px' }}>
+            Create Assignment
+          </Button>
+        )}
         <List
           grid={{ gutter: 16, column: 1 }}
           dataSource={enrollment.assignments}

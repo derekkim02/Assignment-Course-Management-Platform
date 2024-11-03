@@ -31,7 +31,7 @@ const CourseExpandable: React.FC<CourseExpandableProps> = ({ name, role, useFetc
   }, {});
 
   return (
-    <Collapse defaultActiveKey={['1']}>
+    <Collapse defaultActiveKey={['1']} style={{ marginTop: '20px' }}>
       <Panel header={name} key="1">
         {isLoading && <p>Loading...</p>}
         {groupedData && Object.keys(groupedData).map((termKey) => (
