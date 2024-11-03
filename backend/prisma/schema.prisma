@@ -70,7 +70,7 @@ model CourseOffering {
 
   @@unique([courseId, termYear, termTerm])
 
-  lecturerId         Int                
+  lecturerId         Int
   lecturer           User               @relation("Lecturer", fields: [lecturerId], references: [zid])
   tutors             User[]             @relation("Tutors")
   enrolledStudents   User[]             @relation("EnrolledStudents")

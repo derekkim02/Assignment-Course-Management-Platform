@@ -122,7 +122,7 @@ export const viewLecturedCourses = async (req: Request, res: Response): Promise<
       res.status(404).json({ error: 'User\'s data does not exist' });
       return;
     }
-    
+
     const response = data.coursesLectured.map(enrolment => ({
 			enrolmentId: enrolment.id,
 			courseName: enrolment.course.name,
@@ -259,7 +259,7 @@ export const markAllSubmissions = async (req: Request, res: Response): Promise<v
         });
       });
     }));
-    
+
     res.status(200).json({ message: 'Submissions marked' });
   } catch {
     res.status(500).json({ error: 'Failed to mark submissions' });

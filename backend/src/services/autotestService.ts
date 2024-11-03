@@ -33,11 +33,11 @@ class AutotestService {
 
             return results.map(result => ({
                 passed: result.status === 'fulfilled' && result.value === "Passed",
-                message: result.status === 'fulfilled' 
-                    ? (result.value === "Passed" ? "Passed" : result.value) 
+                message: result.status === 'fulfilled'
+                    ? (result.value === "Passed" ? "Passed" : result.value)
                     : (result.reason as Error).message,
             }));
-            
+
         } catch (error) {
             await this.cleanup();
             throw error;
@@ -100,7 +100,7 @@ class AutotestService {
                     resolve(discrepancies ? `Some lines are incorrect:\n${discrepancies}` : 'Passed');
                 });
             } catch (error) {
-                // Error executing the shellCommands
+                // Error executing the shellCommands  
                 reject(`Error executing command: ${error}`);
             }
         });

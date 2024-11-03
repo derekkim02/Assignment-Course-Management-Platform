@@ -14,7 +14,7 @@ export const submitGroupAssignment = async (req: Request, res: Response): Promis
 const handleAssignmentSubmission = async (req: Request, res: Response, isGroupAssignment: boolean): Promise<void> => {
 	try {
 		const { assignmentId } = req.params;
-		
+
 		if (!req.file) {
 			res.status(400).json({ error: 'No file uploaded' });
 			return;
@@ -40,7 +40,7 @@ const handleAssignmentSubmission = async (req: Request, res: Response, isGroupAs
 
 		const automarkService = new AutotestService(testCases, shCmd, filePath);
 		const results = await automarkService.runTests();
-		
+
 		const response = {
 			results: results,
 			total: results.length,

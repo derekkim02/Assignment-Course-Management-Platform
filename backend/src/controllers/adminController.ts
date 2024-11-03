@@ -147,3 +147,91 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ error: `Failed to fetch users (${e})` });
   }
 }
+
+export const getCourseOfferings = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const courseOfferings = await prisma.courseOffering.findMany(
+      {
+        include: {
+          course: true,
+          term: true,
+          lecturer: true
+        }
+      }
+    );
+
+    const response = courseOfferings.map(enrolment => ({
+      id: enrolment.id,
+      courseCode: enrolment.course.code,
+      courseName: enrolment.course.name,
+      term: `${enrolment.term.year}${enrolment.term.term}`,
+		}));
+
+
+    res.status(200).json(response);
+  } catch (e) {
+    res.status(500).json({ error: `Failed to fetch users (${e})` });
+  }
+}
+
+export const getCourseOffering = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const courseOffering = await prisma.courseOffering.findUnique(
+      {
+        where: {
+          id: parseInt(req.params.courseOfferingId)
+        },
+        include: {
+          course: true,
+          term: true,
+          lecturer: true,
+          enrolledStudents: true,
+          tutors: true
+        }
+      }
+    );
+
+    if (!courseOffering) {
+      res.status(404).json({ error: 'Course offering not found' });
+      return;
+    }
+
+    const response = {
+      courseCode: courseOffering.course.code,
+      courseName: courseOffering.course.name,
+      term: `${courseOffering.term.year}${courseOffering.term.term}`,
+      lecturer: courseOffering.lecturer,
+      students: courseOffering.enrolledStudents,
+      tutors: courseOffering.tutors
+    }
+
+    res.status(200).json(response);
+  } catch (e) {
+    res.status(500).json({ error: `Failed to fetch users (${e})` });
+  }
+}
+
+export const updateCourseOffering = async (req: Request, res: Response): Promise<void> => {
+  const { lecturerId, tutorsIds, studentIds } = req.body;
+  const { courseOfferingId } = req.params;
+
+  try {
+    await prisma.courseOffering.update({
+      where: {
+        id: parseInt(courseOfferingId)
+      },
+      data: {
+        lecturerId,
+        tutors: {
+          set: tutorsIds.map((tutorId: number) => ({ zid: tutorId }))
+        },
+        enrolledStudents: {
+          set: studentIds.map((studentId: number) => ({ zid: studentId }))
+        }
+      }
+    });
+    res.status(200).json({ message: 'Course offering updated successfully' });
+  } catch (e) {
+    res.status(500).json({ error: `Failed to update course offering (${e})` });
+  }
+}

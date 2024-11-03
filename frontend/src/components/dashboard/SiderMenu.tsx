@@ -1,3 +1,4 @@
+// frontend/src/components/dashboard/SiderMenu.tsx
 import React from 'react';
 import { Layout, Menu } from 'antd';
 import { UserOutlined, FileTextOutlined, CalendarOutlined, BookOutlined, SettingOutlined } from '@ant-design/icons';
@@ -11,7 +12,7 @@ interface SidebarMenuProps {
   children?: React.ReactNode;
 }
 
-const SidebarMenu: React.FC<SidebarMenuProps> = ({ isMobile, children }) => {
+const SidebarMenu: React.FC<SidebarMenuProps> = ({ isMobile }) => {
   const auth = useAuth();
   const isAdmin = auth.isIGiveAdmin;
   const location = useLocation();
@@ -31,16 +32,15 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isMobile, children }) => {
     return currentItem ? [currentItem.key] : ['1'];
   };
 
+  const items = filteredMenuItems.map(item => ({
+    key: item.key,
+    icon: item.icon,
+    label: <Link to={item.path}>{item.label}</Link>
+  }));
+
   return (
-    <Sider width={isMobile ? '100%' : '250px'} style={{ height: 'auto' }}>
-      <Menu mode={'inline'} selectedKeys={getSelectedKey()} style={{ borderRight: 0 }}>
-        {filteredMenuItems.map(item => (
-          <Menu.Item key={item.key} icon={item.icon}>
-            <Link to={item.path}>{item.label}</Link>
-          </Menu.Item>
-        ))}
-        {children}
-      </Menu>
+    <Sider width={isMobile ? '100%' : '250px'} style={{ height: 'auto', backgroundColor: 'white' }}>
+      <Menu mode={'inline'} selectedKeys={getSelectedKey()} items={items} style={{ borderRight: 0 }} />
     </Sider>
   );
 };
