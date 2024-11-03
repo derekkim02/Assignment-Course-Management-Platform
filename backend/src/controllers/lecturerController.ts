@@ -3,31 +3,21 @@ import { createAssessment, updateAssessment } from "../assessments";
 import { createTestCase } from "../testCases";
 import { getUserFromToken } from "../middleware/jwt";
 import prisma from '../prismaClient';
+import AutotestService from "../services/autotestService";
+import LatePenaltyService from "../services/latepenaltyService";
 
-/**
- * Creates a new assignment.
- * @param {Request} req - The request object containing the assignment details in the body.
- * @param {Response} res - The response object used to send the created assignment or an error message.
- * @returns {Promise<void>} - A promise that resolves to void.
- */
 export const createAssignment =  async (req: Request, res: Response): Promise<void> => {
 	const user = await getUserFromToken(req);
 	const lecturerId = user.zid;
 	const { title, description, dueDate, isGroupAssignment, term, courseID, defaultShCmd } = req.body;
 	try {
-	  const newAssignment = await createAssessment(lecturerId, title, description, dueDate, isGroupAssignment, term, courseID, defaultShCmd);
-	  res.status(201).json(newAssignment);
+    const newAssignment = await createAssessment(lecturerId, title, description, dueDate, isGroupAssignment, term, courseID, defaultShCmd);
+    res.status(201).json(newAssignment);
 	} catch (error) {
-	  res.status(400).json({ error: (error as Error).message });
+    res.status(400).json({ error: (error as Error).message });
 	}
 }
 
-/**
- * Updates an existing assignment.
- * @param {Request} req - The request object containing the assignment ID in the params and the updated assignment details in the body.
- * @param {Response} res - The response object used to send the updated assignment or an error message.
- * @returns {Promise<void>} - A promise that resolves to void.
- */
 export const updateAssignment = async (req: Request, res: Response): Promise<void> => {
 	const user = await getUserFromToken(req);
 	const lecturerId = user.zid;
@@ -41,12 +31,6 @@ export const updateAssignment = async (req: Request, res: Response): Promise<voi
 	}
 }
 
-/**
- * Creates a new test case for an assignment.
- * @param {Request} req - The request object containing the lecturer ID, assignment ID, input, and output in the body.
- * @param {Response} res - The response object used to send the created test case or an error message.
- * @returns {Promise<void>} - A promise that resolves to void.
- */
 export const createTest = async (req: Request, res: Response): Promise<void> => {
 	const { lecturerId, assignmentId, input, output } = req.body;
 	try {
@@ -57,12 +41,6 @@ export const createTest = async (req: Request, res: Response): Promise<void> => 
 	}
 }
 
-/**
- * Retrieves a submission by its ID.
- * @param {Request} req - The request object containing the submission ID in the body.
- * @param {Response} res - The response object used to send the submission data or an error message.
- * @returns {Promise<void>} - A promise that resolves to void.
- */
 export const viewSubmission =  async (req: Request, res: Response): Promise<void> => {
   try {
     const { submissionId } = req.body;
@@ -78,13 +56,6 @@ export const viewSubmission =  async (req: Request, res: Response): Promise<void
   }
 }
 
-/**
- * Retrieves students enrolled in a specific course offering.
- * @param {Request} req - The request object containing the course ID, term year, and term term in the body.
- * @param {Response} res - The response object used to send the list of enrolled students or an error message.
- * @returns {Promise<void>} - A promise that resolves to void.
- *
- */
 export const getStudentsInCourse =  async (req: Request, res: Response): Promise<void> => {
   try {
     const { courseId, termYear, termTerm } = req.body;
@@ -112,13 +83,6 @@ export const getStudentsInCourse =  async (req: Request, res: Response): Promise
   }
 }
 
-/**
- * Searches for a student by their ID.
- * @param {Request} req - The request object containing the student ID in the body.
- * @param {Response} res - The response object used to send the student data or an error message.
- * @returns {Promise<void>} - A promise that resolves to void.
- *
- */
 export const searchStudentById =  async (req: Request, res: Response): Promise<void> => {
   try {
     const { studentId } = req.body;
@@ -224,4 +188,80 @@ export const viewLecturedCourseDetails = async (req: Request, res: Response): Pr
 	} catch {
     res.status(500).json({ error: 'Failed to fetch courses' });
 	}
+}
+
+export const markAllSubmissions = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const assignmentId = parseInt(req.params.assignmentId);
+
+    const data = await prisma.assignment.findUnique({
+      where: {
+        id: assignmentId,
+        courseOffering: {
+          lecturer: {
+            email: req.userEmail
+          }
+        }
+      },
+      include: {
+        submissions: true,
+        testCases: true,
+        courseOffering: true,
+      },
+    });
+
+    if (!data) {
+      res.status(404).json({ error: 'Assignment not found or you are not the lecturer for this course' });
+      return;
+    }
+
+    const latestSubmissions = data.submissions.reduce((acc, submission) => {
+      const submitterId = data.isGroupAssignment ? submission.groupId : submission.studentId;
+      const existingSubmission = acc.find(s => (data.isGroupAssignment ? s.groupId : s.studentId) === submitterId);
+
+      if (!existingSubmission || submission.submissionTime > existingSubmission.submissionTime) {
+        acc.filter(s => data.isGroupAssignment ? s.groupId : s.studentId !== submitterId);
+        acc.push(submission);
+      }
+
+      return acc;
+    }, [] as typeof data.submissions);
+
+
+    const testCases = data.testCases.map(testCase => ({ input: testCase.input, expectedOutput: testCase.expectedOutput }));
+    const shellCommand = data.defaultShCmd;
+    const penaltyStrategy = data.courseOffering.penaltyStrategy;
+
+    await Promise.all(latestSubmissions.map(async submission => {
+      const submitterId = data.isGroupAssignment ? submission.groupId : submission.studentId;
+      if (!submitterId) {
+        return;
+      }
+
+      const autotestService = new AutotestService(testCases, shellCommand, submission.filePath);
+
+      const extraDays = data.isGroupAssignment ? await LatePenaltyService.getExtraDaysGroup(submitterId, data.dueDate)
+      : await LatePenaltyService.getExtraDaysIndividual(submitterId, data.dueDate);
+
+      const latepenaltyService = new LatePenaltyService(data.dueDate, submission.submissionTime, penaltyStrategy , extraDays);
+
+      autotestService.runTests().then((results) => {
+        const score = results.filter(result => result.passed).length / results.length;
+
+        prisma.submission.update({
+          where: {
+            id: submission.id,
+          },
+          data: {
+            autoMarkResult: score,
+            latePenalty: latepenaltyService.getLatePenalty(),
+          },
+        });
+      });
+    }));
+
+    res.status(200).json({ message: 'Submissions marked' });
+  } catch {
+    res.status(500).json({ error: 'Failed to mark submissions' });
+  }
 }

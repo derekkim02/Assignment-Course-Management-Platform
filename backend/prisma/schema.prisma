@@ -31,7 +31,6 @@ model User {
   groups              Group[]
   ELSDuration         ELSDuration?
   // This refers to the submissions that the user has marked
-  marks               Mark[]
 }
 
 model Course {
@@ -117,8 +116,12 @@ model Submission {
   groupId            Int?
   group              Group?              @relation(fields: [groupId], references: [id])
 
-  mark               Mark?
-
+  isMarked           Boolean             @default(false)
+  autoMarkResult     Decimal?
+  styleMarkResult    Decimal?
+  finalMark          Decimal?
+  markerComments     String?
+  latePenalty        Decimal?
 }
 
 enum SubmissionType {
@@ -130,6 +133,7 @@ model TestCase {
   id                 Int                @id @default(autoincrement())
   input              String
   expectedOutput     String
+  isHidden           Boolean            @default(false)
 
   assignmentId       Int
   assignment         Assignment         @relation(fields: [assignmentId], references: [id])
@@ -142,20 +146,6 @@ model Group {
 
   members            User[]
   submissions        Submission[]
-}
-
-model Mark {
-  mark               Decimal
-  feedback           String
-  isMarked           Boolean
-
-  submissionId       Int                @unique
-  submission         Submission         @relation(fields: [submissionId], references: [id])
-
-  markerId           Int
-  marker             User               @relation(fields: [markerId], references: [zid])
-
-  @@id([submissionId, markerId])
 }
 
 model ELSType {

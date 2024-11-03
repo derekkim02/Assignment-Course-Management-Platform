@@ -29,6 +29,7 @@ export const validateSingleSubmission = async (
 					select: {
 						input: true,
 						expectedOutput: true,
+						isHidden: true,
 					},
 				},
 			},
@@ -51,7 +52,7 @@ export const validateSingleSubmission = async (
 		req.submissionInfo = {
 			submitterId: data.courseOffering.enrolledStudents[0].zid,
 			shCmd: data.defaultShCmd,
-			testCases: data.testCases
+			testCases: data.testCases.filter(t => t.isHidden === false),
 		};
 		next();
 	} catch {
