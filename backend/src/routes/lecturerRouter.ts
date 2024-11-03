@@ -1,5 +1,6 @@
 import express from 'express';
 import { verifyToken } from '../middleware/jwt';
+import { validateAssignmentData } from 'middleware/assignment';
 import { 
 	createAssignment,
 	searchStudentById,
@@ -57,10 +58,10 @@ router.get('/courses',viewLecturedCourses);
 router.get('/courses/:courseId',viewLecturedCourseDetails);
 
 // Create assignment
-router.post('/courses/:courseId/assignments', createAssignment);
+router.post('/courses/:courseId/assignments', validateAssignmentData, createAssignment);
 
 // Change assignment details
-router.put('/courses/:courseId/assignments/:assignmentId', updateAssignment );
+router.put('/courses/:courseId/assignments/:assignmentId', validateAssignmentData, updateAssignment );
 
 // Delete assignment
 router.delete('/courses/:courseId/assignments/:assignmentId', );
