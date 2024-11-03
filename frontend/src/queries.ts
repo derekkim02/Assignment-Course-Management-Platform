@@ -30,6 +30,13 @@ export const useAdminCourseOfferings = () => {
   });
 };
 
+export const useAdminGetCourseOffering = (courseOfferingId: string) => {
+  return useQuery({
+    queryKey: ['adminCourseOffering'],
+    queryFn: () => fetchWithAuth(`api/admin/course-offerings/${courseOfferingId}`, {})
+  });
+};
+
 export const useCourses = (role: string) => {
   return useQuery({
     queryKey: ['courses'],
