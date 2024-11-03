@@ -30,7 +30,7 @@ router.get('/course-offerings', getCourseOfferings);
  * @route GET /course-offerings/:courseOfferingId
  * @description Fetch a specific course offering.
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
- * @param {string} courseOfferingId.path.required - The unique identifier of the course offering
+ * @param {string} courseOfferingId- The unique identifier of the course offering
  * @returns {object} 200 - Course offering
  * @returns {string} 200.id - Unique identifier of the course offering
  * @returns {string} 200.courseCode - Course code
@@ -48,12 +48,19 @@ router.get('/course-offerings/:courseOfferingId', getCourseOffering);
  * @route PUT /course-offerings/:courseOfferingId
  * @description Update a specific course offering.
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
- * @param {string} courseOfferingId.path.required - The unique identifier of the course offering
- * @param {string} lecturerId.body.required - The unique identifier of the lecturer
- * @param {string[]} studentIds.required - The unique identifiers of the students
- * @param {string[]} tutorIds.required - The unique identifiers of the tutors
- * @param {string} courseId.body.required - The unique identifier of the course
- * @returns 200 - Course offering
+ * @param {string} courseOfferingId - The unique identifier of the course offering
+ * @param {object} body - The request body
+ * @param {string} body.lecturerId - The unique identifier of the lecturer
+ * @param {string[]} body.studentIds - The unique identifiers of the students
+ * @param {string[]} body.tutorIds - The unique identifiers of the tutors
+ * @param {string} body.courseId - The unique identifier of the course
+ * @returns {object} 200 - Course offering
+ * @returns {string} 200.id - Unique identifier of the course offering
+ * @returns {string} 200.courseCode - Course code
+ * @returns {string} 200.courseName - Course name
+ * @returns {string} 200.term - Term of the course offering in the format `yearTerm`
+ * @returns {object} 500 - Internal server error
+ * @returns {string} 500.error - Error message
  */
 router.put('/course-offerings/:courseOfferingId', updateCourseOffering);
 
