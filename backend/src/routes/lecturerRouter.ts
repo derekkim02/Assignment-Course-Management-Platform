@@ -1,6 +1,16 @@
 import express from 'express';
 import { verifyToken } from '../middleware/jwt';
-import { createAssignment, searchStudentById, getStudentsInCourse, viewSubmission, createTest, updateAssignment, viewLecturedCourses, viewLecturedCourseDetails } from '../controllers/lecturerController';
+import { 
+	createAssignment,
+	searchStudentById,
+	getStudentsInCourse,
+	viewSubmission,
+	createTest,
+	updateAssignment,
+	viewLecturedCourses,
+	viewLecturedCourseDetails,
+	markAllSubmissions
+} from '../controllers/lecturerController';
 
 const router = express.Router();
 router.use(verifyToken);
@@ -73,8 +83,14 @@ router.get('/students', getStudentsInCourse);
 // Look at student details
 router.get('/students/:studentId', searchStudentById);
 
-// Start auto-marking for every submission in the course
-router.post('/courses/:courseId/assignments/:assignmentId/mark', );
+/**
+ * @route POST /courses/:courseId/assignments/:assignmentId/mark
+ * @description Begin the automated marking process for an assignment.
+ * @param {string} assignmentId - Unique identifier of the assignment
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object} 200 - Success message
+ */
+router.post('/assignments/:assignmentId/mark', markAllSubmissions);
 
 // Download a student submission
 router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/download', );
