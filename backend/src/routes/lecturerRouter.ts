@@ -56,7 +56,28 @@ router.get('/courses',viewLecturedCourses);
  */
 router.get('/courses/:courseId',viewLecturedCourseDetails);
 
-// Create assignment
+
+
+/**
+ * @route POST /courses/:courseId/assignments
+ * @description Create a new assignment for a specific course offering.
+ * @param {string} courseId - Unique identifier of the course offering
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @body {string} title - Title of the assignment
+ * @body {string} description - Description of the assignment
+ * @body {string} dueDate - Due date of the assignment in ISO 8601 format
+ * @body {boolean} isGroupAssignment - Whether the assignment is a group assignment
+ * @body {string} defaultShCmd - Default shell command for the assignment
+ * @returns {object} 201 - Created assignment
+ * @returns {string} 201.id - Unique identifier of the assignment
+ * @returns {string} 201.title - Title of the assignment
+ * @returns {string} 201.description - Description of the assignment
+ * @returns {string} 201.dueDate - Due date of the assignment
+ * @returns {boolean} 201.isGroupAssignment - Whether the assignment is a group assignment
+ * @returns {string} 201.defaultShCmd - Default shell command for the assignment
+ * @returns {object} 400 - Bad request
+ * @returns {string} 400.error - Error message
+ */
 router.post('/courses/:courseId/assignments', createAssignment);
 
 // Change assignment details
