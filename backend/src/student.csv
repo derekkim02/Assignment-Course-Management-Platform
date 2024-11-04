@@ -1,0 +1,86 @@
+fullname,zId,email,groupId,groupName,classId,className,startTime,endTime,Day,tutorId,tutorFullname
+John Smith,z1234567,z1234567@student.unsw.edu.au,1,Thor,1,H10A,10am,12pm,Thursday,z1234566,David Jones
+Jane Doe,z7654321,z7654321@student.unsw.edu.au,2,Iron Man,1,H10B,2pm,4pm,Wednesday,z9876543,Susan Lee
+Alice Brown,z2345678,z2345678@student.unsw.edu.au,3,Hulk,2,H12A,9am,11am,Monday,z1234599,Mark Wilson
+Michael Tan,z3456789,z3456789@student.unsw.edu.au,1,Thor,3,H11A,3pm,5pm,Tuesday,z1234566,David Jones
+Emily White,z4567890,z4567890@student.unsw.edu.au,4,Black Widow,4,H13A,1pm,3pm,Friday,z2345678,Karen Scott
+Oliver Green,z5678901,z5678901@student.unsw.edu.au,2,Iron Man,1,H10B,2pm,4pm,Wednesday,z9876543,Susan Lee
+Sophia Lee,z6789012,z6789012@student.unsw.edu.au,1,Thor,2,H12B,10am,12pm,Thursday,z1234566,David Jones
+Liam Nguyen,z7890123,z7890123@student.unsw.edu.au,3,Hulk,3,H11B,3pm,5pm,Tuesday,z1234599,Mark Wilson
+Isabella King,z8901234,z8901234@student.unsw.edu.au,2,Iron Man,2,H10A,1pm,3pm,Monday,z9876543,Susan Lee
+Ethan Scott,z9012345,z9012345@student.unsw.edu.au,4,Black Widow,4,H13B,9am,11am,Friday,z2345678,Karen Scott
+Chloe Kim,z0123456,z0123456@student.unsw.edu.au,3,Hulk,1,H10C,11am,1pm,Wednesday,z1234599,Mark Wilson
+Mia Johnson,z1023456,z1023456@student.unsw.edu.au,2,Iron Man,3,H11C,12pm,2pm,Monday,z9876543,Susan Lee
+Noah Hill,z2103456,z2103456@student.unsw.edu.au,4,Black Widow,4,H13C,4pm,6pm,Thursday,z2345678,Karen Scott
+Amelia Martinez,z3203456,z3203456@student.unsw.edu.au,1,Thor,2,H12C,9am,11am,Wednesday,z1234566,David Jones
+Lucas Perez,z4303456,z4303456@student.unsw.edu.au,3,Hulk,3,H11A,10am,12pm,Tuesday,z1234599,Mark Wilson
+Charlotte Roberts,z5403456,z5403456@student.unsw.edu.au,2,Iron Man,4,H10D,1pm,3pm,Monday,z9876543,Susan Lee
+James Young,z6503456,z6503456@student.unsw.edu.au,4,Black Widow,4,H13D,3pm,5pm,Friday,z2345678,Karen Scott
+Ava Turner,z7603456,z7603456@student.unsw.edu.au,1,Thor,1,H10E,11am,1pm,Thursday,z1234566,David Jones
+Henry Walker,z8703456,z8703456@student.unsw.edu.au,3,Hulk,2,H12D,2pm,4pm,Tuesday,z1234599,Mark Wilson
+Abigail Phillips,z9803456,z9803456@student.unsw.edu.au,2,Iron Man,3,H11D,4pm,6pm,Monday,z9876543,Susan Lee
+Mason Rivera,z1903456,z1903456@student.unsw.edu.au,4,Black Widow,4,H13E,10am,12pm,Friday,z2345678,Karen Scott
+Ella Lewis,z2903456,z2903456@student.unsw.edu.au,1,Thor,1,H10F,9am,11am,Thursday,z1234566,David Jones
+Alexander Carter,z3903456,z3903456@student.unsw.edu.au,3,Hulk,2,H12E,11am,1pm,Tuesday,z1234599,Mark Wilson
+Grace Ramirez,z4903456,z4903456@student.unsw.edu.au,2,Iron Man,3,H11E,3pm,5pm,Wednesday,z9876543,Susan Lee
+Lily Gomez,z5903456,z5903456@student.unsw.edu.au,4,Black Widow,4,H13F,1pm,3pm,Friday,z2345678,Karen Scott
+Benjamin Sanders,z6903456,z6903456@student.unsw.edu.au,1,Thor,1,H10G,10am,12pm,Thursday,z1234566,David Jones
+Victoria Powell,z7903456,z7903456@student.unsw.edu.au,3,Hulk,3,H11F,2pm,4pm,Tuesday,z1234599,Mark Wilson
+Samuel Ward,z8903456,z8903456@student.unsw.edu.au,2,Iron Man,4,H10H,1pm,3pm,Monday,z9876543,Susan Lee
+Emma Baker,z9903456,z9903456@student.unsw.edu.au,4,Black Widow,4,H13G,9am,11am,Friday,z2345678,Karen Scott
+Aiden Torres,z0903456,z0903456@student.unsw.edu.au,1,Thor,2,H12F,10am,12pm,Thursday,z1234566,David Jones
+Hannah Brooks,z1013456,z1013456@student.unsw.edu.au,3,Hulk,3,H11G,3pm,5pm,Wednesday,z1234599,Mark Wilson
+David Coleman,z1113456,z1113456@student.unsw.edu.au,2,Iron Man,4,H10I,2pm,4pm,Monday,z9876543,Susan Lee
+Madison Ross,z1213456,z1213456@student.unsw.edu.au,4,Black Widow,4,H13H,1pm,3pm,Friday,z2345678,Karen Scott
+Matthew Patterson,z1313456,z1313456@student.unsw.edu.au,1,Thor,1,H10J,9am,11am,Thursday,z1234566,David Jones
+Audrey Gray,z1413456,z1413456@student.unsw.edu.au,3,Hulk,3,H11H,10am,12pm,Wednesday,z1234599,Mark Wilson
+Joshua Morales,z1513456,z1513456@student.unsw.edu.au,2,Iron Man,4,H10K,12pm,2pm,Monday,z9876543,Susan Lee
+Alyssa Hughes,z1613456,z1613456@student.unsw.edu.au,4,Black Widow,4,H13I,3pm,5pm,Friday,z2345678,Karen Scott
+Daniel Cook,z1713456,z1713456@student.unsw.edu.au,1,Thor,2,H12G,10am,12pm,Thursday,z1234566,David Jones
+Samantha Kelly,z1813456,z1813456@student.unsw.edu.au,3,Hulk,2,H11I,2pm,4pm,Tuesday,z1234599,Mark Wilson
+Christopher Diaz,z1913456,z1913456@student.unsw.edu.au,2,Iron Man,3,H10L,1pm,3pm,Wednesday,z9876543,Susan Lee
+Brianna Cooper,z2013456,z2013456@student.unsw.edu.au,4,Black Widow,4,H13J,9am,11am,Friday,z2345678,Karen Scott
+Joseph Perry,z2113456,z2113456@student.unsw.edu.au,1,Thor,1,H10M,3pm,5pm,Thursday,z1234566,David Jones
+Gabriella Howard,z2213456,z2213456@student.unsw.edu.au,3,Hulk,3,H11J,11am,1pm,Monday,z1234599,Mark Wilson
+Nathan Bailey,z2313456,z2313456@student.unsw.edu.au,2,Iron Man,2,H10N,10am,12pm,Wednesday,z9876543,Susan Lee
+Zoe Cox,z2413456,z2413456@student.unsw.edu.au,4,Black Widow,4,H13K,1pm,3pm,Friday,z2345678,Karen Scott
+Andrew Bell,z2513456,z2513456@student.unsw.edu.au,1,Thor,2,H12H,9am,11am,Thursday,z1234566,David Jones
+Julia Butler,z2613456,z2613456@student.unsw.edu.au,3,Hulk,3,H11K,2pm,4pm,Monday,z1234599,Mark Wilson
+Ryan Henderson,z2713456,z2713456@student.unsw.edu.au,2,Iron Man,4,H10O,12pm,2pm,Wednesday,z9876543,Susan Lee
+Katherine Foster,z2813456,z2813456@student.unsw.edu.au,4,Black Widow,4,H13L,3pm,5pm,Friday,z2345678,Karen Scott
+Robert Jenkins,z2913456,z2913456@student.unsw.edu.au,1,Thor,1,H10P,10am,12pm,Thursday,z1234566,David Jones
+Sophia Simmons,z3013456,z3013456@student.unsw.edu.au,3,Hulk,2,H12I,2pm,4pm,Tuesday,z1234599,Mark Wilson
+Evelyn Peterson,z3113456,z3113456@student.unsw.edu.au,2,Iron Man,3,H10Q,4pm,6pm,Monday,z9876543,Susan Lee
+Luke Richardson,z3213456,z3213456@student.unsw.edu.au,4,Black Widow,4,H13M,1pm,3pm,Friday,z2345678,Karen Scott
+Amelia Myers,z3313456,z3313456@student.unsw.edu.au,1,Thor,2,H12J,9am,11am,Thursday,z1234566,David Jones
+Jack Long,z3413456,z3413456@student.unsw.edu.au,3,Hulk,3,H11L,11am,1pm,Wednesday,z1234599,Mark Wilson
+Lily Cooper,z3513456,z3513456@student.unsw.edu.au,2,Iron Man,2,H10R,1pm,3pm,Monday,z9876543,Susan Lee
+Aidan Griffin,z3613456,z3613456@student.unsw.edu.au,4,Black Widow,4,H13N,10am,12pm,Friday,z2345678,Karen Scott
+Mia Powell,z3713456,z3713456@student.unsw.edu.au,1,Thor,1,H10S,3pm,5pm,Thursday,z1234566,David Jones
+Christian Price,z3813456,z3813456@student.unsw.edu.au,3,Hulk,3,H11M,9am,11am,Tuesday,z1234599,Mark Wilson
+Bella Collins,z3913456,z3913456@student.unsw.edu.au,2,Iron Man,4,H10T,2pm,4pm,Wednesday,z9876543,Susan Lee
+Ethan Ward,z4013456,z4013456@student.unsw.edu.au,4,Black Widow,4,H13O,12pm,2pm,Friday,z2345678,Karen Scott
+Natalie Brooks,z4113456,z4113456@student.unsw.edu.au,1,Thor,2,H12K,1pm,3pm,Thursday,z1234566,David Jones
+Connor Scott,z4213456,z4213456@student.unsw.edu.au,3,Hulk,2,H11N,11am,1pm,Monday,z1234599,Mark Wilson
+Sophia Lewis,z4313456,z4313456@student.unsw.edu.au,2,Iron Man,4,H10U,10am,12pm,Wednesday,z9876543,Susan Lee
+Logan White,z4413456,z4413456@student.unsw.edu.au,4,Black Widow,4,H13P,1pm,3pm,Friday,z2345678,Karen Scott
+Rebecca Allen,z4513456,z4513456@student.unsw.edu.au,1,Thor,3,H12L,3pm,5pm,Thursday,z1234566,David Jones
+Owen Young,z4613456,z4613456@student.unsw.edu.au,3,Hulk,1,H11O,2pm,4pm,Tuesday,z1234599,Mark Wilson
+Grace Harris,z4713456,z4713456@student.unsw.edu.au,2,Iron Man,2,H10V,12pm,2pm,Monday,z9876543,Susan Lee
+Lucas Adams,z4813456,z4813456@student.unsw.edu.au,4,Black Widow,4,H13Q,10am,12pm,Friday,z2345678,Karen Scott
+Abigail Nelson,z4913456,z4913456@student.unsw.edu.au,1,Thor,1,H10W,9am,11am,Thursday,z1234566,David Jones
+Elijah Murphy,z5013456,z5013456@student.unsw.edu.au,3,Hulk,2,H11P,4pm,6pm,Wednesday,z1234599,Mark Wilson
+Victoria Rogers,z5113456,z5113456@student.unsw.edu.au,2,Iron Man,3,H10X,1pm,3pm,Monday,z9876543,Susan Lee
+Isabella Sanchez,z5213456,z5213456@student.unsw.edu.au,4,Black Widow,4,H13R,9am,11am,Friday,z2345678,Karen Scott
+Sebastian Lopez,z5313456,z5313456@student.unsw.edu.au,1,Thor,1,H10Y,3pm,5pm,Thursday,z1234566,David Jones
+Natalie Wood,z5413456,z5413456@student.unsw.edu.au,3,Hulk,3,H11Q,10am,12pm,Tuesday,z1234599,Mark Wilson
+Avery Cooper,z5513456,z5513456@student.unsw.edu.au,2,Iron Man,2,H10Z,4pm,6pm,Monday,z9876543,Susan Lee
+Isaiah Stewart,z5613456,z5613456@student.unsw.edu.au,4,Black Widow,4,H13S,12pm,2pm,Friday,z2345678,Karen Scott
+Savannah Bennett,z5713456,z5713456@student.unsw.edu.au,1,Thor,2,H12M,9am,11am,Thursday,z1234566,David Jones
+Jonathan Gray,z5813456,z5813456@student.unsw.edu.au,3,Hulk,3,H11R,1pm,3pm,Wednesday,z1234599,Mark Wilson
+Stella Lee,z5913456,z5913456@student.unsw.edu.au,2,Iron Man,1,H10A,2pm,4pm,Monday,z9876543,Susan Lee
+Dylan Gonzalez,z6013456,z6013456@student.unsw.edu.au,4,Black Widow,4,H13T,3pm,5pm,Friday,z2345678,Karen Scott
+Zoey Martin,z6113456,z6113456@student.unsw.edu.au,1,Thor,1,H10B,9am,11am,Thursday,z1234566,David Jones
+Brandon Perez,z6213456,z6213456@student.unsw.edu.au,3,Hulk,3,H11S,10am,12pm,Tuesday,z1234599,Mark Wilson
+Brooklyn Thompson,z6313456,z6313456@student.unsw.edu.au,2,Iron Man,4,H10C,1pm,3pm,Wednesday,z9876543,Susan Lee
+Blake Fisher,z6413456,z6413456@student.unsw.edu.au,4,Black Widow,4,H13U,12pm,2pm,Friday,z2345678,Karen Scott
