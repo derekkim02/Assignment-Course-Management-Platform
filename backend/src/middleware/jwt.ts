@@ -5,8 +5,8 @@ import { User } from '@prisma/client';
 
 const secretKey = process.env.JWT_SECRET || 'capstone-arat-project';
 
-export const generateToken = (email: string, isAdmin: boolean, zId: number): string => {
-	return jwt.sign({ email, isAdmin, zId }, secretKey, { expiresIn: '7 days' });
+export const generateToken = (email: string, isAdmin: boolean): string => {
+	return jwt.sign({ email, isAdmin }, secretKey, { expiresIn: '7 days' });
 }
 
 export const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
