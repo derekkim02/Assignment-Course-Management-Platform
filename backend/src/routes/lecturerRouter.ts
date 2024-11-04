@@ -60,7 +60,7 @@ router.get('/courses/:courseId',viewLecturedCourseDetails);
 router.post('/courses/:courseId/assignments', createAssignment);
 
 // Change assignment details
-router.put('/courses/:courseId/assignments/:assignmentId', updateAssignment );
+router.put('/courses/:courseId/assignments/:assignmentId', updateAssignment);
 
 // Delete assignment
 router.delete('/courses/:courseId/assignments/:assignmentId', );

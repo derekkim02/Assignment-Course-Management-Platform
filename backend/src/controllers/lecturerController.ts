@@ -9,11 +9,13 @@ import LatePenaltyService from "../services/latepenaltyService";
 export const createAssignment =  async (req: Request, res: Response): Promise<void> => {
 	const user = await getUserFromToken(req);
 	const lecturerId = user.zid;
-	const { title, description, dueDate, isGroupAssignment, term, courseID, defaultShCmd } = req.body;
+  const courseOfferingId = parseInt(req.params.courseId);
+	const { title, description, dueDate, isGroupAssignment, defaultShCmd } = req.body;
 	try {
-    const newAssignment = await createAssessment(lecturerId, title, description, dueDate, isGroupAssignment, term, courseID, defaultShCmd);
+    const newAssignment = await createAssessment(lecturerId, title, description, dueDate, isGroupAssignment, courseOfferingId, defaultShCmd);
     res.status(201).json(newAssignment);
 	} catch (error) {
+    console.log(error);
     res.status(400).json({ error: (error as Error).message });
 	}
 }
@@ -22,9 +24,9 @@ export const updateAssignment = async (req: Request, res: Response): Promise<voi
 	const user = await getUserFromToken(req);
 	const lecturerId = user.zid;
 	const { assignmentId } = req.params
-	const { title, description, dueDate, isGroupAssignment, term, courseID } = req.body;
+	const { title, description, dueDate, isGroupAssignment, courseOfferingId } = req.body;
 	try {
-	  const updatedAssignment = await updateAssessment(lecturerId, assignmentId, title, description, dueDate, isGroupAssignment, term, courseID);
+	  const updatedAssignment = await updateAssessment(lecturerId, assignmentId, title, description, dueDate, isGroupAssignment, courseOfferingId);
 	  res.status(201).json(updatedAssignment);
 	} catch (error) {
 	  res.status(400).json({ error: (error as Error).message });

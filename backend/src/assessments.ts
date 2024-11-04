@@ -1,43 +1,24 @@
-import { Trimester, User } from '@prisma/client';
 import prisma from './prismaClient';
-import { parse, isValid } from 'date-fns';
-import { Request } from 'express';
-import { getUserFromToken } from './middleware/jwt';
+import { isValid, parseISO } from 'date-fns';
 
 // function to check if provided values are valid
-export async function validateAssessmentData(lecturerId: number, termYear: string, termTrimester: Trimester, dueDate: string, courseId: string) {
-  // Check that the term exists
-  const termExists = await prisma.term.findFirst({
+export async function validateAssessmentData(lecturerId: number, dueDate: string, courseOfferingId: number) {
+  // Check that the courseOffering Exists.
+  const courseOffering = await prisma.courseOffering.findFirst({
     where: {
-      year: parseInt(termYear, 10),
-      term: termTrimester
+      id: courseOfferingId
     }
   });
 
-  if (!termExists) {
-    throw new Error("Term does not exist");
+  if (!courseOffering) {
+    throw new Error("Course Offering not found");
   }
 
   // Check that the due date is a valid date
-  const parsedDate = parse(dueDate, 'dd/MM/yyyy', new Date());
+
+  const parsedDate = parseISO(dueDate);
   if (!isValid(parsedDate)) {
     throw new Error("Invalid due date");
-  }
-
-  // Check that the course exists
-  const course = await prisma.course.findFirst({
-    where: {
-      id: parseInt(courseId)
-    }
-  });
-
-  if (!course) {
-    throw new Error("Course does not exist");
-  }
-
-  // Check that lecturererId is 7 characters long
-  if (lecturerId.toString().length !== 7) {
-    throw new Error("Invalid lecturer ID");
   }
 
   // Check that the lecturer exists in the database
@@ -54,10 +35,8 @@ export async function validateAssessmentData(lecturerId: number, termYear: strin
   // Check that the lecturer is assigned to the course
   const teachingAssignment = await prisma.courseOffering.findFirst({
     where: {
-      courseId: parseInt(courseId),
-      termYear: parseInt(termYear),
-      termTerm: termTrimester,
-      lecturerId: lecturerId,
+      id: courseOfferingId,
+      lecturerId: lecturerId
     }
   });
 
@@ -66,8 +45,7 @@ export async function validateAssessmentData(lecturerId: number, termYear: strin
   }
 
   return {
-    parsedDate,
-    teachingAssignmentId: teachingAssignment.id
+    parsedDate
   };
 }
 
@@ -77,19 +55,10 @@ export async function createAssessment(
   description: string,
   dueDate: string,
   isGroupAssignment: boolean,
-  term: string,
-  courseId: string,
+  courseOfferingId: number,
   defaultShCmd: string
 ) {
-  // Check that the term is given in the format '24T3'
-  if (term.length !== 4) {
-    throw new Error("Invalid term");
-  }
-
-  const termYear = term.slice(0, 2);
-  const termTrimester = term.slice(2) as Trimester;
-
-  const { parsedDate, teachingAssignmentId } = await validateAssessmentData(lecturerId, termYear, termTrimester, dueDate, courseId);
+  const { parsedDate } = await validateAssessmentData(lecturerId, dueDate, courseOfferingId);
 
   const newAssignment = await prisma.assignment.create({
     data: {
@@ -98,7 +67,7 @@ export async function createAssessment(
       dueDate: parsedDate,
       isGroupAssignment: isGroupAssignment,
       autoTestExecutable: '',
-      courseOfferingId: teachingAssignmentId,
+      courseOfferingId: courseOfferingId,
       defaultShCmd: defaultShCmd,
       submissions: {
         create: []
@@ -112,16 +81,10 @@ export async function createAssessment(
   return newAssignment;
 }
 
-export async function updateAssessment(lecturerId: number, assignmentId: string, assignmentName: string, description: string, dueDate: string, isGroupAssignment: boolean, term: string, courseId: string) {
-  // Check that the term is given in the format '24T3'
-  if (term.length !== 4) {
-    throw new Error("Invalid term");
-  }
+export async function updateAssessment(lecturerId: number, assignmentId: string, assignmentName: string,
+  description: string, dueDate: string, isGroupAssignment: boolean, courseOfferingId: number) {
 
-  const termYear = term.slice(0, 2);
-  const termTrimester = term.slice(2) as Trimester;
-
-  const { parsedDate } = await validateAssessmentData(lecturerId, termYear, termTrimester, dueDate, courseId);
+  const { parsedDate } = await validateAssessmentData(lecturerId, dueDate, courseOfferingId);
 
   // Check that the assignment exists
   const assignment = await prisma.assignment.findFirst({

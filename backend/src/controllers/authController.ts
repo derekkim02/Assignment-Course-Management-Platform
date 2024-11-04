@@ -36,7 +36,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 		// Validate username and password
 		if (user && user.password === password) {
-			const token = generateToken(email, user.isAdmin);
+			const token = generateToken(email, user.isAdmin, user.zid);
 			res.status(200).json({ token });
 		} else {
 			res.status(400).json({ error: 'Invalid email or password'});
