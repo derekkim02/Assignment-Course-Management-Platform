@@ -27,9 +27,12 @@ model User {
   coursesEnrolled     CourseOffering[]   @relation("EnrolledStudents")
 
   submissions         Submission[]
-  
   groups              Group[]
   ELSDuration         ELSDuration?
+
+  classesTutored      Class[]            @relation("Tutor")
+  classesIn           Class[]            @relation("InClass")
+  
   // This refers to the submissions that the user has marked
 }
 
@@ -75,10 +78,36 @@ model CourseOffering {
   tutors             User[]             @relation("Tutors")
   enrolledStudents   User[]             @relation("EnrolledStudents")
   assignments        Assignment[]
+  classes            Class[]
 
   penaltyStrategy    PenaltyStrategy    @default(Hourly)
 }
 
+model Class {
+  id                 Int                @id @default(autoincrement())
+  name               String
+  startTime          String
+  endTime            String
+  day                Day
+
+  tutorId            Int
+  tutor              User               @relation("Tutor",fields: [tutorId], references: [zid])
+
+  courseOfferingId   Int
+  courseOffering     CourseOffering     @relation(fields: [courseOfferingId], references: [id])
+
+  students           User[]             @relation("InClass")
+}
+
+enum Day {
+  Monday
+  Tuesday
+  Wednesday
+  Thursday
+  Friday
+  Saturday
+  Sunday
+}
 
 enum PenaltyStrategy {
   Hourly
