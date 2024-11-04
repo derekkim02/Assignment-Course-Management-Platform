@@ -85,6 +85,58 @@ export const updateAssignment = async (req: Request, res: Response): Promise<voi
   }
 };
 
+export const viewAssignment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const assignmentId = parseInt(req.params.assignmentId);
+
+    const assignment = await prisma.assignment.findUnique({
+      where: {
+        id: assignmentId,
+      },
+      include: {
+        testCases: true,
+        submissions: true,
+      },
+    });
+
+    if (!assignment) {
+      res.status(404).json({ error: 'Assignment not found' });
+      return;
+    }
+
+    res.status(200).json(assignment);
+  } catch {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+export const deleteAssignment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const assignmentId = parseInt(req.params.assignmentId);
+
+    const assignment = await prisma.assignment.findUnique({
+      where: {
+        id: assignmentId,
+      },
+    });
+
+    if (!assignment) {
+      res.status(404).json({ error: 'Assignment not found' });
+      return;
+    }
+
+    await prisma.assignment.delete({
+      where: {
+        id: assignmentId,
+      },
+    });
+
+    res.status(200).json({ message: 'Assignment deleted' });
+  } catch {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
 export const createTest = async (req: Request, res: Response): Promise<void> => {
 	const { lecturerId, assignmentId, input, output } = req.body;
 	try {

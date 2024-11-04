@@ -1,21 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-
-// Extend the Request interface to include assignmentData
-declare module 'express-serve-static-core' {
-  interface Request {
-    assignmentData?: {
-      assignmentName: string;
-      description: string;
-      dueDate: Date;
-      isGroupAssignment: boolean;
-      courseOfferingId: number;
-      defaultShCmd: string;
-      assignmentId?: number; // Include assignmentId when updating
-    };
-    userEmail?: string; // Assuming userEmail is added to req object by authentication middleware
-  }
-}
-
 import { Trimester } from '@prisma/client';
 import prisma from '../prismaClient';
 import { isValid, parse } from 'date-fns';
