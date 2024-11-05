@@ -1,7 +1,7 @@
 import {describe, expect, beforeAll, afterEach, afterAll, test} from '@jest/globals';
 import { resetDatabase } from '../utils';
 import request from 'supertest';
-import app from '../../server';
+import app from '../../app';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
