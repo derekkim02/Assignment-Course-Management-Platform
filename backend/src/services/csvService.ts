@@ -107,8 +107,8 @@ class CsvService {
 						prisma.user.createMany({ data: tutors, skipDuplicates: true }),
 						prisma.class.createMany({ data: classes, skipDuplicates: true }),
 					]);
-					await Promise.all(courseOfferingUpdates.map(({ classId, studentId, tutorId }) => {
-						prisma.class.update({
+					await Promise.all(courseOfferingUpdates.map(async ({ classId, studentId, tutorId }) => {
+						await prisma.class.update({
 							where: { id: classId },
 							data: {
 								students: {
@@ -116,7 +116,7 @@ class CsvService {
 								},
 							},
 						});
-						prisma.courseOffering.update({
+						await prisma.courseOffering.update({
 							where: { id: courseOfferingId },
 							data: {
 								classes: {
