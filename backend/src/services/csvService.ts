@@ -136,6 +136,17 @@ class CsvService {
 			} catch (err) {
 				console.error(err);
 			}
+		}).on('error', (err) => {
+			console.error('Error parsing CSV:', err);
+			throw new Error('Error parsing CSV');
+		});
+	}
+	public unlinkCsvFile() {
+		fs.unlink(this.csvFilePath, (err) => {
+			if (err) {
+				console.error('Error deleting CSV file:', err);
+				throw new Error('Error deleting CSV file');
+			}
 		});
 	}
 }
