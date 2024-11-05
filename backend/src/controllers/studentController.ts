@@ -48,7 +48,7 @@ const handleAssignmentSubmission = async (req: Request, res: Response, isGroupAs
 			failed: results.filter(result => !result.passed).length,
 		}
 
-		res.status(200).json(response);
+		res.status(201).json(response);
 	} catch (e) {
 		res.status(500).json({ error: (e as Error).message });
 	}
