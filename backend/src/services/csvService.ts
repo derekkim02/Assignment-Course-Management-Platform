@@ -45,100 +45,100 @@ class CsvService {
 		this.csvFilePath = csvFilePath;
 	}
 
-	public importSMSCsvToDbForCourseOffering(courseOfferingId: number) {
-		const students: User[] = [];
-		const tutors: User[] = [];
-		const classes: Class[] = [];
-		const courseOfferingUpdates: {
-			courseOfferingId: number,
-			classId: number,
-			studentId: number,
-			tutorId: number
-		}[] = [];
+	public async importSMSCsvToDbForCourseOffering(courseOfferingId: number): Promise<void> {
+		return new Promise<void>((resolve, reject) => {
+			const students: User[] = [];
+			const tutors: User[] = [];
+			const classes: Class[] = [];
+			const courseOfferingUpdates: {
+				classId: number,
+				studentId: number,
+				tutorId: number
+			}[] = [];
 
-		fs.createReadStream(this.csvFilePath)
-		.pipe(csv())
-		.on('data', (data: SMSCsvRow) => {
-			const { firstName, lastName } = splitFullName(data.fullname);
-			const { firstName: tutorFirstName, lastName: tutorLastName } = splitFullName(data.tutorName);
-			const defaultPassword = 'default_password';
-			const studentId = parseInt(data.zId.replace('z', ''), 10);
-			const tutorId = parseInt(data.tutorId.replace('z', ''), 10);
-			const classId = parseInt(data.classId, 10);
-			const duration = parseInt(data.duration, 10);
+			fs.createReadStream(this.csvFilePath)
+			.pipe(csv())
+			.on('data', (data: SMSCsvRow) => {
+				const { firstName, lastName } = splitFullName(data.fullname);
+				const { firstName: tutorFirstName, lastName: tutorLastName } = splitFullName(data.tutorName);
+				const defaultPassword = 'default_password';
+				const studentId = parseInt(data.zId.replace('z', ''), 10);
+				const tutorId = parseInt(data.tutorId.replace('z', ''), 10);
+				const classId = parseInt(data.classId, 10);
+				const duration = parseInt(data.duration, 10);
 
-			students.push({
-				zid: studentId,
-				firstName,
-				lastName,
-				email: data.email,
-				password: defaultPassword,
-				isAdmin: false,
-			});
+				students.push({
+					zid: studentId,
+					firstName,
+					lastName,
+					email: data.email,
+					password: defaultPassword,
+					isAdmin: false,
+				});
 
-			tutors.push({
-				zid: tutorId,
-				firstName: tutorFirstName,
-				lastName: tutorLastName,
-				email: data.tutorEmail,
-				password: defaultPassword,
-				isAdmin: false,
-			});
+				tutors.push({
+					zid: tutorId,
+					firstName: tutorFirstName,
+					lastName: tutorLastName,
+					email: data.tutorEmail,
+					password: defaultPassword,
+					isAdmin: false,
+				});
 
-			classes.push({
-				id: classId,
-				name: data.className,
-				startTime: data.startTime,
-				duration: duration,
-				day: dayToEnum(data.day),
-				tutorId: tutorId,
-				courseOfferingId,
-			});
+				classes.push({
+					id: classId,
+					name: data.className,
+					startTime: data.startTime,
+					duration: duration,
+					day: dayToEnum(data.day),
+					tutorId: tutorId,
+					courseOfferingId,
+				});
 
-			courseOfferingUpdates.push({
-				courseOfferingId,
-				classId,
-				studentId,
-				tutorId,
-			});
-		}).on('end', () => {
-			try {
-				prisma.$transaction([
-					prisma.user.createMany({ data: students, skipDuplicates: true }),
-					prisma.user.createMany({ data: tutors, skipDuplicates: true }),
-					prisma.class.createMany({ data: classes, skipDuplicates: true }),
-				]);
-
-				for (const { courseOfferingId, classId, studentId, tutorId } of courseOfferingUpdates) {
-					prisma.class.update({
-						where: { id: classId },
-						data: {
-							students: {
-								connect: { zid: studentId },
+				courseOfferingUpdates.push({
+					classId,
+					studentId,
+					tutorId,
+				});
+			}).on('end', async () => {
+				try {
+					await prisma.$transaction([
+						prisma.user.createMany({ data: students, skipDuplicates: true }),
+						prisma.user.createMany({ data: tutors, skipDuplicates: true }),
+						prisma.class.createMany({ data: classes, skipDuplicates: true }),
+					]);
+					await Promise.all(courseOfferingUpdates.map(({ classId, studentId, tutorId }) => {
+						prisma.class.update({
+							where: { id: classId },
+							data: {
+								students: {
+									connect: { zid: studentId },
+								},
 							},
-						},
-					});
-					prisma.courseOffering.update({
-						where: { id: courseOfferingId },
-						data: {
-							classes: {
-								connect: { id: classId },
+						});
+						prisma.courseOffering.update({
+							where: { id: courseOfferingId },
+							data: {
+								classes: {
+									connect: { id: classId },
+								},
+								enrolledStudents: {
+									connect: { zid: studentId },
+								},
+								tutors: {
+									connect: { zid: tutorId },
+								},
 							},
-							enrolledStudents: {
-								connect: { zid: studentId },
-							},
-							tutors: {
-								connect: { zid: tutorId },
-							},
-						},
-					});
+						});
+					}));
+					resolve();
+				} catch (err) {
+					reject(err);
 				}
-			} catch (err) {
-				console.error(err);
-			}
-		}).on('error', (err) => {
-			console.error('Error parsing CSV:', err);
-			throw new Error('Error parsing CSV');
+			}).on('error', (err) => {
+				console.error('Error parsing CSV:', err);
+				throw new Error('Error parsing CSV');
+			});
 		});
 	}
 	public unlinkCsvFile() {

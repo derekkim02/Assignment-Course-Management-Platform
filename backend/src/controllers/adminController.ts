@@ -248,9 +248,8 @@ export const importCsv = async (req: Request, res: Response): Promise<void> => {
 
     // Parse the CSV file
     const csvService = new CsvService(req.file.path);
-    csvService.importSMSCsvToDbForCourseOffering(parseInt(courseOfferingId, 10));
+    await csvService.importSMSCsvToDbForCourseOffering(parseInt(courseOfferingId, 10));
     csvService.unlinkCsvFile();
-
     res.status(201).json({ message: 'CSV imported successfully' });
   } catch (e) {
     res.status(500).json({ error: `Failed to import CSV (${e})` });
