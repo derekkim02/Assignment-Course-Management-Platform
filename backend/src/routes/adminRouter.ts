@@ -11,7 +11,7 @@ import {
 	updateCourseOffering
 } from '../controllers/adminController';
 import { checkIgiveAdmin, verifyToken } from '../middleware/jwt';
-import { uploadCsv } from 'middleware/multer';
+import { uploadCsv } from '../middleware/multer';
 
 const router = express.Router();
 
@@ -23,7 +23,7 @@ router.put('/change-role/:userId', changeAdminRole);
  * @route POST /course-offerings
  * @description Create a new course offering.
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
- * @body {string} body.lecturerId - The unique identifier of the lecturer
+ * @body {int} body.lecturerId - The unique identifier of the lecturer
  * @body {string} body.courseId - The unique identifier of the course
  * @body {string} body.termYear - The year of the term
  * @body {number} body.termTerm - The term of the course offering
