@@ -43,7 +43,7 @@ for student in students:
         "className": student["class"]["className"],
         "startTime": fake.time(pattern="%I:%M %p"),
         "duration": fake.random_int(min=1, max=3),
-        "Day": fake.day_of_week(),
+        "day": fake.day_of_week(),
         "tutorId": student["class"]["tutor"]["tutorId"],
         "tutorName": student["class"]["tutor"]["tutorName"],
         "tutorEmail": student["class"]["tutor"]["tutorEmail"]
