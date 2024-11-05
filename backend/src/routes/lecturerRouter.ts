@@ -81,7 +81,7 @@ router.post('/courses/:courseId/assignments', validateAssignmentData, createAssi
 /**
  * @route PUT /courses/:courseId/assignments/:assignmentId
  * @description Update an existing assignment.
- * @param {string} courseId - Unique identifier of the course
+ * @param {string} courseId - Unique identifier of the courseOffering
  * @param {string} assignmentId - Unique identifier of the assignment
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @body {string} assignmentName - Updated name of the assignment
