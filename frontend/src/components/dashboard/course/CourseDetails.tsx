@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Layout, Typography, List, Card, Button, Modal, Form, Input, DatePicker, Spin, Checkbox } from 'antd';
 import { Link, useParams } from 'react-router-dom';
 import { useEnrollment } from '../../../queries';
@@ -30,12 +30,16 @@ const CourseDetails: React.FC = () => {
     form.resetFields();
   };
 
-  console.log(enrollment);
+  useEffect(() => {
+    if (enrollment) {
+      refetchCourse();
+    }
+  }, [enrollment, refetchCourse]);
 
   const handleOk = () => {
     form.validateFields().then(values => {
       const payload = {
-        title: values.title,
+        assignmentName: values.title,
         description: values.description,
         dueDate: values.dueDate,
         isGroupAssignment: values.isGroupAssignment,
@@ -49,6 +53,8 @@ const CourseDetails: React.FC = () => {
         },
         body: JSON.stringify(payload)
       });
+      refetchCourse();
+      setIsModalVisible(false);
     }).catch(() => {
       // Do nothing on validation error
     });

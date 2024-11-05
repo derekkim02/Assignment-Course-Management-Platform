@@ -1,36 +1,138 @@
 import { Request, Response } from "express";
-import { createAssessment, updateAssessment } from "../assessments";
 import { createTestCase } from "../testCases";
-import { getUserFromToken } from "../middleware/jwt";
 import prisma from '../prismaClient';
 import AutotestService from "../services/autotestService";
 import LatePenaltyService from "../services/latepenaltyService";
 
-export const createAssignment =  async (req: Request, res: Response): Promise<void> => {
-	const user = await getUserFromToken(req);
-	const lecturerId = user.zid;
-  const courseOfferingId = parseInt(req.params.courseId);
-	const { title, description, dueDate, isGroupAssignment, defaultShCmd } = req.body;
-	try {
-    const newAssignment = await createAssessment(lecturerId, title, description, dueDate, isGroupAssignment, courseOfferingId, defaultShCmd);
+export const createAssignment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.assignmentData) {
+      res.status(500).json({ error: 'Missing assignment data' });
+      return;
+    }
+
+    const {
+      assignmentName,
+      description,
+      dueDate,
+      isGroupAssignment,
+      courseOfferingId,
+      defaultShCmd,
+    } = req.assignmentData;
+
+    const newAssignment = await prisma.assignment.create({
+      data: {
+        name: assignmentName,
+        description: description,
+        dueDate: dueDate,
+        isGroupAssignment: isGroupAssignment,
+        autoTestExecutable: '',
+        courseOfferingId: courseOfferingId,
+        defaultShCmd: defaultShCmd,
+        submissions: {
+          create: [],
+        },
+        testCases: {
+          create: [],
+        },
+      },
+    });
+
     res.status(201).json(newAssignment);
-	} catch (error) {
-    console.log(error);
-    res.status(400).json({ error: (error as Error).message });
-	}
-}
+  } catch {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
 export const updateAssignment = async (req: Request, res: Response): Promise<void> => {
-	const user = await getUserFromToken(req);
-	const lecturerId = user.zid;
-	const { assignmentId } = req.params
-	const { title, description, dueDate, isGroupAssignment, courseOfferingId } = req.body;
-	try {
-	  const updatedAssignment = await updateAssessment(lecturerId, assignmentId, title, description, dueDate, isGroupAssignment, courseOfferingId);
-	  res.status(201).json(updatedAssignment);
-	} catch (error) {
-	  res.status(400).json({ error: (error as Error).message });
-	}
+  try {
+    if (!req.assignmentData) {
+      res.status(500).json({ error: 'Missing assignment data' });
+      return;
+    }
+
+    const {
+      assignmentName,
+      description,
+      dueDate,
+      isGroupAssignment,
+      assignmentId,
+    } = req.assignmentData;
+
+    if (!assignmentId) {
+      res.status(400).json({ error: 'Assignment ID is required for updating' });
+      return;
+    }
+
+    const updatedAssignment = await prisma.assignment.update({
+      where: {
+        id: assignmentId,
+      },
+      data: {
+        name: assignmentName,
+        description: description,
+        dueDate: dueDate,
+        isGroupAssignment: isGroupAssignment,
+      },
+    });
+
+    res.status(200).json(updatedAssignment);
+  } catch (error) {
+    console.error('Update Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const viewAssignment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const assignmentId = parseInt(req.params.assignmentId);
+
+    const assignment = await prisma.assignment.findUnique({
+      where: {
+        id: assignmentId,
+      },
+      include: {
+        testCases: true,
+        submissions: true,
+      },
+    });
+
+    if (!assignment) {
+      res.status(404).json({ error: 'Assignment not found' });
+      return;
+    }
+
+    res.status(200).json(assignment);
+  } catch {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+export const deleteAssignment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const assignmentId = parseInt(req.params.assignmentId);
+
+    const assignment = await prisma.assignment.findUnique({
+      where: {
+        id: assignmentId,
+      },
+    });
+
+    if (!assignment) {
+      res.status(404).json({ error: 'Assignment not found' });
+      return;
+    }
+
+    await prisma.assignment.delete({
+      where: {
+        id: assignmentId,
+      },
+    });
+
+    res.status(200).json({ message: 'Assignment deleted' });
+  } catch {
+    res.status(500).json({ error: 'Internal server error' });
+  }
 }
 
 export const createTest = async (req: Request, res: Response): Promise<void> => {
