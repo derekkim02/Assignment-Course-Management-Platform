@@ -138,10 +138,35 @@ export const deleteAssignment = async (req: Request, res: Response): Promise<voi
 }
 
 export const createTest = async (req: Request, res: Response): Promise<void> => {
-	const { lecturerId, assignmentId, input, output } = req.body;
+  const assignmentId = parseInt(req.params.assignmentId);
+	const { input, output, isHidden } = req.body;
 	try {
-	  const newTestCase = await createTestCase(lecturerId, assignmentId, input, output);
-	  res.status(201).json(newTestCase);
+      // Check that the assignment exists
+    const assignment = await prisma.assignment.findFirst({
+      where: {
+        id: assignmentId
+      }
+    });
+
+    if (!assignment) {
+      throw new Error("Assignment not found");
+    }
+
+    // Sanitize and validate inputs
+    if (!input || !output) {
+      throw new Error("Invalid input or outputs");
+    }
+
+    // Create the test case
+    const testCase = await prisma.testCase.create({
+      data: {
+        input: input,
+        expectedOutput: output,
+        assignmentId: assignmentId,
+        isHidden: isHidden,
+      }
+    });
+	  res.status(201).json(testCase);
 	} catch (error) {
 	  res.status(400).json({ error: (error as Error).message });
 	}

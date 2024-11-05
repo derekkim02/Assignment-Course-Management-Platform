@@ -126,7 +126,22 @@ router.delete('/courses/:courseId/assignments/:assignmentId', deleteAssignment);
  */
 router.get('/courses/:courseId/assignments/:assignmentId/view', viewAssignment);
 
-// Create test case for an assignment
+/**
+ * @route POST /courses/:courseId/assignments/:assignmentId/testcases
+ * @description Create a new test case for a specific assignment.
+ * @param {string} courseId - Unique identifier of the course.
+ * @param {string} assignmentId - Unique identifier of the assignment.
+ * @body {string} input - The input for the test case.
+ * @body {string} output - The expected output for the test case.
+ * @body {boolean} [isHidden] - Optional flag indicating if the test case is hidden.
+ * @header {string} Authorization - Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object} 201 - The created test case.
+ * @returns {number} 201.id - Unique identifier of the test case.
+ * @returns {string} 201.input - The input for the test case.
+ * @returns {string} 201.expectedOutput - The expected output for the test case.
+ * @returns {boolean} 201.isHidden - Whether the test case is hidden.
+ * @returns {number} 201.assignmentId - Unique identifier of the assignment.
+ */
 router.post('/courses/:courseId/assignments/:assignmentId/testcases', createTest);
 
 // View all submissions for an assignment
