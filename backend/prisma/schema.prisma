@@ -27,11 +27,13 @@ model User {
   coursesEnrolled     CourseOffering[]   @relation("EnrolledStudents")
 
   submissions         Submission[]
-  
   groups              Group[]
   ELSDuration         ELSDuration?
+
+  classesTutored      Class[]            @relation("Tutor")
+  classesIn           Class[]            @relation("InClass")
+  
   // This refers to the submissions that the user has marked
-  marks               Mark[]
 }
 
 model Course {
@@ -71,15 +73,41 @@ model CourseOffering {
 
   @@unique([courseId, termYear, termTerm])
 
-  lecturerId         Int                
+  lecturerId         Int
   lecturer           User               @relation("Lecturer", fields: [lecturerId], references: [zid])
   tutors             User[]             @relation("Tutors")
   enrolledStudents   User[]             @relation("EnrolledStudents")
   assignments        Assignment[]
+  classes            Class[]
 
   penaltyStrategy    PenaltyStrategy    @default(Hourly)
 }
 
+model Class {
+  id                 Int                @id @default(autoincrement())
+  name               String
+  startTime          String
+  duration           Int
+  day                Day
+
+  tutorId            Int
+  tutor              User               @relation("Tutor",fields: [tutorId], references: [zid])
+
+  courseOfferingId   Int
+  courseOffering     CourseOffering     @relation(fields: [courseOfferingId], references: [id])
+
+  students           User[]             @relation("InClass")
+}
+
+enum Day {
+  Monday
+  Tuesday
+  Wednesday
+  Thursday
+  Friday
+  Saturday
+  Sunday
+}
 
 enum PenaltyStrategy {
   Hourly
@@ -92,6 +120,7 @@ model Assignment {
   description        String
   dueDate            DateTime
   isGroupAssignment  Boolean
+  defaultShCmd       String
   autoTestExecutable String?
 
   courseOfferingId   Int
@@ -104,7 +133,7 @@ model Assignment {
 model Submission {
   id                 Int                 @id @default(autoincrement())
   filePath           String
-  submissionTime     DateTime
+  submissionTime     DateTime            @default(now())
   submissionType     SubmissionType
 
   assignmentId       Int
@@ -116,8 +145,12 @@ model Submission {
   groupId            Int?
   group              Group?              @relation(fields: [groupId], references: [id])
 
-  marks              Mark[]
-  
+  isMarked           Boolean             @default(false)
+  autoMarkResult     Decimal?
+  styleMarkResult    Decimal?
+  finalMark          Decimal?
+  markerComments     String?
+  latePenalty        Decimal?
 }
 
 enum SubmissionType {
@@ -129,6 +162,7 @@ model TestCase {
   id                 Int                @id @default(autoincrement())
   input              String
   expectedOutput     String
+  isHidden           Boolean            @default(false)
 
   assignmentId       Int
   assignment         Assignment         @relation(fields: [assignmentId], references: [id])
@@ -137,24 +171,9 @@ model TestCase {
 model Group {
   id                 Int                @id @default(autoincrement())
   name               String
-  size               Int
 
   members            User[]
   submissions        Submission[]
-}
-
-model Mark {
-  mark               Decimal
-  feedback           String
-  isMarked           Boolean
-
-  submissionId       Int                @unique
-  submission         Submission         @relation(fields: [submissionId], references: [id])
-
-  markerId           Int
-  marker             User               @relation(fields: [markerId], references: [zid])
-
-  @@id([submissionId, markerId])
 }
 
 model ELSType {

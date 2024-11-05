@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import prisma from './prismaClient';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import prisma from '../prismaClient';
 import { User } from '@prisma/client';
 
 const secretKey = process.env.JWT_SECRET || 'capstone-arat-project';
@@ -15,11 +15,12 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction): vo
 		res.status(401).json({ message: 'No token provided' });
 		return;
 	}
-	jwt.verify(token, secretKey, (err) => {
+	jwt.verify(token, secretKey, (err, decoded) => {
 		if (err) {
 			res.status(403).json({ message: 'Failed to authenticate token' });
 			return;
 		}
+		req.userEmail = (decoded as JwtPayload).email;
 		next();
 	});
 }
