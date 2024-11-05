@@ -27,8 +27,19 @@ router.put('/change-role/:userId', changeAdminRole);
  * @body {string} body.courseId - The unique identifier of the course
  * @body {string} body.termYear - The year of the term
  * @body {number} body.termTerm - The term of the course offering
- * @returns {object} 201 - Success message
- * @returns {string} 201.message - Success message
+ * lecturerId: number;
+    courseId: number;
+    termYear: number;
+    termTerm: $Enums.Trimester;
+    id: number;
+    penaltyStrategy: $Enums.PenaltyStrategy
+ * @returns {object} 201 - Course offering
+ * @returns {number} 201.id - Unique identifier of the course offering
+ * @returns {number} 201.lecturerId - The unique identifier of the lecturer
+ * @returns {number} 201.courseId - The unique identifier of the course
+ * @returns {number} 201.termYear - The year of the term
+ * @returns {Term} 201.termTerm - The term of the course offering
+ * @returns {PenaltyStrategy} 201.penaltyStrategy - The penalty strategy of the course offering
  */
 router.post('/course-offerings', createEnrollment);
 router.get('/courses', getCourses);

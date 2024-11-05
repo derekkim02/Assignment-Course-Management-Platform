@@ -91,7 +91,7 @@ export const createEnrollment = async (req: Request, res: Response): Promise<voi
       }
     });
 
-    await prisma.courseOffering.create({
+    const offering = await prisma.courseOffering.create({
       data: {
         courseId,
         termYear,
@@ -99,7 +99,7 @@ export const createEnrollment = async (req: Request, res: Response): Promise<voi
         lecturerId,
       }
     });
-    res.status(201).json({ message: 'Course offering created successfully' });
+    res.status(201).json(offering);
   } catch (error) {
     console.error('Error creating course offering:', error);
     res.status(500).json({ error: 'Failed to create course offering' });
