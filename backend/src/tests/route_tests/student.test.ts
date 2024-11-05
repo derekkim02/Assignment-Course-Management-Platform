@@ -1,18 +1,15 @@
-import {describe, expect, beforeAll, afterEach, afterAll, test} from '@jest/globals';
+import {describe, expect, test} from '@jest/globals';
 import { resetDatabase } from '../utils';
 import request from 'supertest';
 import app from '../../app';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import { t } from 'tar';
-import exp from 'constants';
+import tar from 'tar-stream';
+import zlib from 'zlib';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-beforeAll(async () => {
-	await resetDatabase();
-});
 const generateDbData = async (): Promise<{token1: string, token2: string, assigmentId: number}> => {
 	// Registers 2 users
 	await request(app)
@@ -115,6 +112,7 @@ const generateDbData = async (): Promise<{token1: string, token2: string, assigm
 describe('POST api/student/assignments/:assignmentId/submit', () => {
 	const py3FilePath = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz');
 	test('successful submit assignment', async () => {
+		await resetDatabase();
 		const {token2, assigmentId} = await generateDbData();
 		const response = await request(app)
 			.post(`/api/student/assignments/${assigmentId}/submit`)
@@ -124,3 +122,62 @@ describe('POST api/student/assignments/:assignmentId/submit', () => {
 		expect(response.body.results).toEqual([]);
 	});
 })
+
+describe('GET api/student/submissions/:submissionId/download', () => {
+	async function containsMainPy(tarGzBuffer: Buffer): Promise<boolean> {
+		return new Promise((resolve, reject) => {
+			const extract = tar.extract();
+			const gunzip = zlib.createGunzip();
+
+			let mainPyFound = false;
+
+			extract.on('entry', (header, stream, next) => {
+				// Check if the file name is 'main.py'
+				if (header.name.endsWith('main.py')) {
+					mainPyFound = true;
+					stream.resume(); // Proceed to next file
+				} else {
+					stream.resume(); // Resume to next file if not 'main.py'
+				}
+				stream.on('end', next);
+			});
+
+			extract.on('finish', () => resolve(mainPyFound));
+			extract.on('error', reject);
+			gunzip.on('error', reject);
+
+			// Pipe the tar.gz data through gunzip and into tar-stream
+			gunzip.pipe(extract);
+			gunzip.end(tarGzBuffer);
+		});
+	}
+	test('successful get submission', async () => {
+		const testFile = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz')
+		await resetDatabase();
+		const {token2, assigmentId} = await generateDbData();
+		const submission = await request(app)
+			.post(`/api/student/assignments/${assigmentId}/submit`)
+			.set('authorization', `Bearer ${token2}`)
+			.attach('submission', testFile)
+			.expect(201);
+		const submissionId = submission.body.submissionId;
+		const getResponse = await request(app)
+			.get(`/api/student/submissions/${submissionId}/download`)
+			.set('authorization', `Bearer ${token2}`)
+			.expect('Content-Type', 'application/gzip')
+			.expect(200)
+			.buffer()
+			.parse((res, callback) => {
+				res.setEncoding('binary');
+				let data = '';
+				res.on('data', (chunk) => {
+					data += chunk;
+				});
+				res.on('end', () => {
+					callback(null, Buffer.from(data, 'binary'));
+				});
+			});
+		const tarGzBuffer = getResponse.body;
+		expect(await containsMainPy(tarGzBuffer)).toBe(true);
+	});
+});
