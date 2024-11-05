@@ -87,7 +87,7 @@ model Class {
   id                 Int                @id @default(autoincrement())
   name               String
   startTime          String
-  endTime            String
+  duration           Int
   day                Day
 
   tutorId            Int
