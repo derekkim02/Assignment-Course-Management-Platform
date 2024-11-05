@@ -350,7 +350,7 @@ export const markAllSubmissions = async (req: Request, res: Response): Promise<v
       const latepenaltyService = new LatePenaltyService(data.dueDate, submission.submissionTime, penaltyStrategy , extraDays);
 
       autotestService.runTests().then((results) => {
-        const score = results.filter(result => result.passed).length / results.length;
+        const score = results.length === 0 ? results.filter(result => result.passed).length / results.length : 100;
 
         prisma.submission.update({
           where: {
