@@ -4,11 +4,10 @@ import fs from 'fs';
 import { extract } from 'tar';
 import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 class AutotestService {
-    private static __filename = fileURLToPath(import.meta.url);
-    private static __dirname = path.dirname(AutotestService.__filename);
-
-    public static testEnvDir = path.join(AutotestService.__dirname, "..", "..", "app", "test_env");
+    public static testEnvDir = path.join(__dirname, "..", "..", "app", "test_env");
 
     private testCases: TestCase[];
 	private shellCommands: string;
