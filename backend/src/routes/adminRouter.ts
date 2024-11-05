@@ -101,7 +101,6 @@ router.get('/course-offerings/:courseOfferingId', getCourseOffering);
  * @body {string} body.lecturerId - The unique identifier of the lecturer
  * @body {string[]} body.studentIds - The unique identifiers of the students
  * @body {string[]} body.tutorIds - The unique identifiers of the tutors
- * @body {string} body.courseId - The unique identifier of the course
  * @returns {object} 200 - Course offering
  * @returns {string} 200.id - Unique identifier of the course offering
  * @returns {string} 200.courseCode - Course code
