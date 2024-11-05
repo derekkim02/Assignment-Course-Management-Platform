@@ -13,7 +13,7 @@ classes = [{"classId": i + 1, "className": f"H{str(i + 10)}A"} for i in range(nu
 
 # Generate unique tutors
 tutors = [
-    {"tutorId": f"z{fake.random_number(digits=7, fix_len=True)}", "tutorName": fake.name()}
+    {"tutorId": f"z{fake.random_number(digits=7, fix_len=True)}", "tutorName": fake.first_name() + " " + fake.last_name()}
     for _ in range(num_tutors)
 ]
 
@@ -25,7 +25,7 @@ for cls in classes:
 students = []
 for _ in range(num_students):
     student = {
-        "fullname": fake.name(),
+        "fullname": fake.first_name() + " " + fake.last_name(),
         "zId": f"z{fake.random_number(digits=7, fix_len=True)}",
         "email": fake.email(),
         "class": random.choice(classes)
