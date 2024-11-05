@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../prismaClient';
 import { Trimester } from '@prisma/client';
+import CsvService from '../services/csvService';
 
 export const changeAdminRole = async (req: Request, res: Response): Promise<void> => {
   const { userId } = req.params;
@@ -233,5 +234,24 @@ export const updateCourseOffering = async (req: Request, res: Response): Promise
     res.status(200).json({ message: 'Course offering updated successfully' });
   } catch (e) {
     res.status(500).json({ error: `Failed to update course offering (${e})` });
+  }
+}
+
+export const importCsv = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { courseOfferingId } = req.params;
+  
+    if (!req.file) {
+      res.status(400).json({ error: 'No file uploaded' });
+      return;
+    }
+
+    // Parse the CSV file
+    const csvService = new CsvService(req.file.path);
+    await csvService.importSMSCsvToDbForCourseOffering(parseInt(courseOfferingId, 10));
+    csvService.unlinkCsvFile();
+    res.status(201).json({ message: 'CSV imported successfully' });
+  } catch (e) {
+    res.status(500).json({ error: `Failed to import CSV (${e})` });
   }
 }

@@ -84,6 +84,7 @@ const LoginPage = () => {
         if ('error' in res) {
           addAlert(res.error, 'error');
         }
+        addAlert('Account created!', 'success');
       }
     } catch (error) {
       console.error('Failed to login/register:', error);

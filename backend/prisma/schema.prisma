@@ -87,7 +87,7 @@ model Class {
   id                 Int                @id @default(autoincrement())
   name               String
   startTime          String
-  endTime            String
+  duration           Int
   day                Day
 
   tutorId            Int
@@ -171,7 +171,6 @@ model TestCase {
 model Group {
   id                 Int                @id @default(autoincrement())
   name               String
-  size               Int
 
   members            User[]
   submissions        Submission[]

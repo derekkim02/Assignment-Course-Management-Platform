@@ -1,6 +1,6 @@
 import express from 'express';
 import { verifyToken } from '../middleware/jwt';
-import { validateAssignmentData } from 'middleware/assignment';
+import { validateAssignmentData } from '../middleware/assignment';
 import { 
 	createAssignment,
 	searchStudentById,
