@@ -105,8 +105,8 @@ router.put('/course-offerings/:courseOfferingId', updateCourseOffering);
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @param {string} courseOfferingId - The unique identifier of the course offering
  * @body {file} body.file - The CSV file to import
- * @returns {object} 200 - Success message
- * @returns {string} 200.message - Success message
+ * @returns {object} 201 - Success message
+ * @returns {string} 201.message - Success message
  */
 router.post('/course-offerings/:courseOfferingId/import-csv', uploadCsv ,importCsv);
 
