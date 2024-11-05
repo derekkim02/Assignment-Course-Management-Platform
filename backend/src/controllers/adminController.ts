@@ -231,7 +231,7 @@ export const updateCourseOffering = async (req: Request, res: Response): Promise
         }
       }
     });
-    res.status(200).json({ message: 'Course offering updated successfully' });
+    res.status(201).json({ message: 'Course offering updated successfully' });
   } catch (e) {
     res.status(500).json({ error: `Failed to update course offering (${e})` });
   }

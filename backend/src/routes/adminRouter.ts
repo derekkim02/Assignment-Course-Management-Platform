@@ -59,6 +59,20 @@ router.get('/courses', getCourses);
  * @returns {string} 201.description - The description of the course
  */
 router.post('/courses', createCourse);
+
+
+/**
+ * @route GET /users
+ * @description Fetch all users.
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object[]} 200 - List of users
+ * @returns {string} 200.zid - Unique identifier of the user
+ * @returns {string} 200.firstName - First name of the user
+ * @returns {string} 200.lastName - Last name of the user
+ * @returns {string} 200.email - Email of the user
+ * @returns {string} 200.password - Password of the user
+ * @returns {boolean} 200.isAdmin - Whether the user is an admin
+ */
 router.get('/users', getUsers);
 
 /**

@@ -66,7 +66,7 @@ router.get('/courses/:courseId',viewLecturedCourseDetails);
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @body {string} assignmentName - Name of the assignment
  * @body {string} description - Description of the assignment
- * @body {string} dueDate - Due date of the assignment in 'dd/MM/yyyy' format
+ * @body {string} dueDate - Due date of the assignment in '"YYYY-MM-DD HH:mm"' format
  * @body {boolean} isGroupAssignment - Whether the assignment is a group assignment
  * @body {string} defaultShCmd - Default shell command for the assignment
  * @returns {object} 201 - Created assignment details
@@ -86,7 +86,7 @@ router.post('/courses/:courseId/assignments', validateAssignmentData, createAssi
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @body {string} assignmentName - Updated name of the assignment
  * @body {string} description - Updated description of the assignment
- * @body {string} dueDate - Updated due date in 'dd/MM/yyyy' format
+ * @body {string} dueDate - Updated due date in "YYYY-MM-DD HH:mm" format
  * @body {boolean} isGroupAssignment - Updated group assignment status
  * @body {string} defaultShCmd - Updated default shell command
  * @returns {object} 200 - Updated assignment details
