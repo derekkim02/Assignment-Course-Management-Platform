@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
-import { Layout, Typography, List, Card, Button, Modal, Form, Input, DatePicker, Spin } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Layout, Typography, List, Card, Button, Modal, Form, Input, DatePicker, Spin, Checkbox } from 'antd';
 import { Link, useParams } from 'react-router-dom';
 import { useEnrollment } from '../../../queries';
+import { config } from '../../../config';
+import Cookies from 'js-cookie';
+import { jwtDecode, JwtPayload } from 'jwt-decode';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
 
 interface Assignment {
-  id: number;
+  assignmentId: number;
   title: string;
   dueDate: string;
   weighting: number;
@@ -15,9 +18,9 @@ interface Assignment {
 
 const CourseDetails: React.FC = () => {
   const { role, enrolmentId } = useParams<{ role: string, enrolmentId: string }>();
+  const token = Cookies.get('token') || '';
 
   const { data: enrollment, isLoading: isLoadingCourses, error, refetch: refetchCourse } = useEnrollment(role || '', enrolmentId || '');
-
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [form] = Form.useForm();
 
@@ -27,12 +30,33 @@ const CourseDetails: React.FC = () => {
     form.resetFields();
   };
 
+  useEffect(() => {
+    if (enrollment) {
+      refetchCourse();
+    }
+  }, [enrollment, refetchCourse]);
+
   const handleOk = () => {
     form.validateFields().then(values => {
-      console.log(values);
-      setIsModalVisible(false);
+      const payload = {
+        assignmentName: values.title,
+        description: values.description,
+        dueDate: values.dueDate,
+        isGroupAssignment: values.isGroupAssignment,
+        defaultShCmd: values.defaultShCmd
+      };
+      fetch(`${config.backendUrl}/api/lecturer/courses/${enrolmentId}/assignments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
       refetchCourse();
-      form.resetFields();
+      setIsModalVisible(false);
+    }).catch(() => {
+      // Do nothing on validation error
     });
   };
 
@@ -87,7 +111,7 @@ const CourseDetails: React.FC = () => {
           dataSource={enrollment.assignments}
           renderItem={(assignment: Assignment) => (
             <List.Item>
-              <Link to={`assignments/${assignment.id}`}>
+              <Link to={`assignments/${assignment.assignmentId}`}>
                 <Card title={assignment.title} hoverable>
                   <p>Due Date: {assignment.dueDate}</p>
                   <p>Weighting: {assignment.weighting}%</p>
@@ -115,11 +139,33 @@ const CourseDetails: React.FC = () => {
             <Input />
           </Form.Item>
           <Form.Item
+            name="description"
+            label="Assignment Description"
+            rules={[{ required: true, message: 'Please enter the assignment description' }]}
+          >
+            <Input.TextArea />
+          </Form.Item>
+          <Form.Item
             name="dueDate"
             label="Due Date"
             rules={[{ required: true, message: 'Please select the due date and time' }]}
           >
             <DatePicker showTime format="YYYY-MM-DD HH:mm" />
+          </Form.Item>
+          <Form.Item
+            name="isGroupAssignment"
+            label="Is Group Assignment"
+            valuePropName="checked"
+            initialValue={false}
+          >
+            <Checkbox />
+          </Form.Item>
+          <Form.Item
+            name="defaultShCmd"
+            label="Default Shell Command"
+            rules={[{ required: true, message: 'Please enter the default shell command' }]}
+          >
+            <Input />
           </Form.Item>
         </Form>
       </Modal>

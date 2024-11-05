@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
-import { createAssessment, updateAssessment } from "../assessments";
 import { createTestCase } from "../testCases";
-import { getUserFromToken } from "../middleware/jwt";
 import prisma from '../prismaClient';
 import AutotestService from "../services/autotestService";
 import LatePenaltyService from "../services/latepenaltyService";

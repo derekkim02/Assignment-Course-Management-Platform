@@ -58,10 +58,10 @@ export const useLecturedCourses = () => {
   });
 };
 
-export const useMarkingCourses = () => {
+export const useTutoringCourses = () => {
   return useQuery({
-    queryKey: ['markingCourses'],
-    queryFn: () => fetchWithAuth('api/enrollments', {})
+    queryKey: ['tutuoringCourses'],
+    queryFn: () => fetchWithAuth('api/tutor/courses', {})
   });
 };
 

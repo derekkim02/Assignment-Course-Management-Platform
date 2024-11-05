@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { Trimester } from '@prisma/client';
 import prisma from '../prismaClient';
-import { isValid, parse } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 
 export const validateAssignmentData = async (
   req: Request,
@@ -16,7 +15,6 @@ export const validateAssignmentData = async (
       description,
       dueDate,
       isGroupAssignment,
-      term,
       defaultShCmd,
     } = req.body;
 
@@ -29,7 +27,6 @@ export const validateAssignmentData = async (
       !assignmentName ||
       !description ||
       !dueDate ||
-      !term ||
       !courseId ||
       !defaultShCmd ||
       (isUpdating && !assignmentId)
@@ -38,38 +35,10 @@ export const validateAssignmentData = async (
       return;
     }
 
-    const termYear = term.slice(0, 2);
-    const termTrimester = term.slice(2) as Trimester;
-
-    // Check that the term exists
-    const termExists = await prisma.term.findFirst({
-      where: {
-        year: parseInt(termYear, 10),
-        term: termTrimester,
-      },
-    });
-
-    if (!termExists) {
-      res.status(400).json({ error: 'Term does not exist' });
-      return;
-    }
-
     // Check that the due date is a valid date
-    const parsedDate = parse(dueDate, 'dd/MM/yyyy', new Date());
+    const parsedDate = parseISO(dueDate);
     if (!isValid(parsedDate)) {
       res.status(400).json({ error: 'Invalid due date' });
-      return;
-    }
-
-    // Check that the course exists
-    const course = await prisma.course.findFirst({
-      where: {
-        id: parseInt(courseId),
-      },
-    });
-
-    if (!course) {
-      res.status(400).json({ error: 'Course does not exist' });
       return;
     }
 
@@ -88,11 +57,9 @@ export const validateAssignmentData = async (
     // Check that the lecturer is assigned to the course
     const teachingAssignment = await prisma.courseOffering.findFirst({
       where: {
-        courseId: parseInt(courseId),
-        termYear: parseInt(termYear),
-        termTerm: termTrimester,
+        id: parseInt(courseId, 10),
         lecturerId: lecturer.zid,
-      },
+      }
     });
 
     if (!teachingAssignment) {
