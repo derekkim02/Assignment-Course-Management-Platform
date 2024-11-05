@@ -34,4 +34,5 @@ const o = await prisma.courseOffering.create({
 		}
 	}
 });
-await CsvService.importSMSCsvToDbForCourseOffering(csvPath, o.id);
+const csvService = new CsvService(csvPath);
+csvService.importSMSCsvToDbForCourseOffering(o.id);

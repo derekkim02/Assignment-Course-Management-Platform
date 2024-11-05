@@ -39,7 +39,13 @@ const dayToEnum = (day: string): Day => {
 }
 
 class CsvService {
-	public static async importSMSCsvToDbForCourseOffering(csvFilePath: string, courseOfferingId: number): Promise<void> {
+	private csvFilePath: string;
+
+	constructor(csvFilePath: string) {
+		this.csvFilePath = csvFilePath;
+	}
+
+	public importSMSCsvToDbForCourseOffering(courseOfferingId: number) {
 		const students: User[] = [];
 		const tutors: User[] = [];
 		const classes: Class[] = [];
@@ -50,9 +56,9 @@ class CsvService {
 			tutorId: number
 		}[] = [];
 
-		fs.createReadStream(csvFilePath)
+		fs.createReadStream(this.csvFilePath)
 		.pipe(csv())
-		.on('data', async (data: SMSCsvRow) => {
+		.on('data', (data: SMSCsvRow) => {
 			const { firstName, lastName } = splitFullName(data.fullname);
 			const { firstName: tutorFirstName, lastName: tutorLastName } = splitFullName(data.tutorName);
 			const defaultPassword = 'default_password';
@@ -95,16 +101,16 @@ class CsvService {
 				studentId,
 				tutorId,
 			});
-		}).on('end', async () => {
+		}).on('end', () => {
 			try {
-				await prisma.$transaction([
+				prisma.$transaction([
 					prisma.user.createMany({ data: students, skipDuplicates: true }),
 					prisma.user.createMany({ data: tutors, skipDuplicates: true }),
 					prisma.class.createMany({ data: classes, skipDuplicates: true }),
 				]);
 
 				for (const { courseOfferingId, classId, studentId, tutorId } of courseOfferingUpdates) {
-					await prisma.class.update({
+					prisma.class.update({
 						where: { id: classId },
 						data: {
 							students: {
@@ -112,7 +118,7 @@ class CsvService {
 							},
 						},
 					});
-					await prisma.courseOffering.update({
+					prisma.courseOffering.update({
 						where: { id: courseOfferingId },
 						data: {
 							classes: {
@@ -130,7 +136,6 @@ class CsvService {
 			} catch (err) {
 				console.error(err);
 			}
-			
 		});
 	}
 }
