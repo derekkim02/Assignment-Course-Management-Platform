@@ -4,7 +4,6 @@ import request from 'supertest';
 import app from '../../server';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import { c } from 'tar';
 
 beforeAll(async () => {
 	await resetDatabase();
