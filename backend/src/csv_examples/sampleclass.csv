@@ -1,4 +1,4 @@
-fullname,zId,email,classId,className,startTime,duration,Day,tutorId,tutorName,tutorEmail
+fullname,zId,email,classId,className,startTime,duration,day,tutorId,tutorName,tutorEmail
 Matthew Dawson,z8278449,dana51@example.com,14,H23A,02:36 AM,2,Friday,z1260120,Natalie Kline,cmercado@example.com
 David Lowe,z8862282,cherylmaxwell@example.com,5,H14A,02:48 AM,3,Saturday,z9017099,Tonya Williams,dennissimpson@example.org
 Tammy Shah,z6344968,ssolomon@example.net,6,H15A,05:41 AM,1,Wednesday,z1260120,Natalie Kline,cmercado@example.com
