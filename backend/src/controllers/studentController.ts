@@ -29,7 +29,7 @@ const handleAssignmentSubmission = async (req: Request, res: Response, isGroupAs
 		const submitterIdKey = isGroupAssignment ? 'groupId' : 'studentId';
 
 		const filePath = req.file.path;
-		await prisma.submission.create({
+		const submission = await prisma.submission.create({
 			data: {
 				assignmentId: parseInt(assignmentId),
 				[submitterIdKey]: submitterId,
@@ -42,6 +42,7 @@ const handleAssignmentSubmission = async (req: Request, res: Response, isGroupAs
 		const results = await automarkService.runTests();
 
 		const response = {
+			submissionId: submission.id,
 			results: results,
 			total: results.length,
 			passed: results.filter(result => result.passed).length,

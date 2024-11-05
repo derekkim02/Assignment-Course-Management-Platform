@@ -21,6 +21,7 @@ router.use(verifyToken);
  * @consumes multipart/form-data
  * @returns {object} 200 - Submission results
  * @returns {object[]} 200.results - List of individual test results.
+ * @returns {number} 200.submissionId - Unique identifier of the submission.
  * @returns {boolean} 200.results.passed - Whether the test case passed.
  * @returns {string} 200.results.message - Message about the test case result.
  * @returns {number} 200.total - Total number of test cases.
@@ -39,6 +40,7 @@ router.post('/assignments/:assignmentId/submit', validateSingleSubmission, uploa
  * @consumes multipart/form-data
  * @returns {object} 200 - Submission results
  * @returns {object[]} 200.results - List of individual test results.
+ * @returns {number} 200.submissionId - Unique identifier of the submission.
  * @returns {boolean} 200.results.passed - Whether the test case passed.
  * @returns {string} 200.results.message - Message about the test case result.
  * @returns {number} 200.total - Total number of test cases.
@@ -104,6 +106,6 @@ router.get('/courses/:courseId', viewCourseEnrollmentDetails);
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @returns {file} 200 - Submission file
  */
-router.get('/submissions/:submissionId', downloadSubmission);
+router.get('/submissions/:submissionId/download', downloadSubmission);
 
 export default router;
