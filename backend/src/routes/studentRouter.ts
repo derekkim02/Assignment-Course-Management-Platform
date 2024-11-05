@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import { submitAssignment, submitGroupAssignment, viewMarks, viewAssignment, viewCourseEnrollments, viewCourseEnrollmentDetails } from '../controllers/studentController';
+import { submitAssignment, submitGroupAssignment, viewMarks, viewAssignment, viewCourseEnrollments, viewCourseEnrollmentDetails, downloadSubmission } from '../controllers/studentController';
 import { verifyToken } from '../middleware/jwt';
 import { uploadSubmission } from '../middleware/multer';
 import { validateSingleSubmission, validateGroupSubmission } from '../middleware/submission';
@@ -96,7 +96,14 @@ router.get('/courses', viewCourseEnrollments);
  */
 router.get('/courses/:courseId', viewCourseEnrollmentDetails);
 
-// Fetch submissions for an assignment
-router.get('/courses/:courseId/assignments/:assignmentId', );
+
+/**
+ * @route GET /submissions/:submissionId
+ * @description Download a submission file.
+ * @param {string} submissionId - Unique identifier of the submission
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {file} 200 - Submission file
+ */
+router.get('/submissions/:submissionId', downloadSubmission);
 
 export default router;

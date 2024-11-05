@@ -144,3 +144,27 @@ export const viewCourseEnrollmentDetails = async (req: Request, res: Response): 
 		res.status(500).json({ error: 'Failed to fetch courses' });
 	}
 }
+
+export const downloadSubmission = async (req: Request, res: Response): Promise<void> => {
+	try {
+		const { submissionId } = req.params;
+		const submission = await prisma.submission.findFirst({
+			where: {
+				id: parseInt(submissionId),
+				OR: [
+					{ student: { email: req.userEmail }},
+					{ group: { members: { some: { email: req.userEmail }}}},
+				],
+			},
+		});
+
+		if (!submission) {
+			res.status(404).json({ error: 'Submission not found or you do not have permission' });
+			return;
+		}
+
+		res.download(submission.filePath);
+	} catch {
+		res.status(500).json({ error: 'Failed to download submission' });
+	}
+}
