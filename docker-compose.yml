@@ -28,3 +28,14 @@ services:
       - ./database:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+  prisma-studio:
+    build:
+      context: ./backend
+    working_dir: /app
+    env_file:
+      - ./backend/.env
+    ports:
+      - "5555:5555"
+    volumes:
+      - ./backend:/app
+    command: ["npx", "prisma", "studio"]
