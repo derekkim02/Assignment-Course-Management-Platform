@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Typography, List, Card, Button, Modal, Form, Input, DatePicker, Spin, Checkbox } from 'antd';
+import { Layout, Typography, List, Button, Modal, Form, Input, DatePicker, Spin, Checkbox, Empty } from 'antd';
 import { Link, useParams } from 'react-router-dom';
 import { useEnrollment } from '../../../queries';
 import { format } from 'date-fns';
@@ -25,8 +25,6 @@ const CourseDetails: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [form] = Form.useForm();
 
-  console.log(enrollment);
-
   const showModal = () => setIsModalVisible(true);
   const handleCancel = () => {
     setIsModalVisible(false);
@@ -34,9 +32,7 @@ const CourseDetails: React.FC = () => {
   };
 
   useEffect(() => {
-    if (enrollment) {
-      refetchCourse();
-    }
+    refetchCourse();
   }, [enrollment, refetchCourse]);
 
   const handleOk = () => {
@@ -133,10 +129,12 @@ const CourseDetails: React.FC = () => {
             itemLayout="vertical"
             size="large"
             pagination={{
-              onChange: (page) => {
-                console.log(page);
-              },
-              pageSize: 4,
+              pageSize: 3,
+            }}
+            locale={{
+              emptyText: (
+                <Empty description="No assignments have been released yet." />
+              ),
             }}
             dataSource={enrollment.assignments}
             renderItem={(assignment: Assignment) => (
