@@ -1,7 +1,7 @@
 import { describe, beforeAll, it } from '@jest/globals';
 import { resetDatabase } from '../utils';
 import request from 'supertest';
-import app from '../../server';
+import app from '../../app';
 
 beforeAll(async () => {
 	await resetDatabase();
