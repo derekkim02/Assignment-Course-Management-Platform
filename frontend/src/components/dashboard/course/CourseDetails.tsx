@@ -2,15 +2,17 @@ import React, { useState } from 'react';
 import { Layout, Typography, List, Card, Button, Modal, Form, Input, DatePicker, Spin } from 'antd';
 import { Link, useParams } from 'react-router-dom';
 import { useEnrollment } from '../../../queries';
+import { textAlign } from '@mui/system';
+import { format } from 'date-fns';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
 
 interface Assignment {
   id: number;
-  title: string;
+  assignmentName: string;
   dueDate: string;
-  weighting: number;
+  description: string;
 }
 
 const CourseDetails: React.FC = () => {
@@ -63,16 +65,21 @@ const CourseDetails: React.FC = () => {
     borderRadius: '8px',
     padding: '20px',
     marginBottom: '20px',
-    width: '100%',
-  }
+    width: '90%',
+    alignSelf: 'center',
+  };
+
+  const listContainerStyle = {
+    display: 'flex',
+    justifyContent: 'center',
+  };
 
   return (
     <Layout style={{ padding: '20px' }}>
-      <Content style={{ maxWidth: '800px', margin: '0 auto' }}>
+
         <div style={bannerStyle}>
           <Title level={1} style={{ textAlign: 'left' }}>{enrollment.courseCode}</Title>
           <Title level={3} style={{ textAlign: 'left' }}>{enrollment.courseName}</Title>
-
         </div>
 
         <Paragraph>{enrollment.courseDescription}</Paragraph>
@@ -82,22 +89,32 @@ const CourseDetails: React.FC = () => {
             Create Assignment
           </Button>
         )}
-        <List
-          grid={{ gutter: 16, column: 1 }}
-          dataSource={enrollment.assignments}
-          renderItem={(assignment: Assignment) => (
-            <List.Item>
-              <Link to={`assignments/${assignment.id}`}>
-                <Card title={assignment.title} hoverable>
-                  <p>Due Date: {assignment.dueDate}</p>
-                  <p>Weighting: {assignment.weighting}%</p>
-                </Card>
-              </Link>
-            </List.Item>
-          )}
-        />
-      </Content>
-
+        <div style={listContainerStyle}>
+          <div style={{ width: '70%' }}>
+            <List
+              itemLayout="vertical"
+              size="large"
+              pagination={{
+                onChange: (page) => {
+                  console.log(page);
+                },
+                pageSize: 3,
+              }}
+              dataSource={enrollment.assignments}
+              renderItem={(assignment: Assignment) => (
+                <List.Item
+                  key={assignment.id}
+                >
+                  <List.Item.Meta
+                    title={assignment.assignmentName}
+                    description={`${assignment.description}`}
+                  />
+                  Due Date: {format(new Date(assignment.dueDate), 'HH:mm dd/MM/yyyy')}
+                </List.Item>
+              )}
+            />
+          </div>
+        </div>
       <Modal
         title="Create Assignment"
         open={isModalVisible}
