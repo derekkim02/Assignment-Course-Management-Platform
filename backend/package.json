@@ -7,7 +7,7 @@
   "scripts": {
     "start": "tsx src/server.ts",
     "build": "tsc",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --detectOpenHandles --coverage",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix"
   },
