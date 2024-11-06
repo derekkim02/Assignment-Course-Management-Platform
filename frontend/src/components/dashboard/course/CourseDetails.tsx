@@ -124,7 +124,7 @@ const CourseDetails: React.FC = () => {
 
       <Title level={3}>Assignments</Title>
       <div style={listContainerStyle}>
-        <div style={{ width: '100%', border: '1px solid #d9d9d9', padding: '30px', borderRadius: '10px' }}>
+        <div style={{ minWidth: '80%', maxWidth: '90%', border: '1px solid #d9d9d9', padding: '30px', borderRadius: '10px' }}>
           <List
             itemLayout="vertical"
             size="large"
