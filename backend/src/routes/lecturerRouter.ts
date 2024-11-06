@@ -66,9 +66,8 @@ router.get('/courses/:courseId',viewLecturedCourseDetails);
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @body {string} assignmentName - Name of the assignment
  * @body {string} description - Description of the assignment
- * @body {string} dueDate - Due date of the assignment in 'dd/MM/yyyy' format
+ * @body {string} dueDate - Due date of the assignment in '"YYYY-MM-DD HH:mm"' format
  * @body {boolean} isGroupAssignment - Whether the assignment is a group assignment
- * @body {string} term - Term of the course (e.g., '23T3')
  * @body {string} defaultShCmd - Default shell command for the assignment
  * @returns {object} 201 - Created assignment details
  * @returns {number} 201.assignmentId - Unique identifier of the created assignment
@@ -82,14 +81,13 @@ router.post('/courses/:courseId/assignments', validateAssignmentData, createAssi
 /**
  * @route PUT /courses/:courseId/assignments/:assignmentId
  * @description Update an existing assignment.
- * @param {string} courseId - Unique identifier of the course
+ * @param {string} courseId - Unique identifier of the courseOffering
  * @param {string} assignmentId - Unique identifier of the assignment
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @body {string} assignmentName - Updated name of the assignment
  * @body {string} description - Updated description of the assignment
- * @body {string} dueDate - Updated due date in 'dd/MM/yyyy' format
+ * @body {string} dueDate - Updated due date in "YYYY-MM-DD HH:mm" format
  * @body {boolean} isGroupAssignment - Updated group assignment status
- * @body {string} term - Term of the course (e.g., '23T3')
  * @body {string} defaultShCmd - Updated default shell command
  * @returns {object} 200 - Updated assignment details
  * @returns {number} 200.assignmentId - Unique identifier of the assignment
@@ -103,7 +101,7 @@ router.put('/courses/:courseId/assignments/:assignmentId', validateAssignmentDat
 /**
  * @route DELETE /courses/:courseId/assignments/:assignmentId
  * @description Delete an assignment from a course.
- * @param {string} courseId - Unique identifier of the course
+ * @param {string} courseId - Unique identifier of the courseOffering
  * @param {string} assignmentId - Unique identifier of the assignment
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @returns {object} 200 - Deletion confirmation
