@@ -29,7 +29,7 @@ const handleAssignmentSubmission = async (req: Request, res: Response, isGroupAs
 		const submitterIdKey = isGroupAssignment ? 'groupId' : 'studentId';
 
 		const filePath = req.file.path;
-		await prisma.submission.create({
+		const submission = await prisma.submission.create({
 			data: {
 				assignmentId: parseInt(assignmentId),
 				[submitterIdKey]: submitterId,
@@ -42,13 +42,14 @@ const handleAssignmentSubmission = async (req: Request, res: Response, isGroupAs
 		const results = await automarkService.runTests();
 
 		const response = {
+			submissionId: submission.id,
 			results: results,
 			total: results.length,
 			passed: results.filter(result => result.passed).length,
 			failed: results.filter(result => !result.passed).length,
 		}
 
-		res.status(200).json(response);
+		res.status(201).json(response);
 	} catch (e) {
 		res.status(500).json({ error: (e as Error).message });
 	}
@@ -142,5 +143,29 @@ export const viewCourseEnrollmentDetails = async (req: Request, res: Response): 
 		res.status(200).json(response);
 	} catch {
 		res.status(500).json({ error: 'Failed to fetch courses' });
+	}
+}
+
+export const downloadSubmission = async (req: Request, res: Response): Promise<void> => {
+	try {
+		const { submissionId } = req.params;
+		const submission = await prisma.submission.findFirst({
+			where: {
+				id: parseInt(submissionId),
+				OR: [
+					{ student: { email: req.userEmail }},
+					{ group: { members: { some: { email: req.userEmail }}}},
+				],
+			},
+		});
+
+		if (!submission) {
+			res.status(404).json({ error: 'Submission not found or you do not have permission' });
+			return;
+		}
+
+		res.download(submission.filePath);
+	} catch {
+		res.status(500).json({ error: 'Failed to download submission' });
 	}
 }
