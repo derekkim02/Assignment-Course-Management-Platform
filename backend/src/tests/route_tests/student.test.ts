@@ -143,6 +143,7 @@ describe('POST api/student/assignments/:assignmentId/submit', () => {
 	// 		.post(`/api/student/assignments/${groupAssignmentId}/group/submit`)
 	// 		.set('authorization', `Bearer ${token2}`)
 	// 		.attach('submission', py3FilePath)
+	// 		.attach('group', groupId) // make groups??
 	// 		.expect(201);
 	// 	expect(response.body.results).toEqual([]);
 	// // Test may sometimes take longer than 5 seconds (set to 10 seconds)
