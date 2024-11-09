@@ -106,7 +106,6 @@ router.get('/submissions/:submissionId', viewSubmission);
  * @param {string} submissionId - Unique identifier of the submission
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @body {number} styleMarkResult - Style mark result
- * @body {number} finalMark - Final mark
  * @body {string} comments - Marker comments
  * @returns {object} 200 - Success message
  */
