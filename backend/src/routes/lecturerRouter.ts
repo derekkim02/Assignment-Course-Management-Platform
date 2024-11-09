@@ -106,7 +106,7 @@ router.put('/courses/:courseId/assignments/:assignmentId', validateAssignmentDat
  * @returns {object} 200 - Deletion confirmation
  * @returns {string} 200.message - Success message
  */
-router.delete('/courses/assignments/:assignmentId', deleteAssignment);
+router.delete('/assignments/:assignmentId', deleteAssignment);
 
 /**
  * @route GET /courses/:courseId/assignments
@@ -121,7 +121,7 @@ router.delete('/courses/assignments/:assignmentId', deleteAssignment);
  * @returns {boolean} 200.isGroupAssignment - Group assignment status
  * @returns {string} 200.term - Term of the assignment
  */
-router.get('/courses/assignments/:assignmentId/view', viewAssignment);
+router.get('/assignments/:assignmentId/view', viewAssignment);
 
 /**
  * @route POST /courses/:courseId/assignments/:assignmentId/testcases
@@ -138,7 +138,7 @@ router.get('/courses/assignments/:assignmentId/view', viewAssignment);
  * @returns {boolean} 201.isHidden - Whether the test case is hidden.
  * @returns {number} 201.assignmentId - Unique identifier of the assignment.
  */
-router.post('/courses/assignments/:assignmentId/testcases', createTest);
+router.post('/assignments/:assignmentId/testcases', createTest);
 
 // View all submissions for an assignment
 router.get('/courses/:courseId/assignments/:assignmentId/submissions', );
