@@ -247,3 +247,33 @@ export const markSubmission = async (req: Request, res: Response): Promise<void>
 		res.status(500).json({ error: 'Failed to mark submission' });
 	}
 }
+
+export const downloadSubmission = async (req: Request, res: Response): Promise<void> => {
+	try {
+		const  submissionId  = parseInt(req.params.submissionId);
+		const submission = await prisma.submission.findFirst({
+			where: {
+				id: submissionId,
+				assignment: {
+					courseOffering: {
+						tutors: {
+							some: {
+								email: req.userEmail
+							}
+						},
+					},
+				},
+			},
+		});
+
+		if (!submission) {
+			res.status(404).json({ error: 'Submission not found or you are not the tutor for this course' });
+			return;
+		}
+
+		res.status(200).download(submission.filePath);
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ error: 'Failed to download submission' });
+	}
+}

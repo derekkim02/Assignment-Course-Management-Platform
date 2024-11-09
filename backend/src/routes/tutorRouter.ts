@@ -6,7 +6,8 @@ import {
 	viewAssignmentDetails,
 	viewAllSubmissions,
 	viewSubmission,
-	markSubmission
+	markSubmission,
+	downloadSubmission
 } from '../controllers/tutorController';
 
 
@@ -110,11 +111,17 @@ router.get('/submissions/:submissionId', viewSubmission);
  */
 router.put('submissions/:submissionId', markSubmission);
 
-// Download a student submission
-router.get('/submissions/:submissionId/download', );
+/**
+ * @route GET /submissions/:submissionId/download
+ * @description Download a student submission.
+ * @param {string} submissionId - Unique identifier of the submission
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {file} 200 - Submission file
+ */
+router.get('/submissions/:submissionId/download', downloadSubmission);
 
 // Search for students
-router.get('/students', );
+router.get('/courses/:courseId/students', );
 
 
 export default router;
