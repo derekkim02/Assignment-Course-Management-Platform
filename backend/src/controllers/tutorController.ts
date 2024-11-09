@@ -209,3 +209,41 @@ export const viewSubmission = async (req: Request, res: Response): Promise<void>
 		res.status(500).json({ error: 'Failed to fetch submission' });
 	}
 }
+
+export const markSubmission = async (req: Request, res: Response): Promise<void> => {
+	try {
+		const submissionId = parseInt(req.params.submissionId);
+		const { styleMarkResult, finalMark, markerComments } = req.body;
+
+		const markedSubmission = await prisma.submission.update({
+			where: {
+				id: submissionId,
+				assignment: {
+					courseOffering: {
+						tutors: {
+							some: {
+								email: req.userEmail
+							}
+						}
+					}
+				}
+			},
+			data: {
+				isMarked: true,
+				styleMarkResult,
+				finalMark,
+				markerComments
+			}
+		});
+
+		if (!markedSubmission) {
+			res.status(404).json({ error: 'Submission not found or you are not the tutor for this course' });
+			return;
+		}
+
+		res.status(201).json({ message: 'Submission marked successfully' });
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ error: 'Failed to mark submission' });
+	}
+}

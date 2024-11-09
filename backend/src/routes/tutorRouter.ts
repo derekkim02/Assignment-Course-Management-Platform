@@ -5,7 +5,8 @@ import {
 	viewTutoredCourseDetails,
 	viewAssignmentDetails,
 	viewAllSubmissions,
-	viewSubmission
+	viewSubmission,
+	markSubmission
 } from '../controllers/tutorController';
 
 
@@ -97,8 +98,17 @@ router.get('/assignments/:assignmentId/submissions', viewAllSubmissions);
  */
 router.get('/submissions/:submissionId', viewSubmission);
 
-// Assign a mark to a student submission
-router.put('submissions/:submissionId', );
+/** 
+ * @route PUT /submissions/:submissionId
+ * @description Mark a student submission.
+ * @param {string} submissionId - Unique identifier of the submission
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @body {number} styleMarkResult - Style mark result
+ * @body {number} finalMark - Final mark
+ * @body {string} comments - Marker comments
+ * @returns {object} 200 - Success message
+ */
+router.put('submissions/:submissionId', markSubmission);
 
 // Download a student submission
 router.get('/submissions/:submissionId/download', );
