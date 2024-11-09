@@ -4,8 +4,10 @@ import {
 	viewTutoredCourses,
 	viewTutoredCourseDetails,
 	viewAssignmentDetails,
-	viewAllSubmissions
+	viewAllSubmissions,
+	viewSubmission
 } from '../controllers/tutorController';
+
 
 const router = express.Router();
 router.use(verifyToken);
@@ -71,6 +73,20 @@ router.get('/assignments/:assignmentId', viewAssignmentDetails);
  * @returns {number?} 200.studentId - Unique identifier of the student
  * @returns {number?} 200.groupId - Unique identifier of the group
  * @returns {DateTime} 200.submissionTime - Time of submission
+ * @returns {boolean} 200.isMarked - Whether the submission has been marked
+ */
+router.get('/assignments/:assignmentId/submissions', viewAllSubmissions);
+
+/**
+ * @route GET /submissions/:submissionId
+ * @description View a specific student submission.
+ * @param {string} submissionId - Unique identifier of the submission
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object} 200 - Submission details
+ * @returns {number} 200.id - Unique identifier of the submission
+ * @returns {number?} 200.studentId - Unique identifier of the student
+ * @returns {number?} 200.groupId - Unique identifier of the group
+ * @returns {DateTime} 200.submissionTime - Time of submission
  * @returns {SubmissionType} 200.submissionType - Type of submission
  * @returns {boolean} 200.isMarked - Whether the submission has been marked
  * @returns {number?} 200.automark - Automark result
@@ -79,10 +95,7 @@ router.get('/assignments/:assignmentId', viewAssignmentDetails);
  * @returns {string?} 200.comments - Marker comments
  * @returns {number?} 200.latePenalty - Late penalty
  */
-router.get('/assignments/:assignmentId/submissions', viewAllSubmissions);
-
-// View a submission's content
-router.get('/submissions/:submissionId', );
+router.get('/submissions/:submissionId', viewSubmission);
 
 // Assign a mark to a student submission
 router.put('submissions/:submissionId', );

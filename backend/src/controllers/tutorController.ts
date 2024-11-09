@@ -156,17 +156,56 @@ export const viewAllSubmissions = async (req: Request, res: Response): Promise<v
 			studentId: submission.studentId,
 			groupId: submission.groupId,
 			submissionTime: submission.submissionTime,
+			isMarked: submission.isMarked,
+		}));
+
+		res.status(200).json(response);
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ error: 'Failed to fetch submissions' });
+	}
+}
+
+export const viewSubmission = async (req: Request, res: Response): Promise<void> => {
+	try {
+		const submissionId = parseInt(req.params.submissionId);
+		const submission = await prisma.submission.findUnique({
+			where: {
+				id: submissionId,
+				assignment: {
+					courseOffering: {
+						tutors: {
+							some: {
+								email: req.userEmail
+							}
+						}
+					}
+				}
+			}
+		});
+
+		if (!submission) {
+			res.status(404).json({ error: 'Submission not found or you are not the tutor for this course' });
+			return;
+		}
+
+		const response = {
+			id: submission.id,
+			studentId: submission.studentId,
+			groupId: submission.groupId,
+			submissionTime: submission.submissionTime,
 			submissionType: submission.submissionType,
 			isMarked: submission.isMarked,
 			automark: submission.autoMarkResult,
 			stylemark: submission.styleMarkResult,
 			finalMark: submission.finalMark,
 			comments: submission.markerComments,
-			latePenalty: submission.latePenalty,
-		}));
+			latePenalty: submission.latePenalty
+		};
 
 		res.status(200).json(response);
-	} catch {
-		res.status(500).json({ error: 'Failed to fetch submissions' });
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ error: 'Failed to fetch submission' });
 	}
 }
