@@ -108,7 +108,7 @@ router.put('/courses/:courseId/assignments/:assignmentId', validateAssignmentDat
  * @returns {object} 200 - Deletion confirmation
  * @returns {string} 200.message - Success message
  */
-router.delete('/courses/:courseId/assignments/:assignmentId', deleteAssignment);
+router.delete('/courses/assignments/:assignmentId', deleteAssignment);
 
 /**
  * @route GET /courses/:courseId/assignments

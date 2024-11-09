@@ -28,8 +28,7 @@ export const validateAssignmentData = async (
       !description ||
       !dueDate ||
       !courseId ||
-      !defaultShCmd ||
-      (isUpdating && !assignmentId)
+      !defaultShCmd
     ) {
       res.status(400).json({ error: 'Missing required fields' });
       return;
