@@ -101,18 +101,17 @@ router.put('/courses/:courseId/assignments/:assignmentId', validateAssignmentDat
 /**
  * @route DELETE /courses/:courseId/assignments/:assignmentId
  * @description Delete an assignment from a course.
- * @param {string} courseId - Unique identifier of the courseOffering
  * @param {string} assignmentId - Unique identifier of the assignment
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @returns {object} 200 - Deletion confirmation
  * @returns {string} 200.message - Success message
  */
-router.delete('/courses/:courseId/assignments/:assignmentId', deleteAssignment);
+router.delete('/assignments/:assignmentId', deleteAssignment);
 
 /**
  * @route GET /courses/:courseId/assignments
- * @description View all assignments for a specific course.
- * @param {string} courseId - Unique identifier of the course
+ * @description View a speecific assignment.
+ * @param {string} assignmentId - Unique identifier of the assignment.
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @returns {object[]} 200 - List of assignments
  * @returns {number} 200.assignmentId - Unique identifier of the assignment
@@ -122,10 +121,24 @@ router.delete('/courses/:courseId/assignments/:assignmentId', deleteAssignment);
  * @returns {boolean} 200.isGroupAssignment - Group assignment status
  * @returns {string} 200.term - Term of the assignment
  */
-router.get('/courses/:courseId/assignments/:assignmentId/view', viewAssignment);
+router.get('/assignments/:assignmentId/view', viewAssignment);
 
-// Create test case for an assignment
-router.post('/courses/:courseId/assignments/:assignmentId/testcases', createTest);
+/**
+ * @route POST /courses/:courseId/assignments/:assignmentId/testcases
+ * @description Create a new test case for a specific assignment.
+ * @param {string} assignmentId - Unique identifier of the assignment.
+ * @body {string} input - The input for the test case.
+ * @body {string} output - The expected output for the test case.
+ * @body {boolean} [isHidden] - Optional flag indicating if the test case is hidden.
+ * @header {string} Authorization - Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object} 201 - The created test case.
+ * @returns {number} 201.id - Unique identifier of the test case.
+ * @returns {string} 201.input - The input for the test case.
+ * @returns {string} 201.expectedOutput - The expected output for the test case.
+ * @returns {boolean} 201.isHidden - Whether the test case is hidden.
+ * @returns {number} 201.assignmentId - Unique identifier of the assignment.
+ */
+router.post('/assignments/:assignmentId/testcases', createTest);
 
 // View all submissions for an assignment
 router.get('/courses/:courseId/assignments/:assignmentId/submissions', );
