@@ -116,6 +116,7 @@ export const viewAssignmentDetails = async (req: Request, res: Response): Promis
 			assignmentId: data.id,
 			assignmentName: data.name,
 			assignmentDescription: data.description,
+			autoMarkWeighting: data.autoTestWeighting,
 			dueDate: data.dueDate,
 			isGroupAssignment: data.isGroupAssignment,
 			defaultShCmd: data.defaultShCmd,

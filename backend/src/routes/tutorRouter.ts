@@ -60,6 +60,7 @@ router.get('/courses/:courseId', viewTutoredCourseDetails);
  * @returns {number} 200.assignmentId - Unique identifier of the assignment
  * @returns {string} 200.assignmentName - Assignment name
  * @returns {string} 200.assignmentDescription - Assignment description
+ * @returns {Decimal} 200.autoMarkWeighting - Weight of the automark
  * @returns {DateTime} 200.dueDate - Due date of the assignment
  * @returns {boolean} 200.isGroupAssignment - Whether the assignment is a group assignment
  * @returns {string} 200.defaultShCmd - Default shell command for the assignment
@@ -105,7 +106,7 @@ router.get('/submissions/:submissionId', viewSubmission);
  * @description Mark a student submission.
  * @param {string} submissionId - Unique identifier of the submission
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
- * @body {number} styleMarkResult - Style mark result
+ * @body {number} styleMark - Style mark result
  * @body {string} comments - Marker comments
  * @returns {object} 200 - Success message
  */
