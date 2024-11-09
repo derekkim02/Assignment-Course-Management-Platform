@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../prismaClient';
+import { parse } from 'path';
 
 export const viewTutoredCourses = async (req: Request, res: Response): Promise<void> => {
 	try {
@@ -213,25 +214,56 @@ export const viewSubmission = async (req: Request, res: Response): Promise<void>
 export const markSubmission = async (req: Request, res: Response): Promise<void> => {
 	try {
 		const submissionId = parseInt(req.params.submissionId);
-		const { styleMarkResult, finalMark, markerComments } = req.body;
+		const { styleMark, markerComments } = req.body;
+		
+		const assignment = await prisma.assignment.findFirst({
+			where: {
+				submissions: {
+					some: {
+						id: submissionId
+					}
+				},
+				courseOffering: {
+					tutors: {
+						some: {
+							email: req.userEmail
+						}
+					}
+				}
+			}
+		});
+
+		if (!assignment) {
+			res.status(404).json({ error: 'Submission does not exist or you are not the tutor for this course' });
+			return;
+		}
+
+		const autoMark = await prisma.submission.findUnique({
+			where: {
+				id: submissionId
+			},
+			select: {
+				autoMarkResult: true
+			}
+		});
+
+		if (!autoMark || !autoMark.autoMarkResult) {
+			res.status(404).json({ error: 'Submission does not exist' });
+			return;
+		}
+
+		const autoMarkWeighting = assignment.autoTestWeighting.toNumber();
+		const autoMarkResult = autoMark.autoMarkResult.toNumber();
+		const styleMarkResult = parseFloat(styleMark);
 
 		const markedSubmission = await prisma.submission.update({
 			where: {
 				id: submissionId,
-				assignment: {
-					courseOffering: {
-						tutors: {
-							some: {
-								email: req.userEmail
-							}
-						}
-					}
-				}
 			},
 			data: {
 				isMarked: true,
 				styleMarkResult,
-				finalMark,
+				finalMark: (autoMarkWeighting * autoMarkResult + (1 - autoMarkWeighting) * styleMarkResult),
 				markerComments
 			}
 		});
