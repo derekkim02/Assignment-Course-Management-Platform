@@ -141,7 +141,7 @@ router.get('/courses/assignments/:assignmentId/view', viewAssignment);
  * @returns {boolean} 201.isHidden - Whether the test case is hidden.
  * @returns {number} 201.assignmentId - Unique identifier of the assignment.
  */
-router.post('/courses/:courseId/assignments/:assignmentId/testcases', validateTestCaseData, createTest);
+router.post('/courses/assignments/:assignmentId/testcases', validateTestCaseData, createTest);
 
 // View all submissions for an assignment
 router.get('/courses/:courseId/assignments/:assignmentId/submissions', );
