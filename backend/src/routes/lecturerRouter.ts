@@ -102,7 +102,6 @@ router.put('/courses/:courseId/assignments/:assignmentId', validateAssignmentDat
 /**
  * @route DELETE /courses/:courseId/assignments/:assignmentId
  * @description Delete an assignment from a course.
- * @param {string} courseId - Unique identifier of the courseOffering
  * @param {string} assignmentId - Unique identifier of the assignment
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @returns {object} 200 - Deletion confirmation
@@ -112,8 +111,8 @@ router.delete('/courses/assignments/:assignmentId', deleteAssignment);
 
 /**
  * @route GET /courses/:courseId/assignments
- * @description View all assignments for a specific course.
- * @param {string} courseId - Unique identifier of the course
+ * @description View a speecific assignment.
+ * @param {string} assignmentId - Unique identifier of the assignment.
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @returns {object[]} 200 - List of assignments
  * @returns {number} 200.assignmentId - Unique identifier of the assignment
@@ -128,7 +127,6 @@ router.get('/courses/assignments/:assignmentId/view', viewAssignment);
 /**
  * @route POST /courses/:courseId/assignments/:assignmentId/testcases
  * @description Create a new test case for a specific assignment.
- * @param {string} courseId - Unique identifier of the course.
  * @param {string} assignmentId - Unique identifier of the assignment.
  * @body {string} input - The input for the test case.
  * @body {string} output - The expected output for the test case.
