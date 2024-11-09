@@ -1,6 +1,10 @@
 import express from 'express';
 import { verifyToken } from '../middleware/jwt';
-import { viewTutoredCourses, viewTutoredCourseDetails } from '../controllers/tutorController';
+import { 
+	viewTutoredCourses,
+	viewTutoredCourseDetails,
+	viewAssignmentDetails
+} from '../controllers/tutorController';
 
 const router = express.Router();
 router.use(verifyToken);
@@ -41,20 +45,29 @@ router.get('/courses', viewTutoredCourses);
  */
 router.get('/courses/:courseId', viewTutoredCourseDetails);
 
-// View assignment details
-router.get('/courses/:courseId/assignments/:assignmentId/view', );
+/**
+ * @route GET /assignments/:assignmentId
+ * @description View the details of a specific assignment.
+ * @param {string} assignmentId - Unique identifier of the assignment
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object} 200 - Assignment details
+ * @returns {string} 200.assignmentId - Unique identifier of the assignment
+ * @returns {string} 200.assignmentName - Assignment name
+ * @returns {string} 200.assignmentDescription - Assignment description
+ * @returns {string} 200.dueDate - Due date of the assignment
+ * @returns {boolean} 200.isGroupAssignment - Whether the assignment is a group assignment
+ * @returns {string} 200.defaultShCmd - Default shell command for the assignment
+ */
+router.get('/assignments/:assignmentId', viewAssignmentDetails);
 
 // View a submission's content
-router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/view', );
-
-// View submission mark
-router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/mark', );
+router.get('/submissions/:submissionId', );
 
 // Assign a mark to a student submission
-router.put('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/mark', );
+router.put('submissions/:submissionId', );
 
 // Download a student submission
-router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/download', );
+router.get('/submissions/:submissionId/download', );
 
 // Search for students
 router.get('/students', );

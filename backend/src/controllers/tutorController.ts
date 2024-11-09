@@ -90,3 +90,40 @@ export const viewTutoredCourseDetails = async (req: Request, res: Response): Pro
 		res.status(500).json({ error: 'Failed to fetch course details' });
 	}
 }
+
+export const viewAssignmentDetails = async (req: Request, res: Response): Promise<void> => {
+	try {
+		const assignmentId = parseInt(req.params.assignmentId);
+		const data = await prisma.assignment.findUnique({
+			where: {
+				id: assignmentId,
+				courseOffering: {
+					tutors: {
+						some: {
+							email: req.userEmail
+						}
+					}
+				}
+			}
+		});
+
+		if (!data) {
+			res.status(404).json({ error: 'Assignment not found or you are not the tutor for this course' });
+			return;
+		}
+
+		const response = {
+			assignmentId: data.id,
+			assignmentName: data.name,
+			assignmentDescription: data.description,
+			dueDate: data.dueDate,
+			isGroupAssignment: data.isGroupAssignment,
+			defaultShCmd: data.defaultShCmd,
+		};
+		
+		res.status(200).json(response);
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ error: 'Failed to fetch assignment details' });
+	}
+}
