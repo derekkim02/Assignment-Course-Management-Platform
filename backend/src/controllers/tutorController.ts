@@ -120,10 +120,53 @@ export const viewAssignmentDetails = async (req: Request, res: Response): Promis
 			isGroupAssignment: data.isGroupAssignment,
 			defaultShCmd: data.defaultShCmd,
 		};
-		
+
 		res.status(200).json(response);
 	} catch (e) {
 		console.error(e);
 		res.status(500).json({ error: 'Failed to fetch assignment details' });
+	}
+}
+
+export const viewAllSubmissions = async (req: Request, res: Response): Promise<void> => {
+	try {
+		const assignmentId = parseInt(req.params.assignmentId);
+		const submissions = await prisma.submission.findMany({
+			where: {
+				assignment: {
+					id: assignmentId,
+					courseOffering: {
+						tutors: {
+							some: {
+								email: req.userEmail
+							}
+						}
+					}
+				},
+			}
+		});
+
+		if (!submissions) {
+			res.status(404).json({ error: 'There are no submissions for this assignment or you are not a tutor for this assignment' });
+			return;
+		}
+
+		const response = submissions.map(submission => ({
+			id: submission.id,
+			studentId: submission.studentId,
+			groupId: submission.groupId,
+			submissionTime: submission.submissionTime,
+			submissionType: submission.submissionType,
+			isMarked: submission.isMarked,
+			automark: submission.autoMarkResult,
+			stylemark: submission.styleMarkResult,
+			finalMark: submission.finalMark,
+			comments: submission.markerComments,
+			latePenalty: submission.latePenalty,
+		}));
+
+		res.status(200).json(response);
+	} catch {
+		res.status(500).json({ error: 'Failed to fetch submissions' });
 	}
 }

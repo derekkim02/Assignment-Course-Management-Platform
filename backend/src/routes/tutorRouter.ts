@@ -3,7 +3,8 @@ import { verifyToken } from '../middleware/jwt';
 import { 
 	viewTutoredCourses,
 	viewTutoredCourseDetails,
-	viewAssignmentDetails
+	viewAssignmentDetails,
+	viewAllSubmissions
 } from '../controllers/tutorController';
 
 const router = express.Router();
@@ -51,14 +52,34 @@ router.get('/courses/:courseId', viewTutoredCourseDetails);
  * @param {string} assignmentId - Unique identifier of the assignment
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @returns {object} 200 - Assignment details
- * @returns {string} 200.assignmentId - Unique identifier of the assignment
+ * @returns {number} 200.assignmentId - Unique identifier of the assignment
  * @returns {string} 200.assignmentName - Assignment name
  * @returns {string} 200.assignmentDescription - Assignment description
- * @returns {string} 200.dueDate - Due date of the assignment
+ * @returns {DateTime} 200.dueDate - Due date of the assignment
  * @returns {boolean} 200.isGroupAssignment - Whether the assignment is a group assignment
  * @returns {string} 200.defaultShCmd - Default shell command for the assignment
  */
 router.get('/assignments/:assignmentId', viewAssignmentDetails);
+
+/**
+ * @route GET /assignments/:assignmentId/submissions
+ * @description View all submissions for a specific assignment.
+ * @param {string} assignmentId - Unique identifier of the assignment
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object[]} 200 - List of submissions
+ * @returns {number} 200.id - Unique identifier of the submission
+ * @returns {number?} 200.studentId - Unique identifier of the student
+ * @returns {number?} 200.groupId - Unique identifier of the group
+ * @returns {DateTime} 200.submissionTime - Time of submission
+ * @returns {SubmissionType} 200.submissionType - Type of submission
+ * @returns {boolean} 200.isMarked - Whether the submission has been marked
+ * @returns {number?} 200.automark - Automark result
+ * @returns {number?} 200.stylemark - Stylemark result
+ * @returns {number?} 200.finalMark - Final mark
+ * @returns {string?} 200.comments - Marker comments
+ * @returns {number?} 200.latePenalty - Late penalty
+ */
+router.get('/assignments/:assignmentId/submissions', viewAllSubmissions);
 
 // View a submission's content
 router.get('/submissions/:submissionId', );
