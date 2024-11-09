@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import prisma from '../prismaClient';
-import { parse } from 'path';
 
 export const viewTutoredCourses = async (req: Request, res: Response): Promise<void> => {
 	try {
