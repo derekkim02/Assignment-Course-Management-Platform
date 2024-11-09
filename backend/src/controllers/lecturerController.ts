@@ -137,13 +137,47 @@ export const deleteAssignment = async (req: Request, res: Response): Promise<voi
 
 export const createTest = async (req: Request, res: Response): Promise<void> => {
 	try {
-    // Check that testData exists
-    if (!req.testData) {
-      res.status(500).json({ error: 'Missing test data' });
-      return;
+    const lecturerEmail = req.userEmail;
+    const assignmentId = parseInt(req.params.assignmentId);
+    const { input, output, isHidden } = req.body;
+
+    // Check that the assignment exists
+    const assignment = await prisma.assignment.findUnique({
+      where: {
+        id: assignmentId,
+      },
+      include: {
+        courseOffering: {
+          select: {
+            lecturerId: true,
+          },
+        },
+      },
+    });
+
+    if (!assignment) {
+      throw new Error("Assignment not found");
     }
 
-    const { input, output, isHidden, assignmentId} = req.testData;
+    // Check that the lecturer is assigned to the courseOffering of the assignment
+    const lecturer = await prisma.user.findUnique({
+      where: {
+        email: lecturerEmail,
+      },
+    });
+
+    if (!lecturer) {
+      throw new Error("Lecturer not found");
+    }
+
+    if (assignment.courseOffering.lecturerId !== lecturer.zid) {
+      throw new Error("Lecturer does not have permission to create tests for this assignment");
+    }
+
+    // Sanitize and validate inputs
+    if (!input || !output || typeof isHidden !== 'boolean') {
+      throw new Error("Invalid input or outputs");
+    }
 
     // Create the test case
     const testCase = await prisma.testCase.create({

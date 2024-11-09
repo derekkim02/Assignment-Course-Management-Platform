@@ -1,7 +1,6 @@
 import express from 'express';
 import { verifyToken } from '../middleware/jwt';
 import { validateAssignmentData } from '../middleware/assignment';
-import { validateTestCaseData } from 'middleware/testCases';
 import { 
 	createAssignment,
 	searchStudentById,
@@ -139,7 +138,7 @@ router.get('/courses/assignments/:assignmentId/view', viewAssignment);
  * @returns {boolean} 201.isHidden - Whether the test case is hidden.
  * @returns {number} 201.assignmentId - Unique identifier of the assignment.
  */
-router.post('/courses/assignments/:assignmentId/testcases', validateTestCaseData, createTest);
+router.post('/courses/assignments/:assignmentId/testcases', createTest);
 
 // View all submissions for an assignment
 router.get('/courses/:courseId/assignments/:assignmentId/submissions', );
