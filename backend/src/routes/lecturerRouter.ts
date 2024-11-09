@@ -1,6 +1,7 @@
 import express from 'express';
 import { verifyToken } from '../middleware/jwt';
 import { validateAssignmentData } from '../middleware/assignment';
+import { validateTestCaseData } from 'middleware/testCases';
 import { 
 	createAssignment,
 	searchStudentById,
@@ -122,7 +123,7 @@ router.delete('/courses/:courseId/assignments/:assignmentId', deleteAssignment);
  * @returns {boolean} 200.isGroupAssignment - Group assignment status
  * @returns {string} 200.term - Term of the assignment
  */
-router.get('/courses/:courseId/assignments/:assignmentId/view', viewAssignment);
+router.get('/courses/assignments/:assignmentId/view', viewAssignment);
 
 /**
  * @route POST /courses/:courseId/assignments/:assignmentId/testcases
@@ -140,7 +141,7 @@ router.get('/courses/:courseId/assignments/:assignmentId/view', viewAssignment);
  * @returns {boolean} 201.isHidden - Whether the test case is hidden.
  * @returns {number} 201.assignmentId - Unique identifier of the assignment.
  */
-router.post('/courses/:courseId/assignments/:assignmentId/testcases', createTest);
+router.post('/courses/:courseId/assignments/:assignmentId/testcases', validateTestCaseData, createTest);
 
 // View all submissions for an assignment
 router.get('/courses/:courseId/assignments/:assignmentId/submissions', );

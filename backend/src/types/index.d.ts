@@ -4,6 +4,7 @@ declare namespace Express {
 		userEmail?: string;
 		submissionInfo?: SubmissionInfo;
 		assignmentData?: assignmentData;
+		testData?: testData;
 	}
 }
 
@@ -32,3 +33,10 @@ interface assignmentData {
 		defaultShCmd: string;
 		assignmentId?: number; // Include assignmentId when updating
 	};
+
+interface testData {
+	input: string;
+	output: string;
+	isHidden: boolean;
+	assignmentId: number;
+}
