@@ -7,7 +7,8 @@ import {
 	viewAllSubmissions,
 	viewSubmission,
 	markSubmission,
-	downloadSubmission
+	downloadSubmission,
+	viewStudents
 } from '../controllers/tutorController';
 
 
@@ -120,8 +121,19 @@ router.put('submissions/:submissionId', markSubmission);
  */
 router.get('/submissions/:submissionId/download', downloadSubmission);
 
-// Search for students
-router.get('/courses/:courseId/students', );
+
+/**
+ * @route GET /courses/:courseId/students
+ * @description View all students enrolled in a specific course.
+ * @param {string} courseId - Unique identifier of the course offering
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object[]} 200 - List of students
+ * @returns {number} 200.zid - Unique identifier of the student
+ * @returns {string} 200.firstName - First name of the student
+ * @returns {string} 200.lastName - Last name of the student
+ * @returns {string} 200.email - Email of the student
+ */
+router.get('/courses/:courseId/students', viewStudents);
 
 
 export default router;

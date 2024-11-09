@@ -277,3 +277,39 @@ export const downloadSubmission = async (req: Request, res: Response): Promise<v
 		res.status(500).json({ error: 'Failed to download submission' });
 	}
 }
+
+export const viewStudents = async (req: Request, res: Response): Promise<void> => {
+	try {
+		const courseEnrollmentId = parseInt(req.params.courseId);
+		const students = await prisma.courseOffering.findUnique({
+			where: {
+				id: courseEnrollmentId,
+				tutors: {
+					some: {
+						email: req.userEmail
+					}
+				},
+			},
+			include: {
+				enrolledStudents: true
+			}
+		});
+
+		if (!students) {
+			res.status(404).json({ error: 'Course not found or you are not the tutor for this course' });
+			return;
+		}
+
+		const response = students.enrolledStudents.map(student => ({
+			zid: student.zid,
+			firstName: student.firstName,
+			lastName: student.lastName,
+			email: student.email,
+		}));
+
+		res.status(200).json(response);
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ error: 'Failed to fetch students' });
+	}
+}
