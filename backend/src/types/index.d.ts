@@ -4,7 +4,6 @@ declare namespace Express {
 		userEmail?: string;
 		submissionInfo?: SubmissionInfo;
 		assignmentData?: assignmentData;
-		testData?: testData;
 	}
 }
 
