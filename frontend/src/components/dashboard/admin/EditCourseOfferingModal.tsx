@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { UploadOutlined } from '@ant-design/icons';
-import type { UploadProps } from 'antd';
-import { Modal, Form, Select, Button, message, Spin, Space, Upload } from 'antd';
+import { Modal, Form, Select, Button, message, Spin, Space } from 'antd';
 import Cookies from 'js-cookie';
 import { config } from '../../../config';
 import { useAdminGetCourseOffering } from '../../../queries';
@@ -28,6 +27,8 @@ const EditCourseOfferingModal: React.FC<EditCourseOfferingModalProps> = ({
 }) => {
   const token = Cookies.get('token') || '';
   const [form] = Form.useForm();
+  // Create a ref for the hidden file input
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: courseOffering, isLoading: isLoadingCourseOffering, refetch } = useAdminGetCourseOffering(courseId);
 
@@ -88,6 +89,51 @@ const EditCourseOfferingModal: React.FC<EditCourseOfferingModalProps> = ({
   if (!courseOffering) {
     return null;
   }
+
+  const handleUpload = async (file: File) => {
+    const isCsv = file.name.endsWith('.csv');
+    if (!isCsv) {
+      message.error('You can only upload CSV files!');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('csv', file);
+
+      const response = await fetch(`${config.backendUrl}/api/admin/course-offerings/${courseId}/import-csv`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        message.success(`${file.name} file uploaded successfully`);
+        refetch();
+      } else {
+        const errorData = await response.json();
+        message.error(errorData.message || `${file.name} file upload failed.`);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      message.error('Upload failed.');
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await handleUpload(file);
+      // Reset the input value to allow uploading the same file again if needed
+      e.target.value = '';
+    }
+  };
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
 
   return (
     <Modal
@@ -154,59 +200,23 @@ const EditCourseOfferingModal: React.FC<EditCourseOfferingModalProps> = ({
             <Button type="primary" htmlType="submit">
               Save
             </Button>
-            <Upload {...props}>
-              <Button icon={<UploadOutlined />}>Import via CSV</Button>
-            </Upload>
+            <input
+              type="file"
+              accept=".csv"
+              style={{ display: 'none' }}
+              ref={fileInputRef}
+              onChange={handleFileChange}
+            />
+            <label htmlFor="csv-upload">
+              <Button onClick={handleButtonClick} icon={<UploadOutlined />}>
+                Import via CSV
+              </Button>
+            </label>
           </Space>
         </Form.Item>
       </Form>
     </Modal>
   );
-};
-
-// UploadProps
-const props: UploadProps = {
-  name: 'file',
-  accept: '.csv',
-  action: 'https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload',
-  headers: {
-    authorization: 'authorization-text',
-  },
-  onChange (info) {
-    if (info.file.status !== 'uploading') {
-      console.log(info.file, info.fileList);
-    }
-    if (info.file.status === 'done') {
-      message.success(`${info.file.name} file uploaded successfully`);
-    } else if (info.file.status === 'error') {
-      console.log('FLAG');
-      message.error(`${info.file.name} file upload failed.`);
-    }
-  },
-  beforeUpload (file) {
-    const isCsv = file.name.endsWith('.csv');
-    if (!isCsv) {
-      message.error('You can only upload CSV files!');
-      return Promise.resolve(false);
-    }
-
-    const MAX_ROWS = 1000;
-    return new Promise<boolean>((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target?.result as string;
-        const rows = text.split('\n').filter(row => row.trim() !== '');
-        console.log(`Row count: ${rows.length}`);
-        if (rows.length > MAX_ROWS) {
-          message.error(`CSV has too many elements. Max allowed is ${MAX_ROWS}.`);
-          resolve(false);
-        } else {
-          resolve(true);
-        }
-      };
-      reader.readAsText(file);
-    });
-  },
 };
 
 export default EditCourseOfferingModal;
