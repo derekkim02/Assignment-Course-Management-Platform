@@ -4,7 +4,14 @@
  */
 
 import express from 'express';
-import { submitAssignment, submitGroupAssignment, viewMarks, viewAssignment, viewCourseEnrollments, viewCourseEnrollmentDetails, downloadSubmission } from '../controllers/studentController';
+import { 
+	submitAssignment,
+	submitGroupAssignment,
+	viewCourseEnrollments,
+	viewCourseEnrollmentDetails,
+	downloadSubmission
+} from '../controllers/studentController';
+
 import { verifyToken } from '../middleware/jwt';
 import { uploadSubmission } from '../middleware/multer';
 import { validateSingleSubmission, validateGroupSubmission } from '../middleware/submission';
@@ -51,10 +58,10 @@ router.post('/assignments/:assignmentId/submit', validateSingleSubmission, uploa
 router.post('/assignments/:assignmentId/group/submit',validateGroupSubmission, uploadSubmission, submitGroupAssignment);
 
 // View marks
-router.get('/marks', viewMarks);
+router.get('/marks', );
 
 // View assignment details
-router.get('/assignments/:assignmentId/view', viewAssignment);
+router.get('/assignments/:assignmentId/view', );
 
 // Fetch all upcoming assignments
 router.get('/assignments/new', );

@@ -121,6 +121,7 @@ model Assignment {
   dueDate            DateTime
   isGroupAssignment  Boolean
   defaultShCmd       String
+  autoTestWeighting  Decimal            
   autoTestExecutable String?
 
   courseOfferingId   Int

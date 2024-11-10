@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
-import { Modal, Form, Select, Button, message, Spin } from 'antd';
+import React, { useEffect, useRef } from 'react';
+import { UploadOutlined } from '@ant-design/icons';
+import { Modal, Form, Select, Button, message, Spin, Space } from 'antd';
 import Cookies from 'js-cookie';
 import { config } from '../../../config';
 import { useAdminGetCourseOffering } from '../../../queries';
@@ -26,6 +27,8 @@ const EditCourseOfferingModal: React.FC<EditCourseOfferingModalProps> = ({
 }) => {
   const token = Cookies.get('token') || '';
   const [form] = Form.useForm();
+  // Create a ref for the hidden file input
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: courseOffering, isLoading: isLoadingCourseOffering, refetch } = useAdminGetCourseOffering(courseId);
 
@@ -86,6 +89,51 @@ const EditCourseOfferingModal: React.FC<EditCourseOfferingModalProps> = ({
   if (!courseOffering) {
     return null;
   }
+
+  const handleUpload = async (file: File) => {
+    const isCsv = file.name.endsWith('.csv');
+    if (!isCsv) {
+      message.error('You can only upload CSV files!');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('csv', file);
+
+      const response = await fetch(`${config.backendUrl}/api/admin/course-offerings/${courseId}/import-csv`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        message.success(`${file.name} file uploaded successfully`);
+        refetch();
+      } else {
+        const errorData = await response.json();
+        message.error(errorData.message || `${file.name} file upload failed.`);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      message.error('Upload failed.');
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await handleUpload(file);
+      // Reset the input value to allow uploading the same file again if needed
+      e.target.value = '';
+    }
+  };
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
 
   return (
     <Modal
@@ -148,9 +196,23 @@ const EditCourseOfferingModal: React.FC<EditCourseOfferingModalProps> = ({
         </Form.Item>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit">
-            Save
-          </Button>
+          <Space>
+            <Button type="primary" htmlType="submit">
+              Save
+            </Button>
+            <input
+              type="file"
+              accept=".csv"
+              style={{ display: 'none' }}
+              ref={fileInputRef}
+              onChange={handleFileChange}
+            />
+            <label htmlFor="csv-upload">
+              <Button onClick={handleButtonClick} icon={<UploadOutlined />}>
+                Import via CSV
+              </Button>
+            </label>
+          </Space>
         </Form.Item>
       </Form>
     </Modal>
