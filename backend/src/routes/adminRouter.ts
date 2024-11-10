@@ -132,6 +132,6 @@ router.put('/course-offerings/:courseOfferingId', updateCourseOffering);
  * @returns {object} 201 - Success message
  * @returns {string} 201.message - Success message
  */
-router.post('/course-offerings/:courseOfferingId/import-csv', uploadCsv ,importCsv);
+router.post('/course-offerings/:courseOfferingId/import-csv', uploadCsv, importCsv);
 
 export default router;
