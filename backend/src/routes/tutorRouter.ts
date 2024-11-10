@@ -1,6 +1,16 @@
 import express from 'express';
 import { verifyToken } from '../middleware/jwt';
-import { viewTutoredCourses, viewTutoredCourseDetails } from '../controllers/tutorController';
+import { 
+	viewTutoredCourses,
+	viewTutoredCourseDetails,
+	viewAssignmentDetails,
+	viewAllSubmissions,
+	viewSubmission,
+	markSubmission,
+	downloadSubmission,
+	viewStudents
+} from '../controllers/tutorController';
+
 
 const router = express.Router();
 router.use(verifyToken);
@@ -41,23 +51,89 @@ router.get('/courses', viewTutoredCourses);
  */
 router.get('/courses/:courseId', viewTutoredCourseDetails);
 
-// View assignment details
-router.get('/courses/:courseId/assignments/:assignmentId/view', );
+/**
+ * @route GET /assignments/:assignmentId
+ * @description View the details of a specific assignment.
+ * @param {string} assignmentId - Unique identifier of the assignment
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object} 200 - Assignment details
+ * @returns {number} 200.assignmentId - Unique identifier of the assignment
+ * @returns {string} 200.assignmentName - Assignment name
+ * @returns {string} 200.assignmentDescription - Assignment description
+ * @returns {Decimal} 200.autoMarkWeighting - Weight of the automark
+ * @returns {DateTime} 200.dueDate - Due date of the assignment
+ * @returns {boolean} 200.isGroupAssignment - Whether the assignment is a group assignment
+ * @returns {string} 200.defaultShCmd - Default shell command for the assignment
+ */
+router.get('/assignments/:assignmentId', viewAssignmentDetails);
 
-// View a submission's content
-router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/view', );
+/**
+ * @route GET /assignments/:assignmentId/submissions
+ * @description View all submissions for a specific assignment.
+ * @param {string} assignmentId - Unique identifier of the assignment
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object[]} 200 - List of submissions
+ * @returns {number} 200.id - Unique identifier of the submission
+ * @returns {number?} 200.studentId - Unique identifier of the student
+ * @returns {number?} 200.groupId - Unique identifier of the group
+ * @returns {DateTime} 200.submissionTime - Time of submission
+ * @returns {boolean} 200.isMarked - Whether the submission has been marked
+ */
+router.get('/assignments/:assignmentId/submissions', viewAllSubmissions);
 
-// View submission mark
-router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/mark', );
+/**
+ * @route GET /submissions/:submissionId
+ * @description View a specific student submission.
+ * @param {string} submissionId - Unique identifier of the submission
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object} 200 - Submission details
+ * @returns {number} 200.id - Unique identifier of the submission
+ * @returns {number?} 200.studentId - Unique identifier of the student
+ * @returns {number?} 200.groupId - Unique identifier of the group
+ * @returns {DateTime} 200.submissionTime - Time of submission
+ * @returns {SubmissionType} 200.submissionType - Type of submission
+ * @returns {boolean} 200.isMarked - Whether the submission has been marked
+ * @returns {number?} 200.automark - Automark result
+ * @returns {number?} 200.stylemark - Stylemark result
+ * @returns {number?} 200.finalMark - Final mark
+ * @returns {string?} 200.comments - Marker comments
+ * @returns {number?} 200.latePenalty - Late penalty
+ */
+router.get('/submissions/:submissionId', viewSubmission);
 
-// Assign a mark to a student submission
-router.put('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/mark', );
+/** 
+ * @route PUT /submissions/:submissionId
+ * @description Mark a student submission.
+ * @param {string} submissionId - Unique identifier of the submission
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @body {number} styleMark - Style mark result
+ * @body {string} comments - Marker comments
+ * @returns {object} 200 - Success message
+ */
+router.put('submissions/:submissionId', markSubmission);
 
-// Download a student submission
-router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/download', );
+/**
+ * @route GET /submissions/:submissionId/download
+ * @description Download a student submission.
+ * @param {string} submissionId - Unique identifier of the submission
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {file} 200 - Submission file
+ */
+router.get('/submissions/:submissionId/download', downloadSubmission);
 
-// Search for students
-router.get('/students', );
+
+/**
+ * @route GET /courses/:courseId/students
+ * @description View all students enrolled in a specific course.
+ * @param {string} courseId - Unique identifier of the course offering
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object[]} 200 - List of students
+ * @returns {number} 200.zid - Unique identifier of the student
+ * @returns {string} 200.firstName - First name of the student
+ * @returns {string} 200.lastName - Last name of the student
+ * @returns {string} 200.email - Email of the student
+ */
+router.get('/courses/:courseId/students', viewStudents);
 
 
 export default router;
