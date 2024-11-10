@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Layout, Typography, List, Card, Button, Modal, Form, Upload, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
+import Tar from 'tar-js';
+import pako from 'pako';
 import dayjs from 'dayjs';
+import { config } from '../../../../config';
+import Cookies from 'js-cookie';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -23,7 +27,8 @@ interface Assignment {
 }
 
 const AssignmentDetails: React.FC = () => {
-  const { assignmentId } = useParams<{ assignmentId: string }>();
+  const { role, enrolmentId, assignmentId } = useParams<{ role: string, enrolmentId: string, assignmentId: string }>();
+  const token = Cookies.get('token') || '';
 
   // Dummy data for assignment details
   const assignment: Assignment = {
@@ -34,8 +39,8 @@ const AssignmentDetails: React.FC = () => {
     feedback: 'Overall great job on this assignment!',
     submissions: [
       { id: 1, date: '2023-09-15', grade: 'A' },
-      { id: 2, date: '2023-09-20', grade: 'B+' }
-    ]
+      { id: 2, date: '2023-09-20', grade: 'B+' },
+    ],
   };
 
   const [submissions, setSubmissions] = useState<Submission[]>(assignment.submissions);
@@ -51,18 +56,108 @@ const AssignmentDetails: React.FC = () => {
     form.resetFields();
   };
 
-  const handleOk = () => {
-    form.validateFields().then(values => {
-      const newSubmission: Submission = {
-        id: submissions.length + 1,
-        date: dayjs().format('YYYY-MM-DD'),
-        grade: 'Pending'
-      };
-      setSubmissions([...submissions, newSubmission]);
-      setIsModalVisible(false);
-      form.resetFields();
-      message.success('Submission uploaded successfully!');
+  const handleOk = async () => {
+    try {
+      const values = await form.validateFields();
+      const fileList = values.file;
+
+      if (fileList && fileList.length > 0) {
+        const tarball = await createTarGz(fileList);
+        await sendTarballToBackend(tarball);
+        const newSubmission: Submission = {
+          id: submissions.length + 1,
+          date: dayjs().format('YYYY-MM-DD'),
+          grade: 'Pending'
+        };
+        setSubmissions([...submissions, newSubmission]);
+        setIsModalVisible(false);
+        form.resetFields();
+        message.success('Submission uploaded successfully!');
+      } else {
+        message.error('Please upload at least one file.');
+      }
+    } catch (error) {
+      console.error('Failed to create tarball:', error);
+      message.error('Failed to create tarball.');
+    }
+  };
+
+  // const downloadFile = async () => {
+  //   try {
+  //     const response = await fetch(`${config.backendUrl}/api/student/submissions/464/download`, {
+  //       method: 'GET',
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error('Failed to download file');
+  //     }
+
+  //     const blob = await response.blob();
+  //     const url = window.URL.createObjectURL(blob);
+  //     const a = document.createElement('a');
+  //     a.href = url;
+  //     a.download = 'downloaded_file.tar.gz'; // Set the desired file name
+  //     document.body.appendChild(a);
+  //     a.click();
+  //     a.remove();
+  //     window.URL.revokeObjectURL(url);
+  //   } catch (error) {
+  //     console.error('Error downloading file:', error);
+  //     message.error('Failed to download file.');
+  //   }
+  // };
+
+  const createTarGz = (fileList: any[]) => {
+    return new Promise<Uint8Array>((resolve, reject) => {
+      const tar = new Tar();
+      let filesProcessed = 0;
+
+      fileList.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target && e.target.result) {
+            const buffer = new Uint8Array(e.target.result as ArrayBuffer);
+            tar.append(file.name, buffer);
+            filesProcessed += 1;
+
+            if (filesProcessed === fileList.length) {
+              const tarball = tar.out;
+              const compressed = pako.gzip(tarball);
+              resolve(compressed);
+            }
+          }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file.originFileObj);
+      });
     });
+  };
+
+  const sendTarballToBackend = async (tarball: Uint8Array) => {
+    const blob = new Blob([tarball], { type: 'application/gzip' });
+    const formData = new FormData();
+    formData.append('submission', blob, 'submission.tar.gz');
+    try {
+      const response = await fetch(`${config.backendUrl}/api/student/assignments/${assignmentId}/submit`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload tarball');
+      }
+      const result = await response.json();
+      console.log('Upload successful:', result);
+    } catch (error) {
+      console.error('Error uploading tarball:', error);
+      throw error;
+    }
   };
 
   return (
@@ -107,7 +202,7 @@ const AssignmentDetails: React.FC = () => {
             getValueFromEvent={e => (Array.isArray(e) ? e : e && e.fileList)}
             rules={[{ required: true, message: 'Please upload a file' }]}
           >
-            <Upload.Dragger name="files" beforeUpload={() => false}>
+            <Upload.Dragger name="files" multiple={true} beforeUpload={() => false}>
               <p className="ant-upload-drag-icon">
                 <UploadOutlined />
               </p>
