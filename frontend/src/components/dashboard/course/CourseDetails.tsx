@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Typography, List, Card, Button, Modal, Form, Input, DatePicker, Spin, Checkbox } from 'antd';
+import { Layout, Typography, List, Button, Modal, Form, Input, DatePicker, Spin, Checkbox, Empty } from 'antd';
 import { Link, useParams } from 'react-router-dom';
 import { useEnrollment } from '../../../queries';
+import { format } from 'date-fns';
 import { config } from '../../../config';
 import Cookies from 'js-cookie';
-import { jwtDecode, JwtPayload } from 'jwt-decode';
+import { CSSProperties } from 'styled-components';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
 
 interface Assignment {
   assignmentId: number;
-  title: string;
+  assignmentName: string;
   dueDate: string;
-  weighting: number;
+  description: string;
 }
 
 const CourseDetails: React.FC = () => {
@@ -31,9 +32,7 @@ const CourseDetails: React.FC = () => {
   };
 
   useEffect(() => {
-    if (enrollment) {
-      refetchCourse();
-    }
+    refetchCourse();
   }, [enrollment, refetchCourse]);
 
   const handleOk = () => {
@@ -85,43 +84,75 @@ const CourseDetails: React.FC = () => {
     backgroundColor: '#f0f2f5',
     border: '1px solid #d9d9d9',
     borderRadius: '8px',
-    padding: '20px',
     marginBottom: '20px',
-    width: '100%',
-  }
+    width: '90%',
+    alignSelf: 'center',
+  };
+
+  const listContainerStyle = {
+    display: 'flex',
+    justifyContent: 'center',
+  };
+
+  const footerLineStyle: CSSProperties = {
+    borderTop: '1px solid #d9d9d9',
+    marginTop: '20px',
+    paddingTop: '10px',
+    textAlign: 'center',
+  };
 
   return (
     <Layout style={{ padding: '20px' }}>
-      <Content style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <div style={bannerStyle}>
+      <div style={bannerStyle}>
+        <div style={{ paddingTop: '10px', paddingLeft: '25px' }}>
           <Title level={1} style={{ textAlign: 'left' }}>{enrollment.courseCode}</Title>
           <Title level={3} style={{ textAlign: 'left' }}>{enrollment.courseName}</Title>
-
         </div>
 
-        <Paragraph>{enrollment.courseDescription}</Paragraph>
-        <Title level={3}>Assignments</Title>
-        {role === 'lecturer' && (
-          <Button type="primary" onClick={showModal} style={{ marginBottom: '20px' }}>
-            Create Assignment
-          </Button>
-        )}
-        <List
-          grid={{ gutter: 16, column: 1 }}
-          dataSource={enrollment.assignments}
-          renderItem={(assignment: Assignment) => (
-            <List.Item>
-              <Link to={`assignments/${assignment.assignmentId}`}>
-                <Card title={assignment.title} hoverable>
-                  <p>Due Date: {assignment.dueDate}</p>
-                  <p>Weighting: {assignment.weighting}%</p>
-                </Card>
-              </Link>
-            </List.Item>
-          )}
-        />
-      </Content>
+          <div style={footerLineStyle}/>
+          <Paragraph style={{ color: '#A3A3A3' }}>{enrollment.courseDescription}</Paragraph>
 
+        {role === 'lecturer' && (
+          <>
+            <div style={footerLineStyle}/>
+            <Button type="primary" onClick={showModal} style={{ alignSelf: 'left', width: '150px', marginBottom: '20px' }}>
+              Create Assignment
+            </Button>
+          </>
+        )}
+      </div>
+
+      <Title level={3}>Assignments</Title>
+      <div style={listContainerStyle}>
+        <div style={{ minWidth: '80%', maxWidth: '90%', border: '1px solid #d9d9d9', padding: '30px', borderRadius: '10px' }}>
+          <List
+            itemLayout="vertical"
+            size="large"
+            pagination={{
+              pageSize: 3,
+            }}
+            locale={{
+              emptyText: (
+                <Empty description="No assignments have been released yet." />
+              ),
+            }}
+            dataSource={enrollment.assignments}
+            renderItem={(assignment: Assignment) => (
+              <List.Item
+              key={assignment.assignmentId}
+              >
+                <Link to={`assignments/${assignment.assignmentId}`} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
+                  <List.Item.Meta
+                    title={assignment.assignmentName}
+                    description={`${assignment.description}`}
+                  />
+                  Due Date: {format(new Date(assignment.dueDate), 'HH:mm dd/MM/yyyy')}
+                </Link>
+              </List.Item>
+            )}
+          />
+        </div>
+      </div>
       <Modal
         title="Create Assignment"
         open={isModalVisible}

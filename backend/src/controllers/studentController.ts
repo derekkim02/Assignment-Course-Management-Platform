@@ -164,7 +164,7 @@ export const downloadSubmission = async (req: Request, res: Response): Promise<v
 			return;
 		}
 
-		res.download(submission.filePath);
+		res.status(200).download(submission.filePath);
 	} catch {
 		res.status(500).json({ error: 'Failed to download submission' });
 	}
