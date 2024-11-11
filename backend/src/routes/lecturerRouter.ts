@@ -5,6 +5,7 @@ import {
 	createAssignment,
 	searchStudentById,
 	getStudentsInCourse,
+	viewAllSubmissions,
 	viewSubmission,
 	createTest,
 	updateAssignment,
@@ -141,7 +142,7 @@ router.get('/assignments/:assignmentId/view', viewAssignment);
 router.post('/assignments/:assignmentId/testcases', createTest);
 
 // View all submissions for an assignment
-router.get('/courses/:courseId/assignments/:assignmentId/submissions', );
+router.get('/assignments/:assignmentId/submissions', viewAllSubmissions);
 
 // View a submission's content
 router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/view', viewSubmission);

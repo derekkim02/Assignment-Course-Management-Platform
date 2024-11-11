@@ -194,6 +194,37 @@ export const createTest = async (req: Request, res: Response): Promise<void> => 
 	}
 }
 
+export const viewAllSubmissions = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const assignmentId = parseInt(req.params.assignmentId);
+    const assignment = await prisma.assignment.findUnique({
+      where: {
+        id: assignmentId,
+      },
+      include: {
+        submissions: true,
+      },
+    });
+
+    if (!assignment) {
+      res.status(404).json({ error: 'Assignment not found' });
+      return;
+    }
+
+    const response = assignment.submissions.map(submission => ({
+      submissionId: submission.id,
+      submitterId: assignment.isGroupAssignment ? submission.groupId : submission.studentId,
+      submissionTime: submission.submissionTime,
+      autoMarkResult: submission.autoMarkResult,
+      latePenalty: submission.latePenalty,
+    }));
+
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
+}
+
 export const viewSubmission =  async (req: Request, res: Response): Promise<void> => {
   try {
     const { submissionId } = req.body;
