@@ -41,6 +41,12 @@ export const validateAssignmentData = async (
       return;
     }
 
+    // Check that the due date is in the future
+    if (parsedDate <= new Date()) {
+      res.status(400).json({ error: 'Due date must be in the future' });
+      return;
+    }
+
     // Check that the lecturer exists
     const lecturer = await prisma.user.findFirst({
       where: {
