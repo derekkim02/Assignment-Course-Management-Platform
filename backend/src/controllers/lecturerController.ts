@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { createTestCase } from "../testCases";
 import prisma from '../prismaClient';
 import AutotestService from "../services/autotestService";
 import LatePenaltyService from "../services/latepenaltyService";
