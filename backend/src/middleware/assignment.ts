@@ -98,3 +98,50 @@ export const validateAssignmentData = async (
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const validateLecturerPermissions = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const lecturerEmail = req.userEmail;
+    const assignmentId = parseInt(req.params.assignmentId);
+
+    const assignment = await prisma.assignment.findUnique({
+      where: {
+        id: assignmentId,
+      },
+      include: {
+        courseOffering: {
+          select: {
+            lecturerId: true,
+          },
+        },
+      },
+    });
+
+    if (!assignment) {
+      throw new Error("Assignment not found");
+    }
+
+    const lecturer = await prisma.user.findUnique({
+      where: {
+        email: lecturerEmail,
+      },
+    });
+
+    if (!lecturer) {
+      throw new Error("Lecturer not found");
+    }
+
+    if (assignment.courseOffering.lecturerId !== lecturer.zid) {
+      throw new Error("Lecturer does not have permission to access this assignment");
+    }
+
+    next();
+  } catch (error) {
+    console.error('Permission Error:', error);
+    res.status(403).json({ error: 'Permission error' });
+  }
+}

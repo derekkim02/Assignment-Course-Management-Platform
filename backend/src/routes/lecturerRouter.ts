@@ -1,6 +1,8 @@
 import express from 'express';
 import { verifyToken } from '../middleware/jwt';
-import { validateAssignmentData } from '../middleware/assignment';
+import { validateAssignmentData, validateLecturerPermissions } from '../middleware/assignment';
+import { uploadCsv } from 'middleware/multer';
+import { importCsv } from 'controllers/adminController';
 import { 
 	createAssignment,
 	searchStudentById,
@@ -13,7 +15,8 @@ import {
 	deleteAssignment,
 	viewLecturedCourses,
 	viewLecturedCourseDetails,
-	markAllSubmissions
+	markAllSubmissions,
+	downloadStudentSubmission
 } from '../controllers/lecturerController';
 
 const router = express.Router();
@@ -107,7 +110,7 @@ router.put('/courses/:courseId/assignments/:assignmentId', validateAssignmentDat
  * @returns {object} 200 - Deletion confirmation
  * @returns {string} 200.message - Success message
  */
-router.delete('/assignments/:assignmentId', deleteAssignment);
+router.delete('/assignments/:assignmentId', validateLecturerPermissions, deleteAssignment);
 
 /**
  * @route GET /courses/:courseId/assignments
@@ -139,13 +142,13 @@ router.get('/assignments/:assignmentId/view', viewAssignment);
  * @returns {boolean} 201.isHidden - Whether the test case is hidden.
  * @returns {number} 201.assignmentId - Unique identifier of the assignment.
  */
-router.post('/assignments/:assignmentId/testcases', createTest);
+router.post('/assignments/:assignmentId/testcases', validateLecturerPermissions, createTest);
 
 // View all submissions for an assignment
 router.get('/assignments/:assignmentId/submissions', viewAllSubmissions);
 
 // View a submission's content
-router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/view', viewSubmission);
+router.get('/submissions/:submissionId/view', viewSubmission);
 
 // Search for students in a specific course
 router.get('/students', getStudentsInCourse);
@@ -163,9 +166,9 @@ router.get('/students/:studentId', searchStudentById);
 router.post('/assignments/:assignmentId/mark', markAllSubmissions);
 
 // Download a student submission
-router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/download', );
+router.get('/submissions/:submissionId/download', downloadStudentSubmission);
 
 // Upload a CSV file to update student database
-router.post('/upload-student-csv', );
+router.post('/upload-student-csv', uploadCsv, importCsv);
 
 export default router;

@@ -112,17 +112,6 @@ export const deleteAssignment = async (req: Request, res: Response): Promise<voi
   try {
     const assignmentId = parseInt(req.params.assignmentId);
 
-    const assignment = await prisma.assignment.findUnique({
-      where: {
-        id: assignmentId,
-      },
-    });
-
-    if (!assignment) {
-      res.status(404).json({ error: 'Assignment not found' });
-      return;
-    }
-
     await prisma.assignment.delete({
       where: {
         id: assignmentId,
@@ -137,42 +126,8 @@ export const deleteAssignment = async (req: Request, res: Response): Promise<voi
 
 export const createTest = async (req: Request, res: Response): Promise<void> => {
 	try {
-    const lecturerEmail = req.userEmail;
     const assignmentId = parseInt(req.params.assignmentId);
     const { input, output, isHidden } = req.body;
-
-    // Check that the assignment exists
-    const assignment = await prisma.assignment.findUnique({
-      where: {
-        id: assignmentId,
-      },
-      include: {
-        courseOffering: {
-          select: {
-            lecturerId: true,
-          },
-        },
-      },
-    });
-
-    if (!assignment) {
-      throw new Error("Assignment not found");
-    }
-
-    // Check that the lecturer is assigned to the courseOffering of the assignment
-    const lecturer = await prisma.user.findUnique({
-      where: {
-        email: lecturerEmail,
-      },
-    });
-
-    if (!lecturer) {
-      throw new Error("Lecturer not found");
-    }
-
-    if (assignment.courseOffering.lecturerId !== lecturer.zid) {
-      throw new Error("Lecturer does not have permission to create tests for this assignment");
-    }
 
     // Sanitize and validate inputs
     if (!input || !output || typeof isHidden !== 'boolean') {
@@ -447,5 +402,26 @@ export const markAllSubmissions = async (req: Request, res: Response): Promise<v
     res.status(200).json({ message: 'Submissions marked' });
   } catch {
     res.status(500).json({ error: 'Failed to mark submissions' });
+  }
+}
+
+export const downloadStudentSubmission = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const submissionId = parseInt(req.params.submissionId);
+
+    const submission = await prisma.submission.findUnique({
+      where: {
+        id: submissionId,
+      },
+    });
+
+    if (!submission) {
+      res.status(404).json({ error: 'Submission not found' });
+      return;
+    }
+
+    res.download(submission.filePath);
+  } catch {
+    res.status(500).json({ error: 'Failed to download submission' });
   }
 }
