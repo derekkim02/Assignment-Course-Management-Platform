@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { createTestCase } from "../testCases";
 import prisma from '../prismaClient';
 import AutotestService from "../services/autotestService";
 import LatePenaltyService from "../services/latepenaltyService";
@@ -112,17 +111,6 @@ export const deleteAssignment = async (req: Request, res: Response): Promise<voi
   try {
     const assignmentId = parseInt(req.params.assignmentId);
 
-    const assignment = await prisma.assignment.findUnique({
-      where: {
-        id: assignmentId,
-      },
-    });
-
-    if (!assignment) {
-      res.status(404).json({ error: 'Assignment not found' });
-      return;
-    }
-
     await prisma.assignment.delete({
       where: {
         id: assignmentId,
@@ -137,42 +125,8 @@ export const deleteAssignment = async (req: Request, res: Response): Promise<voi
 
 export const createTest = async (req: Request, res: Response): Promise<void> => {
 	try {
-    const lecturerEmail = req.userEmail;
     const assignmentId = parseInt(req.params.assignmentId);
     const { input, output, isHidden } = req.body;
-
-    // Check that the assignment exists
-    const assignment = await prisma.assignment.findUnique({
-      where: {
-        id: assignmentId,
-      },
-      include: {
-        courseOffering: {
-          select: {
-            lecturerId: true,
-          },
-        },
-      },
-    });
-
-    if (!assignment) {
-      throw new Error("Assignment not found");
-    }
-
-    // Check that the lecturer is assigned to the courseOffering of the assignment
-    const lecturer = await prisma.user.findUnique({
-      where: {
-        email: lecturerEmail,
-      },
-    });
-
-    if (!lecturer) {
-      throw new Error("Lecturer not found");
-    }
-
-    if (assignment.courseOffering.lecturerId !== lecturer.zid) {
-      throw new Error("Lecturer does not have permission to create tests for this assignment");
-    }
 
     // Sanitize and validate inputs
     if (!input || !output || typeof isHidden !== 'boolean') {
@@ -192,6 +146,37 @@ export const createTest = async (req: Request, res: Response): Promise<void> => 
 	} catch (error) {
 	  res.status(400).json({ error: (error as Error).message });
 	}
+}
+
+export const viewAllSubmissions = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const assignmentId = parseInt(req.params.assignmentId);
+    const assignment = await prisma.assignment.findUnique({
+      where: {
+        id: assignmentId,
+      },
+      include: {
+        submissions: true,
+      },
+    });
+
+    if (!assignment) {
+      res.status(404).json({ error: 'Assignment not found' });
+      return;
+    }
+
+    const response = assignment.submissions.map(submission => ({
+      submissionId: submission.id,
+      submitterId: assignment.isGroupAssignment ? submission.groupId : submission.studentId,
+      submissionTime: submission.submissionTime,
+      autoMarkResult: submission.autoMarkResult,
+      latePenalty: submission.latePenalty,
+    }));
+
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
 }
 
 export const viewSubmission =  async (req: Request, res: Response): Promise<void> => {
@@ -416,5 +401,26 @@ export const markAllSubmissions = async (req: Request, res: Response): Promise<v
     res.status(200).json({ message: 'Submissions marked' });
   } catch {
     res.status(500).json({ error: 'Failed to mark submissions' });
+  }
+}
+
+export const downloadStudentSubmission = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const submissionId = parseInt(req.params.submissionId);
+
+    const submission = await prisma.submission.findUnique({
+      where: {
+        id: submissionId,
+      },
+    });
+
+    if (!submission) {
+      res.status(404).json({ error: 'Submission not found' });
+      return;
+    }
+
+    res.download(submission.filePath);
+  } catch {
+    res.status(500).json({ error: 'Failed to download submission' });
   }
 }

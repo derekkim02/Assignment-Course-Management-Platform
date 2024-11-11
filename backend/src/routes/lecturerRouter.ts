@@ -1,10 +1,13 @@
 import express from 'express';
 import { verifyToken } from '../middleware/jwt';
-import { validateAssignmentData } from '../middleware/assignment';
+import { validateAssignmentData, validateLecturerPermissions } from '../middleware/assignment';
+import { uploadCsv } from 'middleware/multer';
+import { importCsv } from 'controllers/adminController';
 import { 
 	createAssignment,
 	searchStudentById,
 	getStudentsInCourse,
+	viewAllSubmissions,
 	viewSubmission,
 	createTest,
 	updateAssignment,
@@ -12,7 +15,8 @@ import {
 	deleteAssignment,
 	viewLecturedCourses,
 	viewLecturedCourseDetails,
-	markAllSubmissions
+	markAllSubmissions,
+	downloadStudentSubmission
 } from '../controllers/lecturerController';
 
 const router = express.Router();
@@ -106,7 +110,7 @@ router.put('/courses/:courseId/assignments/:assignmentId', validateAssignmentDat
  * @returns {object} 200 - Deletion confirmation
  * @returns {string} 200.message - Success message
  */
-router.delete('/assignments/:assignmentId', deleteAssignment);
+router.delete('/assignments/:assignmentId', validateLecturerPermissions, deleteAssignment);
 
 /**
  * @route GET /courses/:courseId/assignments
@@ -138,18 +142,57 @@ router.get('/assignments/:assignmentId/view', viewAssignment);
  * @returns {boolean} 201.isHidden - Whether the test case is hidden.
  * @returns {number} 201.assignmentId - Unique identifier of the assignment.
  */
-router.post('/assignments/:assignmentId/testcases', createTest);
+router.post('/assignments/:assignmentId/testcases', validateLecturerPermissions, createTest);
 
-// View all submissions for an assignment
-router.get('/courses/:courseId/assignments/:assignmentId/submissions', );
+/**
+ * @route GET /assignments/:assignmentId/submissions
+ * @description View all submissions for a specific assignment.
+ * @param {string} assignmentId - Unique identifier of the assignment.
+ * @header {string} Authorization - Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object[]} 200 - List of submissions.
+ * @returns {number} 200.submissionId - Unique identifier of the submission.
+ * @returns {string} 200.submitterId - Identifier of the student or group who submitted.
+ * @returns {string} 200.submissionTime - Timestamp of the submission.
+ * @returns {boolean} 200.isGroupSubmission - Indicates if the submission is from a group.
+ */
+router.get('/assignments/:assignmentId/submissions', viewAllSubmissions);
 
-// View a submission's content
-router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/view', viewSubmission);
+/**
+ * @route GET /submissions/:submissionId/view
+ * @description View the details of a specific submission.
+ * @param {string} submissionId - Unique identifier of the submission.
+ * @header {string} Authorization - Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object} 200 - Details of the submission.
+ * @returns {number} 200.submissionId - Unique identifier of the submission.
+ * @returns {string} 200.submitterId - Identifier of the student or group who submitted.
+ * @returns {string} 200.submissionTime - Timestamp of the submission.
+ */
+router.get('/submissions/:submissionId/view', viewSubmission);
 
-// Search for students in a specific course
+/**
+ * @route GET /students
+ * @description Search for students in a specific course.
+ * @query {string} courseId - Unique identifier of the course.
+ * @query {string} [searchTerm] - Optional search term to filter students.
+ * @header {string} Authorization - Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object[]} 200 - List of students.
+ * @returns {string} 200.zid - ZID of the student.
+ * @returns {string} 200.name - Name of the student.
+ * @returns {string} 200.email - Email of the student.
+ */
 router.get('/students', getStudentsInCourse);
 
-// Look at student details
+/**
+ * @route GET /students/:studentId
+ * @description Retrieve details for a specific student.
+ * @param {string} studentId - ZID of the student.
+ * @header {string} Authorization - Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object} 200 - Details of the student.
+ * @returns {string} 200.zid - ZID of the student.
+ * @returns {string} 200.name - Name of the student.
+ * @returns {string} 200.email - Email of the student.
+ * @returns {object[]} 200.enrollments - List of courses the student is enrolled in.
+ */
 router.get('/students/:studentId', searchStudentById);
 
 /**
@@ -161,10 +204,24 @@ router.get('/students/:studentId', searchStudentById);
  */
 router.post('/assignments/:assignmentId/mark', markAllSubmissions);
 
-// Download a student submission
-router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/download', );
+/**
+ * @route GET /submissions/:submissionId/download
+ * @description Download the submission file for a specific submission.
+ * @param {string} submissionId - Unique identifier of the submission.
+ * @header {string} Authorization - Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {file} 200 - The submission file attachment.
+ */
+router.get('/submissions/:submissionId/download', downloadStudentSubmission);
 
-// Upload a CSV file to update student database
-router.post('/upload-student-csv', );
+/**
+ * @route POST '/course-offerings/:courseOfferingId/upload-student-csv'
+ * @description Import students, classes, tutors for a specific course offering from a CSV file.
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @param {string} courseOfferingId - The unique identifier of the course offering
+ * @body {file} body.file - The CSV file to import
+ * @returns {object} 201 - Success message
+ * @returns {string} 201.message - Success message
+ */
+router.post('/course-offerings/:courseOfferingId/upload-student-csv', uploadCsv, importCsv);
 
 export default router;
