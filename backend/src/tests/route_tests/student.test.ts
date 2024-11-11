@@ -19,7 +19,7 @@ const generateDbData = async (): Promise<{token1: string, token2: string, assigm
 	await request(app)
 		.post('/api/auth/register')
 		.send({
-			firstName: 'user', 
+			firstName: 'user',
 			lastName: '1',
 			email: 'user1@gmail.com',
 			password: 'bananas',
@@ -29,7 +29,7 @@ const generateDbData = async (): Promise<{token1: string, token2: string, assigm
 	await request(app)
 		.post('/api/auth/register')
 		.send({
-			firstName: 'user', 
+			firstName: 'user',
 			lastName: '2',
 			email: 'user2@gmail.com',
 			password: 'bananas',
@@ -65,13 +65,13 @@ const generateDbData = async (): Promise<{token1: string, token2: string, assigm
 			description: 'An introduction to programming'
 		})
 		.expect(201);
-	
+
 	// Admin gets the zid of the user1
 	const users = await request(app)
 		.get('/api/admin/users')
 		.set('authorization', `Bearer ${token1}`)
 		.expect(200);
-	
+
 	const zid1 = users.body[0].zid;
 	const zid2 = users.body[1].zid;
 
@@ -86,7 +86,7 @@ const generateDbData = async (): Promise<{token1: string, token2: string, assigm
 			lecturerId: zid1,
 		})
 		.expect(201);
-	
+
 	// Admin updates the course offering to include user2
 	await request(app)
 		.put(`/api/admin/course-offerings/${courseOffering.body.id}`)
@@ -96,7 +96,7 @@ const generateDbData = async (): Promise<{token1: string, token2: string, assigm
 			studentIds: [zid2],
 			tutorsIds: [zid1],
 		}).expect(201);
-	
+
 
 	// Admin creates an assignmen
 	const assignment = await request(app)
@@ -121,7 +121,13 @@ const generateDbData = async (): Promise<{token1: string, token2: string, assigm
 		defaultShCmd: 'python3 main.py'
 	}).expect(201);
 
-	return {token1, token2, assigmentId: assignment.body.id, groupAssignmentId: groupAssignment.body.id, courseId: course.body.id};
+	return {
+		token1,
+		token2,
+		assigmentId: assignment.body.id,
+		groupAssignmentId: groupAssignment.body.id,
+		courseId: course.body.id
+	};
 }
 
 describe('POST api/student/assignments/:assignmentId/submit', () => {

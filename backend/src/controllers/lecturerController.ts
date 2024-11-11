@@ -29,6 +29,7 @@ export const createAssignment = async (req: Request, res: Response): Promise<voi
         autoTestExecutable: '',
         courseOfferingId: courseOfferingId,
         defaultShCmd: defaultShCmd,
+        // autoTestWeighting: 0.6, // UNCOMMENT FOR FUNCTIONALITY, IMPLEMENTATION NOT COMPLETE YET
         submissions: {
           create: [],
         },
