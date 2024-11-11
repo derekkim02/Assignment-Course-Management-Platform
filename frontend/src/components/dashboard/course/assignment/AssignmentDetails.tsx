@@ -7,6 +7,7 @@ import pako from 'pako';
 import dayjs from 'dayjs';
 import { config } from '../../../../config';
 import Cookies from 'js-cookie';
+import { bannerStyle, footerLineStyle } from '../styles';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -28,6 +29,7 @@ interface Assignment {
 
 const AssignmentDetails: React.FC = () => {
   const { role, enrolmentId, assignmentId } = useParams<{ role: string, enrolmentId: string, assignmentId: string }>();
+
   const token = Cookies.get('token') || '';
 
   // Dummy data for assignment details
@@ -82,34 +84,6 @@ const AssignmentDetails: React.FC = () => {
     }
   };
 
-  // const downloadFile = async () => {
-  //   try {
-  //     const response = await fetch(`${config.backendUrl}/api/student/submissions/464/download`, {
-  //       method: 'GET',
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error('Failed to download file');
-  //     }
-
-  //     const blob = await response.blob();
-  //     const url = window.URL.createObjectURL(blob);
-  //     const a = document.createElement('a');
-  //     a.href = url;
-  //     a.download = 'downloaded_file.tar.gz'; // Set the desired file name
-  //     document.body.appendChild(a);
-  //     a.click();
-  //     a.remove();
-  //     window.URL.revokeObjectURL(url);
-  //   } catch (error) {
-  //     console.error('Error downloading file:', error);
-  //     message.error('Failed to download file.');
-  //   }
-  // };
-
   const createTarGz = (fileList: any[]) => {
     return new Promise<Uint8Array>((resolve, reject) => {
       const tar = new Tar();
@@ -162,29 +136,31 @@ const AssignmentDetails: React.FC = () => {
 
   return (
     <Layout style={{ padding: '20px' }}>
-      <Content style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <Title level={2}>{assignment.title}</Title>
-        <Paragraph>{assignment.description}</Paragraph>
-        <Paragraph>Due Date: {assignment.dueDate}</Paragraph>
-        <Title level={3}>Overall Feedback</Title>
-        <Paragraph>{assignment.feedback}</Paragraph>
-        <Title level={3}>Past Submissions</Title>
-        <Button type="primary" onClick={showModal} style={{ marginBottom: '20px' }}>
-          Add Submission
-        </Button>
-        <List
-          grid={{ gutter: 16, column: 1 }}
-          dataSource={submissions}
-          renderItem={submission => (
-            <List.Item>
-              <Card title={`Submission ${submission.id}`}>
-                <p>Date: {submission.date}</p>
-                <p>Grade: {submission.grade}</p>
-              </Card>
-            </List.Item>
-          )}
-        />
-      </Content>
+      <div style={bannerStyle}>
+        <div style={{ paddingTop: '10px', paddingLeft: '25px' }}>
+          <Title level={1}>{assignment.title}</Title>
+        </div>
+
+        <div style={footerLineStyle}/>
+        <Paragraph style={{ color: '#A3A3A3' }}>{assignment.description}</Paragraph>
+      </div>
+
+      <Title level={3}>Submissions</Title>
+      <Button type="primary" onClick={showModal} style={{ marginBottom: '20px' }}>
+        Add Submission
+      </Button>
+      <List
+        grid={{ gutter: 16, column: 1 }}
+        dataSource={submissions}
+        renderItem={submission => (
+          <List.Item>
+            <Card title={`Submission ${submission.id}`}>
+              <p>Date: {submission.date}</p>
+              <p>Grade: {submission.grade}</p>
+            </Card>
+          </List.Item>
+        )}
+      />
 
       <Modal
         title="Add Submission"
