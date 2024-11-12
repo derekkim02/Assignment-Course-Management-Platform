@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import prisma from '../prismaClient';
 import AutotestService from "../services/autotestService";
 import LatePenaltyService from "../services/latepenaltyService";
+import { Decimal } from '@prisma/client/runtime/library';
 
 export const createAssignment = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -17,7 +18,9 @@ export const createAssignment = async (req: Request, res: Response): Promise<voi
       isGroupAssignment,
       courseOfferingId,
       defaultShCmd,
+      autoTestWeighting,
     } = req.assignmentData;
+
 
     const newAssignment = await prisma.assignment.create({
       data: {
@@ -28,6 +31,7 @@ export const createAssignment = async (req: Request, res: Response): Promise<voi
         autoTestExecutable: '',
         courseOfferingId: courseOfferingId,
         defaultShCmd: defaultShCmd,
+        autoTestWeighting: autoTestWeighting,
         submissions: {
           create: [],
         },
