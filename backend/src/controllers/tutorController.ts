@@ -243,7 +243,8 @@ export const markSubmission = async (req: Request, res: Response): Promise<void>
 				id: submissionId
 			},
 			select: {
-				autoMarkResult: true
+				autoMarkResult: true,
+				latePenalty: true
 			}
 		});
 
@@ -255,6 +256,7 @@ export const markSubmission = async (req: Request, res: Response): Promise<void>
 		const autoMarkWeighting = assignment.autoTestWeighting.toNumber();
 		const autoMarkResult = autoMark.autoMarkResult.toNumber();
 		const styleMarkResult = parseFloat(styleMark);
+		const latePenalty = !autoMark.latePenalty ? 0 : autoMark.latePenalty.toNumber();
 
 		const markedSubmission = await prisma.submission.update({
 			where: {
@@ -263,7 +265,7 @@ export const markSubmission = async (req: Request, res: Response): Promise<void>
 			data: {
 				isMarked: true,
 				styleMarkResult,
-				finalMark: (autoMarkWeighting * autoMarkResult + (1 - autoMarkWeighting) * styleMarkResult),
+				finalMark: (autoMarkWeighting * autoMarkResult + (1 - autoMarkWeighting) * styleMarkResult) - latePenalty,
 				markerComments
 			}
 		});
