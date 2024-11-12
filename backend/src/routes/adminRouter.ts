@@ -11,7 +11,8 @@ import {
 	getEls,
 	getUsers,
 	importCsv,
-	updateCourseOffering
+	updateCourseOffering,
+	updateEls
 } from '../controllers/adminController';
 import { checkIgiveAdmin, verifyToken } from '../middleware/jwt';
 import { uploadCsv } from '../middleware/multer';
@@ -172,5 +173,12 @@ router.get('/els/:elsId', getEls);
  * @returns {string} 200.extraDays - Number of extra days for the ELS
  */
 router.get('/els', getAllEls);
+/**
+ * @route PUT /els/:elsId
+ * @description Update a specific ELS.
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object} 200 - success message
+ */
+router.put('/els/:elsId', updateEls);
 
 export default router;

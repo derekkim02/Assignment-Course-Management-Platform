@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import e, { Request, Response } from 'express';
 import prisma from '../prismaClient';
 import { Trimester } from '@prisma/client';
 import CsvService from '../services/csvService';
@@ -291,5 +291,24 @@ export const getAllEls = async (req: Request, res: Response): Promise<void> => {
     res.status(200).json(els);
   } catch (e) {
     res.status(400).json({ error: `Failed to fetch ELS: ${e}` });
+  }
+}
+
+export const updateEls = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const elsId = parseInt(req.params.elsId);
+    const { name, extraDays } = req.body;
+    await prisma.eLSType.update({
+      where: {
+        id: elsId
+      },
+      data: {
+        name,
+        extraDays
+      }
+    });
+    res.status(200).json({ message: 'ELS updated successfully' });
+  } catch (e) {
+    res.status(400).json({ error: `Failed to update ELS: ${e}` });
   }
 }
