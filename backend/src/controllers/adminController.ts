@@ -1,4 +1,4 @@
-import e, { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import prisma from '../prismaClient';
 import { Trimester } from '@prisma/client';
 import CsvService from '../services/csvService';
@@ -310,5 +310,35 @@ export const updateEls = async (req: Request, res: Response): Promise<void> => {
     res.status(200).json({ message: 'ELS updated successfully' });
   } catch (e) {
     res.status(400).json({ error: `Failed to update ELS: ${e}` });
+  }
+}
+
+export const addUserToEls = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = parseInt(req.params.userId);
+    const { elsId, startDate, endDate } = req.body;
+
+    if (!startDate || !endDate || !elsId) {
+      res.status(400).json({ error: 'Missing required fields' });
+      return;
+    }
+
+    if (startDate > endDate) {
+      res.status(400).json({ error: 'Start date must be before end date' });
+      return;
+    }
+    
+    const elsDuration = await prisma.eLSDuration.create({
+      data: {
+        startDate,
+        endDate,
+        elsTypeId: elsId,
+        studentId: userId
+      }
+    });
+    
+    res.status(200).json(elsDuration);
+  } catch (e) {
+    res.status(400).json({ error: `Failed to add user to ELS: ${e}` });
   }
 }

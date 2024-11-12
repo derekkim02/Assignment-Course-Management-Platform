@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+	addUserToEls,
 	changeAdminRole,
 	createCourse,
 	createEls,
@@ -177,8 +178,26 @@ router.get('/els', getAllEls);
  * @route PUT /els/:elsId
  * @description Update a specific ELS.
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @body {string} body.name - The name of the ELS
+ * @body {string} body.extraDays - The number of extra days for the ELS
  * @returns {object} 200 - success message
  */
 router.put('/els/:elsId', updateEls);
+
+/**
+ * @route POST /users/:userId/els
+ * @description Add a user to an ELS.
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @param {string} userId - The unique identifier of the user
+ * @body {string} body.elsId - The unique identifier of the ELS
+ * @body {string} body.startDate - The start date of the ELS
+ * @body {string} body.endDate - The end date of the ELS
+ * @returns {object} 201 - The elsDuration object
+ * @returns {string} 201.studentId - The unique identifier of the student
+ * @returns {string} 201.elsTypeId - The unique identifier of the ELS
+ * @returns {string} 201.startDate - The start date of the ELS
+ * @returns {string} 201.endDate - The end date of the ELS
+ */
+router.post('/users/:userId/els', addUserToEls);
 
 export default router;
