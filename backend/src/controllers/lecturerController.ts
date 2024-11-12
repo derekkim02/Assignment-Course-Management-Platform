@@ -166,6 +166,46 @@ export const createTest = async (req: Request, res: Response): Promise<void> => 
 	}
 }
 
+export const updateTest = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const testCaseId = parseInt(req.params.testId);
+    const { input, output, isHidden } = req.body;
+
+    // Sanitize and validate inputs
+    if (!input || !output || typeof isHidden !== 'boolean') {
+      throw new Error("Invalid input or outputs");
+    }
+
+    // Update the test case
+    const updatedTestCase = await prisma.testCase.update({
+      where: {
+        id: testCaseId,
+        assignment: {
+          courseOffering: {
+            lecturer: {
+              email: req.userEmail
+            }
+          }
+        }
+      },
+      data: {
+        input: input,
+        expectedOutput: output,
+        isHidden: isHidden,
+      }
+    });
+
+    if (!updatedTestCase) {
+      res.status(404).json({ error: 'Test case not found or you are not the lecturer for this assignment' });
+      return;
+    }
+
+    res.status(201).json(updatedTestCase);
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
+}
+
 export const viewAllSubmissions = async (req: Request, res: Response): Promise<void> => {
   try {
     const assignmentId = parseInt(req.params.assignmentId);

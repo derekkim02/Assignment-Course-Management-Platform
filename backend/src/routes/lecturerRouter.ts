@@ -17,7 +17,8 @@ import {
 	viewLecturedCourseDetails,
 	markAllSubmissions,
 	downloadStudentSubmission,
-	downloadStudentGrade
+	downloadStudentGrade,
+	updateTest
 } from '../controllers/lecturerController';
 
 const router = express.Router();
@@ -152,6 +153,23 @@ router.get('/assignments/:assignmentId/view', viewAssignment);
  * @returns {number} 201.assignmentId - Unique identifier of the assignment.
  */
 router.post('/assignments/:assignmentId/testcases', validateLecturerPermissions, createTest);
+
+/**
+ * @route PUT /testcases/:testId
+ * @description Update a test case for a specific assignment.
+ * @param {string} testId - Unique identifier of the test case.
+ * @body {string} input - The input for the test case.
+ * @body {string} output - The expected output for the test case.
+ * @body {boolean} [isHidden] - Optional flag indicating if the test case is hidden.
+ * @header {string} Authorization - Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object} 200 - The updated test case.
+ * @returns {number} 200.id - Unique identifier of the test case.
+ * @returns {string} 200.input - The input for the test case.
+ * @returns {string} 200.expectedOutput - The expected output for the test case.
+ * @returns {boolean} 200.isHidden - Whether the test case is hidden.
+ * @returns {number} 200.assignmentId - Unique identifier of the assignment.
+ */
+router.put('/testcases/:testId', updateTest);
 
 /**
  * @route GET /assignments/:assignmentId/submissions
