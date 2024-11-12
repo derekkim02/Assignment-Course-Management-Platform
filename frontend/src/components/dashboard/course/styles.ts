@@ -12,6 +12,7 @@ const bannerStyle = {
 const listContainerStyle = {
   display: 'flex',
   justifyContent: 'center',
+  marginBottom: '20px',
 };
 
 const footerLineStyle: CSSProperties = {
