@@ -62,6 +62,12 @@ export const viewMarks = async (req: Request, res: Response): Promise<void> => {
 export const viewAssignment = async (req: Request, res: Response): Promise<void> => {
 	const { assignmentId } = req.params;
 
+	const user = await prisma.user.findUnique({
+		where: {
+			email: req.userEmail
+		}
+	})
+
 	try {
 		const assignment = await prisma.assignment.findUnique({
 			where: {
@@ -75,7 +81,12 @@ export const viewAssignment = async (req: Request, res: Response): Promise<void>
 				},
 			},
 			include: {
-				submissions: true,
+				submissions: {
+					where: {
+						studentId: user?.zid,
+					}
+				}
+
 			}
 		});
 

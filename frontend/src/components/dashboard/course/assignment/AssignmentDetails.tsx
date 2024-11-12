@@ -45,7 +45,7 @@ const AssignmentDetails: React.FC = () => {
       if (fileList && fileList.length > 0) {
         const tarball = await createTarGz(fileList);
         await sendTarballToBackend(tarball);
-        setIsModalVisible(false);
+        // setIsModalVisible(false);
         form.resetFields();
         refetchAssignment();
         message.success('Submission uploaded successfully!');
@@ -176,36 +176,37 @@ const AssignmentDetails: React.FC = () => {
           Add Submission
         </Button>
       )}
-
       <div style={listContainerStyle}>
         <div style={{ minWidth: '80%', maxWidth: '90%', border: '1px solid #d9d9d9', padding: '30px', borderRadius: '10px' }}>
-          <List
-            className="demo-loadmore-list"
-            loading={isAssignmentLoading}
-            itemLayout="horizontal"
-            dataSource={assignment.submissions}
-            renderItem={(submission: Submission, index: number) => (
-              <List.Item style={{ width: '100%' }}
-                actions={[
-                  <a key="list-loadmore-download" onClick={() => downloadSubmission(submission.id)}>download</a>
-                ]}
-              >
-                <Skeleton loading={isAssignmentLoading} active>
-                  <List.Item.Meta
-                  style={{ textAlign: 'left' }}
-                    title={`Submission ${assignment.submissions.length - index}`} // Increment the title by 1
-                    description={`Submitted on: ${format(new Date(submission.submissionTime), 'HH:mm dd/MM/yyyy')}`}
-                  />
-                </Skeleton>
-              </List.Item>
-            )}
-          />
+          {role === 'student' && (
+            <List
+              className="demo-loadmore-list"
+              loading={isAssignmentLoading}
+              itemLayout="horizontal"
+              dataSource={assignment.submissions}
+              renderItem={(submission: Submission, index: number) => (
+                <List.Item style={{ width: '100%' }}
+                  actions={[
+                    <a key="list-loadmore-download" onClick={() => downloadSubmission(submission.id)}>download</a>
+                  ]}
+                >
+                  <Skeleton loading={isAssignmentLoading} active>
+                    <List.Item.Meta
+                    style={{ textAlign: 'left' }}
+                      title={`Submission ${assignment.submissions.length - index}`} // Increment the title by 1
+                      description={`Submitted on: ${format(new Date(submission.submissionTime), 'HH:mm dd/MM/yyyy')}`}
+                    />
+                  </Skeleton>
+                </List.Item>
+              )}
+            />
+          )}
         </div>
       </div>
 
       <Modal
         title="Add Submission"
-        visible={isModalVisible}
+        open={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
         okText="Submit"
