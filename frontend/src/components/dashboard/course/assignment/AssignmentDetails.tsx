@@ -1,51 +1,30 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Layout, Typography, List, Card, Button, Modal, Form, Upload, message } from 'antd';
+import { Layout, Typography, List, Button, Modal, Form, Upload, message, Spin, Skeleton } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import Tar from 'tar-js';
 import pako from 'pako';
 import dayjs from 'dayjs';
 import { config } from '../../../../config';
 import Cookies from 'js-cookie';
-import { bannerStyle, footerLineStyle } from '../styles';
+import { bannerStyle, footerLineStyle, listContainerStyle } from '../styles';
+import { useAssignment } from '../../../../queries';
+import { format } from 'date-fns';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
 
 interface Submission {
   id: number;
-  date: string;
-  grade: string;
-}
-
-interface Assignment {
-  id: number;
-  title: string;
-  description: string;
-  dueDate: string;
-  feedback: string;
-  submissions: Submission[];
+  submissionTime: string;
 }
 
 const AssignmentDetails: React.FC = () => {
-  const { role, enrolmentId, assignmentId } = useParams<{ role: string, enrolmentId: string, assignmentId: string }>();
+  const { role, assignmentId } = useParams<{ role: string, enrolmentId: string, assignmentId: string }>();
+  const { data: assignment, isLoading: isAssignmentLoading, error, refetch: refetchAssignment } = useAssignment(role || '', assignmentId || '');
 
   const token = Cookies.get('token') || '';
 
-  // Dummy data for assignment details
-  const assignment: Assignment = {
-    id: Number(assignmentId),
-    title: `Assignment ${assignmentId}`,
-    description: `This is the detailed description for Assignment ${assignmentId}.`,
-    dueDate: '2023-10-01',
-    feedback: 'Overall great job on this assignment!',
-    submissions: [
-      { id: 1, date: '2023-09-15', grade: 'A' },
-      { id: 2, date: '2023-09-20', grade: 'B+' },
-    ],
-  };
-
-  const [submissions, setSubmissions] = useState<Submission[]>(assignment.submissions);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [form] = Form.useForm();
 
@@ -66,14 +45,9 @@ const AssignmentDetails: React.FC = () => {
       if (fileList && fileList.length > 0) {
         const tarball = await createTarGz(fileList);
         await sendTarballToBackend(tarball);
-        const newSubmission: Submission = {
-          id: submissions.length + 1,
-          date: dayjs().format('YYYY-MM-DD'),
-          grade: 'Pending'
-        };
-        setSubmissions([...submissions, newSubmission]);
         setIsModalVisible(false);
         form.resetFields();
+        refetchAssignment();
         message.success('Submission uploaded successfully!');
       } else {
         message.error('Please upload at least one file.');
@@ -134,33 +108,100 @@ const AssignmentDetails: React.FC = () => {
     }
   };
 
+  const downloadSubmission = async (submissionId: number) => {
+    try {
+      const response = await fetch(`${config.backendUrl}/api/${role}/submissions/${submissionId}/download`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download file');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `submission_${submissionId}.tar.gz`; // Set the desired file name
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      message.error('Failed to download file.');
+    }
+  };
+
+  if (isAssignmentLoading) {
+    return (
+      <Layout style={{ padding: '20px' }}>
+        <Content style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+          <Spin size="large" />
+        </Content>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout style={{ padding: '20px' }}>
+        <Content style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+          <Title level={2}>Error</Title>
+          <Paragraph>There was an error loading the course details. Please try again later.</Paragraph>
+        </Content>
+      </Layout>
+    );
+  }
+
   return (
     <Layout style={{ padding: '20px' }}>
       <div style={bannerStyle}>
         <div style={{ paddingTop: '10px', paddingLeft: '25px' }}>
-          <Title level={1}>{assignment.title}</Title>
+          <Title level={1}>{assignment.assignmentName}</Title>
         </div>
 
         <div style={footerLineStyle}/>
         <Paragraph style={{ color: '#A3A3A3' }}>{assignment.description}</Paragraph>
+        <div style={footerLineStyle}/>
+        <Paragraph style={{ color: '#A3A3A3' }}>Due Date: {dayjs(assignment.dueDate).format('YYYY-MM-DD HH:mm')}</Paragraph>
       </div>
 
       <Title level={3}>Submissions</Title>
-      <Button type="primary" onClick={showModal} style={{ marginBottom: '20px' }}>
-        Add Submission
-      </Button>
-      <List
-        grid={{ gutter: 16, column: 1 }}
-        dataSource={submissions}
-        renderItem={submission => (
-          <List.Item>
-            <Card title={`Submission ${submission.id}`}>
-              <p>Date: {submission.date}</p>
-              <p>Grade: {submission.grade}</p>
-            </Card>
-          </List.Item>
-        )}
-      />
+      {role === 'student' && (
+        <Button type="primary" onClick={showModal} style={{ marginBottom: '20px', width: '120px', alignSelf: 'center' }}>
+          Add Submission
+        </Button>
+      )}
+
+      <div style={listContainerStyle}>
+        <div style={{ minWidth: '80%', maxWidth: '90%', border: '1px solid #d9d9d9', padding: '30px', borderRadius: '10px' }}>
+          <List
+            className="demo-loadmore-list"
+            loading={isAssignmentLoading}
+            itemLayout="horizontal"
+            dataSource={assignment.submissions}
+            renderItem={(submission: Submission, index: number) => (
+              <List.Item style={{ width: '100%' }}
+                actions={[
+                  <a key="list-loadmore-download" onClick={() => downloadSubmission(submission.id)}>download</a>
+                ]}
+              >
+                <Skeleton loading={isAssignmentLoading} active>
+                  <List.Item.Meta
+                  style={{ textAlign: 'left' }}
+                    title={`Submission ${assignment.submissions.length - index}`} // Increment the title by 1
+                    description={`Submitted on: ${format(new Date(submission.submissionTime), 'HH:mm dd/MM/yyyy')}`}
+                  />
+                </Skeleton>
+              </List.Item>
+            )}
+          />
+        </div>
+      </div>
 
       <Modal
         title="Add Submission"

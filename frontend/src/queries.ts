@@ -75,6 +75,6 @@ export const useEnrollment = (role: string, enrolmentId: string) => {
 export const useAssignment = (role: string, assignmentId: string) => {
   return useQuery({
     queryKey: ['assignment', assignmentId],
-    queryFn: () => fetchWithAuth(`api/${role}/assignment/${assignmentId}`, {})
+    queryFn: () => fetchWithAuth(`api/${role}/assignments/${assignmentId}/view`, {})
   });
 };
