@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import prisma from '../prismaClient';
 import AutotestService from "../services/autotestService";
 import LatePenaltyService from "../services/latepenaltyService";
-import { Decimal } from '@prisma/client/runtime/library';
 
 export const createAssignment = async (req: Request, res: Response): Promise<void> => {
   try {

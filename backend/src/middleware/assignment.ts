@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../prismaClient';
 import { isValid, parseISO } from 'date-fns';
-import { Decimal } from '@prisma/client/runtime/library';
 
 export const validateAssignmentData = async (
   req: Request,
@@ -30,7 +29,8 @@ export const validateAssignmentData = async (
       !description ||
       !dueDate ||
       !courseId ||
-      !defaultShCmd
+      !defaultShCmd ||
+      !autoTestWeighting
     ) {
       res.status(400).json({ error: 'Missing required fields' });
       return;
@@ -89,23 +89,10 @@ export const validateAssignmentData = async (
       }
     }
 
-    // Convert the string to Decimal
-    let parsedAutoTestWeighting: Decimal;
-    try {
-      parsedAutoTestWeighting = new Decimal(autoTestWeighting);
-    } catch (error) {
-      res.status(400).json({ error: 'autoTestWeighting must be a valid decimal number' });
-      return;
-    }
-
-    // Validate the range (0 to 1)
-    if (
-      parsedAutoTestWeighting.lessThan(0) ||
-      parsedAutoTestWeighting.greaterThan(1)
-    ) {
-      res.status(400).json({
-        error: 'autoTestWeighting must be a decimal between 0 and 1',
-      });
+    const parsedAutoTestWeighting = parseFloat(autoTestWeighting);
+  
+    if ( parsedAutoTestWeighting < 0 || parsedAutoTestWeighting > 1) {
+      res.status(400).json({ error: 'autoTestWeighting must be a decimal between 0 and 1' });
       return;
     }
 

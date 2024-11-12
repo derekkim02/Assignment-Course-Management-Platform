@@ -30,6 +30,6 @@ interface assignmentData {
 		isGroupAssignment: boolean;
 		courseOfferingId: number;
 		defaultShCmd: string;
-		autoTestWeighting: Decimal;
+		autoTestWeighting: number;
 		assignmentId?: number; // Include assignmentId when updating
 	};
