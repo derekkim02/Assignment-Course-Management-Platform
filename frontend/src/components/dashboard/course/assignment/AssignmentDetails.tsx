@@ -8,8 +8,8 @@ import { format } from 'date-fns';
 import UploadSubmissionModal from './UploadSubmissionModal';
 import { config } from '../../../../config';
 import Cookies from 'js-cookie';
-import EditAssignmentModal from './EditAssignmentModal';
 import AutotestModal from './AutotestModal';
+import AssignmentModal from '../AssignmentModal';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -209,12 +209,12 @@ const AssignmentDetails: React.FC = () => {
         </>
       )}
 
-      <EditAssignmentModal
+      <AssignmentModal
         isModalVisible={openModal === 'edit'}
         enrolmentId={enrolmentId || ''}
         closeModal={() => setOpenModal('')}
         assignment={{ ...assignment, id: assignmentId }}
-        refetchAssignment={refetchAssignment}
+        refetch={refetchAssignment}
       />
 
       <UploadSubmissionModal

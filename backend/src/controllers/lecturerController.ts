@@ -114,6 +114,7 @@ export const viewAssignment = async (req: Request, res: Response): Promise<void>
 			isGroupAssignment: assignment.isGroupAssignment,
       defaultShCmd: assignment.defaultShCmd,
       autoTestExecutable: assignment.autoTestExecutable,
+      autoTestWeighting: assignment.autoTestWeighting,
       testCases: assignment.testCases,
 			submissions: assignment.submissions,
       autoTestWeighting: assignment.autoTestWeighting,
