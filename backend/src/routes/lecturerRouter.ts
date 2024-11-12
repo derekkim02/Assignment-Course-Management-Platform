@@ -16,7 +16,8 @@ import {
 	viewLecturedCourses,
 	viewLecturedCourseDetails,
 	markAllSubmissions,
-	downloadStudentSubmission
+	downloadStudentSubmission,
+	downloadStudentGrade
 } from '../controllers/lecturerController';
 
 const router = express.Router();
@@ -223,5 +224,14 @@ router.get('/submissions/:submissionId/download', downloadStudentSubmission);
  * @returns {string} 201.message - Success message
  */
 router.post('/course-offerings/:courseOfferingId/upload-student-csv', uploadCsv, importCsv);
+
+/**
+ * @route GET /assignments/:assignmentId/grades
+ * @description Download the grades for a specific assignment.
+ * @param {string} assignmentId - Unique identifier of the assignment.
+ * @header {string} Authorization - Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {file} 200 - The grades file attachment.
+ */
+router.get('/assignments/:assignmentId/grades', downloadStudentGrade);
 
 export default router;
