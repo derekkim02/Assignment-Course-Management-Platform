@@ -18,7 +18,9 @@ export const createAssignment = async (req: Request, res: Response): Promise<voi
       isGroupAssignment,
       courseOfferingId,
       defaultShCmd,
+      autoTestWeighting,
     } = req.assignmentData;
+
 
     const newAssignment = await prisma.assignment.create({
       data: {
@@ -29,6 +31,7 @@ export const createAssignment = async (req: Request, res: Response): Promise<voi
         autoTestExecutable: '',
         courseOfferingId: courseOfferingId,
         defaultShCmd: defaultShCmd,
+        autoTestWeighting: autoTestWeighting,
         submissions: {
           create: [],
         },
