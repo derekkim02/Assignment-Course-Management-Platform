@@ -296,3 +296,52 @@ export const downloadSubmission = async (req: Request, res: Response): Promise<v
 		res.status(500).json({ error: 'Failed to download submission' });
 	}
 }
+
+export const viewAssignments = async (req: Request, res: Response): Promise<void> => {
+	try {
+		const data = await prisma.user.findUnique({
+			where: {
+				email: req.userEmail
+			},
+			include: {
+				coursesEnrolled: {
+					include: {
+						assignments: true,
+					}
+				},
+				submissions: true,
+				groups: {
+					include: {
+						submissions: true,
+					}
+				}
+			}
+		})
+
+		if (!data) {
+			res.status(404).json({ error: 'User\'s data does not exist' });
+			return;
+		}
+
+		const response = data.coursesEnrolled.flatMap(enrolment => 
+			enrolment.assignments.map(assignment => {
+				const madeSubmission = data.submissions.some(submission => submission.assignmentId === assignment.id);
+				const groupSubmission = data.groups
+					.flatMap(group => group.submissions)
+					.some(submission => submission.assignmentId === assignment.id);
+
+				return {
+					assignmentId: assignment.id,
+					assignmentName: assignment.name,
+					dueDate: assignment.dueDate,
+					isGroupAssignment: assignment.isGroupAssignment,
+					isSubmitted: madeSubmission || groupSubmission,
+				}
+			}
+		));
+
+		res.status(200).json(response);
+	} catch (e) {
+		res.status(500).json({ error: (e as Error).message });
+	}
+}
