@@ -284,3 +284,12 @@ export const getEls = async (req: Request, res: Response): Promise<void> => {
     res.status(400).json({ error: `Failed to fetch ELS: ${e}` });
   }
 }
+
+export const getAllEls = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const els = await prisma.eLSType.findMany();
+    res.status(200).json(els);
+  } catch (e) {
+    res.status(400).json({ error: `Failed to fetch ELS: ${e}` });
+  }
+}
