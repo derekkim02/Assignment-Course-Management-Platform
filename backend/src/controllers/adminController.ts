@@ -255,3 +255,18 @@ export const importCsv = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ error: `Failed to import CSV (${e})` });
   }
 }
+
+export const createEls = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { name, extraDays } = req.body;
+    const els = await prisma.eLSType.create({
+      data: {
+        name,
+        extraDays
+      }
+    });
+    res.status(201).json(els);
+  } catch (e) {
+    res.status(400).json({ error: `Failed to create ELS: ${e}` });
+  }
+}

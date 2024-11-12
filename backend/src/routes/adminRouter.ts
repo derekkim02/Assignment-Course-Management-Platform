@@ -2,6 +2,7 @@ import express from 'express';
 import {
 	changeAdminRole,
 	createCourse,
+	createEls,
 	createEnrollment,
 	getCourseOffering,
 	getCourseOfferings,
@@ -133,5 +134,18 @@ router.put('/course-offerings/:courseOfferingId', updateCourseOffering);
  * @returns {string} 201.message - Success message
  */
 router.post('/course-offerings/:courseOfferingId/import-csv', uploadCsv, importCsv);
+
+/**
+ * @route POST /els
+ * @description Create a new ELS.
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @body {string} body.name - The name of the ELS
+ * @body {string} body.extraDays - The number of extra days for the ELS
+ * @returns {object} 201 - The newly created ELS
+ * @returns {string} 201.id - The unique identifier of the ELS
+ * @returns {string} 201.name - The name of the ELS
+ * @returns {string} 201.extraDays - The number of extra days for the ELS
+ */
+router.post('/els', createEls)
 
 export default router;
