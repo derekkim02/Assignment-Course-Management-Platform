@@ -101,7 +101,18 @@ export const viewAssignment = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    res.status(200).json(assignment);
+    res.status(200).json({
+			assignmentName: assignment.name,
+			description: assignment.description,
+			dueDate: assignment.dueDate,
+			isGroupAssignment: assignment.isGroupAssignment,
+      defaultShCmd: assignment.defaultShCmd,
+      autoTestExecutable: assignment.autoTestExecutable,
+      testCases: assignment.testCases,
+			submissions: assignment.submissions
+		});
+
+
   } catch {
     res.status(500).json({ error: 'Internal server error' });
   }
