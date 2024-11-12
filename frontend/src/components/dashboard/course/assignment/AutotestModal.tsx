@@ -15,7 +15,7 @@ interface AutotestModalProps {
 const AutotestModal: React.FC<AutotestModalProps> = ({ isModalVisible, assignmentId, testCaseId, testCases, closeModal, refetchAssignment }) => {
   const [form] = Form.useForm();
 
-  const testCase = testCases.find((testCase) => testCase.id === parseInt(testCaseId));
+  const testCase = testCases ? testCases.find((testCase) => testCase.id === parseInt(testCaseId)) : null;
 
   useEffect(() => {
     if (testCase) {

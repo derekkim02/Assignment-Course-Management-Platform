@@ -25,15 +25,13 @@ const CourseDetails: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [form] = Form.useForm();
 
+  console.log(enrollment);
+
   const showModal = () => setIsModalVisible(true);
   const handleCancel = () => {
     setIsModalVisible(false);
     form.resetFields();
   };
-
-  useEffect(() => {
-    refetchCourse();
-  }, [enrollment, refetchCourse]);
 
   const handleOk = () => {
     form.validateFields().then(values => {
@@ -51,8 +49,10 @@ const CourseDetails: React.FC = () => {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(payload)
+      }).then(() => {
+        refetchCourse();
+        form.resetFields();
       });
-      refetchCourse();
       setIsModalVisible(false);
     }).catch(() => {
       // Do nothing on validation error

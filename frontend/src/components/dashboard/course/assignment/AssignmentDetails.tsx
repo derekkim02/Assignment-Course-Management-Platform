@@ -173,6 +173,7 @@ const AssignmentDetails: React.FC = () => {
                             <div>
                               <div><strong>Input:</strong> {testCase.input}</div>
                               <div><strong>Expected Output:</strong> {testCase.expectedOutput}</div>
+                              <div><strong>Hidden:</strong> {testCase.isHidden ? 'Yes' : 'No'}</div>
                             </div>
                           }
                         />

@@ -27,6 +27,7 @@ export const createAssignment = async (req: Request, res: Response): Promise<voi
         dueDate: dueDate,
         isGroupAssignment: isGroupAssignment,
         autoTestExecutable: '',
+        autoTestWeighting: 0.8, // Default value for now.
         courseOfferingId: courseOfferingId,
         defaultShCmd: defaultShCmd,
         submissions: {

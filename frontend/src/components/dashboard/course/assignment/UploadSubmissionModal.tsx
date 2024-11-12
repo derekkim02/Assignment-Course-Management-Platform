@@ -1,10 +1,12 @@
 import React from 'react';
-import { Modal, Form, Upload, message } from 'antd';
+import { Modal, Form, Upload, message, Collapse } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import Tar from 'tar-js';
 import { config } from '../../../../config';
 import pako from 'pako';
 import Cookies from 'js-cookie';
+
+const { Panel } = Collapse;
 
 interface UploadSubmissionModalProps {
   assignmentId: string;
@@ -16,6 +18,8 @@ interface UploadSubmissionModalProps {
 const UploadSubmissionModal: React.FC<UploadSubmissionModalProps> = ({ assignmentId, isModalVisible, closeModal, refetchAssignment }) => {
   const [form] = Form.useForm();
 
+  const [results, setResults] = React.useState([]);
+
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
@@ -23,10 +27,12 @@ const UploadSubmissionModal: React.FC<UploadSubmissionModalProps> = ({ assignmen
 
       if (fileList && fileList.length > 0) {
         const tarball = await createTarGz(fileList);
-        await sendTarballToBackend(tarball);
+        const testCases = await sendTarballToBackend(tarball);
         form.resetFields();
         refetchAssignment();
-        closeModal();
+
+        console.log(testCases.results);
+        setResults(testCases.results);
         message.success('Submission uploaded successfully!');
       } else {
         message.error('Please upload at least one file.');
@@ -81,11 +87,17 @@ const UploadSubmissionModal: React.FC<UploadSubmissionModalProps> = ({ assignmen
         throw new Error('Failed to upload tarball');
       }
       const result = await response.json();
-      console.log('Upload successful:', result);
+      return result;
     } catch (error) {
       console.error('Error uploading tarball:', error);
       throw error;
     }
+  };
+
+  const closeModalWrapper = () => {
+    form.resetFields();
+    setResults([]);
+    closeModal();
   };
 
   return (
@@ -93,7 +105,7 @@ const UploadSubmissionModal: React.FC<UploadSubmissionModalProps> = ({ assignmen
       title="Add Submission"
       open={isModalVisible}
       onOk={handleOk}
-      onCancel={closeModal}
+      onCancel={closeModalWrapper}
       okText="Submit"
       cancelText="Cancel"
     >
@@ -114,6 +126,23 @@ const UploadSubmissionModal: React.FC<UploadSubmissionModalProps> = ({ assignmen
           </Upload.Dragger>
         </Form.Item>
       </Form>
+
+      {results.length > 0 && (
+        <div>
+          <h3>Submission Results</h3>
+          <Collapse>
+          {results.map((result: any, index) => (
+            <Panel
+              header={<span style={{ color: result.passed ? 'green' : 'red' }}>{`Test Case ${index + 1}`}</span>}
+              key={index}
+            >
+              <p>Output: {result.message}</p>
+            </Panel>
+          ))}
+        </Collapse>
+
+        </div>
+      )}
     </Modal>
   );
 };
