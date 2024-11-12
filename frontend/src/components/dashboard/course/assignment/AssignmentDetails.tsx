@@ -149,37 +149,41 @@ const AssignmentDetails: React.FC = () => {
         </div>
       </div>
 
-      <Title level={3}>Test Cases</Title>
-      <div style={listContainerStyle}>
-        <div style={{ minWidth: '80%', maxWidth: '90%', border: '1px solid #d9d9d9', padding: '30px', borderRadius: '10px' }}>
-            <List
-              className="demo-loadmore-list"
-              loading={isAssignmentLoading}
-              itemLayout="horizontal"
-              dataSource={assignment.testCases}
-              renderItem={(testCase: TestCase, index: number) => (
-                <List.Item style={{ width: '100%' }}
-                actions={[
-                  <a key="list-loadmore-download" onClick={() => handleEditTestCase(testCase.id)}>edit</a>
-                ]}
-                >
-                  <Skeleton loading={isAssignmentLoading} active>
-                    <List.Item.Meta
-                      style={{ textAlign: 'left' }}
-                      title={`${index + 1}`} // Increment the title by 1
-                      description={
-                        <div>
-                          <div><strong>Input:</strong> {testCase.input}</div>
-                          <div><strong>Expected Output:</strong> {testCase.expectedOutput}</div>
-                        </div>
-                      }
-                    />
-                  </Skeleton>
-                </List.Item>
-              )}
-            />
-        </div>
-      </div>
+      {role === 'lecturer' && (
+        <>
+         <Title level={3}>Test Cases</Title>
+          <div style={listContainerStyle}>
+            <div style={{ minWidth: '80%', maxWidth: '90%', border: '1px solid #d9d9d9', padding: '30px', borderRadius: '10px' }}>
+                <List
+                  className="demo-loadmore-list"
+                  loading={isAssignmentLoading}
+                  itemLayout="horizontal"
+                  dataSource={assignment.testCases}
+                  renderItem={(testCase: TestCase, index: number) => (
+                    <List.Item style={{ width: '100%' }}
+                    actions={[
+                      <a key="list-loadmore-download" onClick={() => handleEditTestCase(testCase.id)}>edit</a>
+                    ]}
+                    >
+                      <Skeleton loading={isAssignmentLoading} active>
+                        <List.Item.Meta
+                          style={{ textAlign: 'left' }}
+                          title={`${index + 1}`} // Increment the title by 1
+                          description={
+                            <div>
+                              <div><strong>Input:</strong> {testCase.input}</div>
+                              <div><strong>Expected Output:</strong> {testCase.expectedOutput}</div>
+                            </div>
+                          }
+                        />
+                      </Skeleton>
+                    </List.Item>
+                  )}
+                />
+            </div>
+          </div>
+        </>
+      )}
 
       <EditAssignmentModal
         isModalVisible={openModal === 'edit'}
