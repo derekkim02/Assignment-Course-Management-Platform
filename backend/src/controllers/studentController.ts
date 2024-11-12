@@ -56,11 +56,138 @@ const handleAssignmentSubmission = async (req: Request, res: Response, isGroupAs
 }
 
 export const viewMarks = async (req: Request, res: Response): Promise<void> => {
-	res.json({ assignment: { title: 'Assignment 1' } });
+	try {
+		const data = await prisma.user.findUnique({
+			where: {
+				email: req.userEmail
+			},
+			include: {
+				submissions: {
+					include: {
+						assignment: true,
+					}
+				},
+				groups: {
+					include: {
+						submissions: {
+							include: {
+								assignment: true,
+							}
+						}
+					}
+				},
+				coursesEnrolled: {
+					include: {
+						course: true,
+						term: true,
+						assignments: true,
+					}
+				}
+			}
+		});
+		if (!data) {
+			res.status(404).json({ error: 'User\'s data does not exist' });
+			return;
+		}
+
+		const assignments = data.coursesEnrolled.flatMap(enrolment => 
+			enrolment.assignments.map(assignment => ({
+				id: assignment.id,
+				name: assignment.name,
+				isGroupAssignment: assignment.isGroupAssignment,
+				term: enrolment.term.term,
+				year: enrolment.term.year,
+			}))
+		);
+
+		const marks = assignments.map(assignment => {
+			const submission = () => {
+				try {
+					return data.submissions
+						.filter(submission => submission.assignmentId === assignment.id)
+						.reduce((prev, current) => (prev.submissionTime > current.submissionTime) ? prev : current);
+				} catch {
+					return null;
+				}
+			}
+			const groupSubmission = () => {
+				try {
+					return data.groups
+						.flatMap(group => group.submissions)
+						.filter(submission => submission.assignmentId === assignment.id)
+						.reduce((prev, current) => (prev.submissionTime > current.submissionTime) ? prev : current);
+				} catch {
+					return null;
+				}
+			}
+
+			const latestSubmission = assignment.isGroupAssignment ? groupSubmission() : submission();
+
+			return {
+				assignmentId: assignment.id,
+				assignmentName: assignment.name,
+				term: assignment.term,
+				year: assignment.year,
+				isMarked: latestSubmission ? latestSubmission.isMarked : null,
+				autoMark: latestSubmission ? latestSubmission.autoMarkResult : null,
+				styleMark:  latestSubmission ? latestSubmission.styleMarkResult : null,
+				latePenalty: latestSubmission ? latestSubmission.latePenalty : null,
+				finalMark: latestSubmission ? latestSubmission.finalMark: null,
+			}
+		});
+
+		res.status(200).json(marks);
+	} catch {
+		res.status(500).json({ error: 'Failed to fetch marks' });
+	}
 }
 
 export const viewAssignment = async (req: Request, res: Response): Promise<void> => {
-	res.json({ assignments: [{ title: 'Assignment 1' }] });
+	const { assignmentId } = req.params;
+
+	const user = await prisma.user.findUnique({
+		where: {
+			email: req.userEmail
+		}
+	})
+
+	try {
+		const assignment = await prisma.assignment.findUnique({
+			where: {
+				id: parseInt(assignmentId),
+				courseOffering: {
+					enrolledStudents: {
+						some: {
+							email: req.userEmail,
+						}
+					}
+				},
+			},
+			include: {
+				submissions: {
+					where: {
+						studentId: user?.zid,
+					}
+				}
+
+			}
+		});
+
+		if (!assignment) {
+			res.status(404).json({ error: 'Assignment not found or you are not enrolled in the course.' });
+			return;
+		}
+
+		res.status(200).json({
+			assignmentName: assignment.name,
+			description: assignment.description,
+			dueDate: assignment.dueDate,
+			isGroupAssignment: assignment.isGroupAssignment,
+			submissions: assignment.submissions
+		});
+	} catch {
+		res.status(500).json({ error: 'Failed to fetch assignment' });
+	}
 }
 
 export const viewCourseEnrollments = async (req: Request, res: Response): Promise<void> => {
@@ -167,5 +294,54 @@ export const downloadSubmission = async (req: Request, res: Response): Promise<v
 		res.status(200).download(submission.filePath);
 	} catch {
 		res.status(500).json({ error: 'Failed to download submission' });
+	}
+}
+
+export const viewAssignments = async (req: Request, res: Response): Promise<void> => {
+	try {
+		const data = await prisma.user.findUnique({
+			where: {
+				email: req.userEmail
+			},
+			include: {
+				coursesEnrolled: {
+					include: {
+						assignments: true,
+					}
+				},
+				submissions: true,
+				groups: {
+					include: {
+						submissions: true,
+					}
+				}
+			}
+		})
+
+		if (!data) {
+			res.status(404).json({ error: 'User\'s data does not exist' });
+			return;
+		}
+
+		const response = data.coursesEnrolled.flatMap(enrolment => 
+			enrolment.assignments.map(assignment => {
+				const madeSubmission = data.submissions.some(submission => submission.assignmentId === assignment.id);
+				const groupSubmission = data.groups
+					.flatMap(group => group.submissions)
+					.some(submission => submission.assignmentId === assignment.id);
+
+				return {
+					assignmentId: assignment.id,
+					assignmentName: assignment.name,
+					dueDate: assignment.dueDate,
+					isGroupAssignment: assignment.isGroupAssignment,
+					isSubmitted: madeSubmission || groupSubmission,
+				}
+			}
+		));
+
+		res.status(200).json(response);
+	} catch (e) {
+		res.status(500).json({ error: (e as Error).message });
 	}
 }

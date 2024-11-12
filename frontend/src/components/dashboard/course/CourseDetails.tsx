@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Layout, Typography, List, Button, Modal, Form, Input, DatePicker, Spin, Checkbox, Empty } from 'antd';
+import React, { useState } from 'react';
+import { Layout, Typography, List, Button, Spin, Empty } from 'antd';
 import { Link, useParams } from 'react-router-dom';
 import { useEnrollment } from '../../../queries';
 import { format } from 'date-fns';
-import { config } from '../../../config';
-import Cookies from 'js-cookie';
-import { CSSProperties } from 'styled-components';
+import { bannerStyle, footerLineStyle, listContainerStyle } from './styles';
+import AssignmentModal from './AssignmentModal';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -19,45 +18,11 @@ interface Assignment {
 
 const CourseDetails: React.FC = () => {
   const { role, enrolmentId } = useParams<{ role: string, enrolmentId: string }>();
-  const token = Cookies.get('token') || '';
 
   const { data: enrollment, isLoading: isLoadingCourses, error, refetch: refetchCourse } = useEnrollment(role || '', enrolmentId || '');
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [form] = Form.useForm();
 
   const showModal = () => setIsModalVisible(true);
-  const handleCancel = () => {
-    setIsModalVisible(false);
-    form.resetFields();
-  };
-
-  useEffect(() => {
-    refetchCourse();
-  }, [enrollment, refetchCourse]);
-
-  const handleOk = () => {
-    form.validateFields().then(values => {
-      const payload = {
-        assignmentName: values.title,
-        description: values.description,
-        dueDate: values.dueDate,
-        isGroupAssignment: values.isGroupAssignment,
-        defaultShCmd: values.defaultShCmd
-      };
-      fetch(`${config.backendUrl}/api/lecturer/courses/${enrolmentId}/assignments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-      refetchCourse();
-      setIsModalVisible(false);
-    }).catch(() => {
-      // Do nothing on validation error
-    });
-  };
 
   if (isLoadingCourses) {
     return (
@@ -79,27 +44,6 @@ const CourseDetails: React.FC = () => {
       </Layout>
     );
   }
-
-  const bannerStyle = {
-    backgroundColor: '#f0f2f5',
-    border: '1px solid #d9d9d9',
-    borderRadius: '8px',
-    marginBottom: '20px',
-    width: '90%',
-    alignSelf: 'center',
-  };
-
-  const listContainerStyle = {
-    display: 'flex',
-    justifyContent: 'center',
-  };
-
-  const footerLineStyle: CSSProperties = {
-    borderTop: '1px solid #d9d9d9',
-    marginTop: '20px',
-    paddingTop: '10px',
-    textAlign: 'center',
-  };
 
   return (
     <Layout style={{ padding: '20px' }}>
@@ -153,53 +97,12 @@ const CourseDetails: React.FC = () => {
           />
         </div>
       </div>
-      <Modal
-        title="Create Assignment"
-        open={isModalVisible}
-        onOk={handleOk}
-        onCancel={handleCancel}
-        okText="Create"
-        cancelText="Cancel"
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="title"
-            label="Assignment Title"
-            rules={[{ required: true, message: 'Please enter the assignment title' }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="description"
-            label="Assignment Description"
-            rules={[{ required: true, message: 'Please enter the assignment description' }]}
-          >
-            <Input.TextArea />
-          </Form.Item>
-          <Form.Item
-            name="dueDate"
-            label="Due Date"
-            rules={[{ required: true, message: 'Please select the due date and time' }]}
-          >
-            <DatePicker showTime format="YYYY-MM-DD HH:mm" />
-          </Form.Item>
-          <Form.Item
-            name="isGroupAssignment"
-            label="Is Group Assignment"
-            valuePropName="checked"
-            initialValue={false}
-          >
-            <Checkbox />
-          </Form.Item>
-          <Form.Item
-            name="defaultShCmd"
-            label="Default Shell Command"
-            rules={[{ required: true, message: 'Please enter the default shell command' }]}
-          >
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <AssignmentModal
+        isModalVisible={isModalVisible}
+        closeModal={() => setIsModalVisible(false)}
+        refetch={refetchCourse}
+        enrolmentId={enrolmentId || ''}
+      />
     </Layout>
   );
 };

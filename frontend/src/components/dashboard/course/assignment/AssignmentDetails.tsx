@@ -1,122 +1,237 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Layout, Typography, List, Card, Button, Modal, Form, Upload, message } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { Layout, Typography, List, Button, Spin, Skeleton, message } from 'antd';
 import dayjs from 'dayjs';
+import { bannerStyle, footerLineStyle, listContainerStyle } from '../styles';
+import { useAssignment } from '../../../../queries';
+import { format } from 'date-fns';
+import UploadSubmissionModal from './UploadSubmissionModal';
+import { config } from '../../../../config';
+import Cookies from 'js-cookie';
+import AutotestModal from './AutotestModal';
+import AssignmentModal from '../AssignmentModal';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
 
 interface Submission {
   id: number;
-  date: string;
-  grade: string;
+  submissionTime: string;
 }
 
-interface Assignment {
+interface TestCase {
   id: number;
-  title: string;
-  description: string;
-  dueDate: string;
-  feedback: string;
-  submissions: Submission[];
+  input: string;
+  expectedOutput: string;
+  isHidden: boolean;
 }
 
 const AssignmentDetails: React.FC = () => {
-  const { assignmentId } = useParams<{ assignmentId: string }>();
+  const { role, enrolmentId, assignmentId } = useParams<{ role: string, enrolmentId: string, assignmentId: string }>();
+  const { data: assignment, isLoading: isAssignmentLoading, error, refetch: refetchAssignment } = useAssignment(role || '', assignmentId || '');
+  const token = Cookies.get('token') || '';
+  const [openModal, setOpenModal] = useState<string>('');
+  const [currentTestCaseId, setCurrentTestCaseId] = useState<string>('');
 
-  // Dummy data for assignment details
-  const assignment: Assignment = {
-    id: Number(assignmentId),
-    title: `Assignment ${assignmentId}`,
-    description: `This is the detailed description for Assignment ${assignmentId}.`,
-    dueDate: '2023-10-01',
-    feedback: 'Overall great job on this assignment!',
-    submissions: [
-      { id: 1, date: '2023-09-15', grade: 'A' },
-      { id: 2, date: '2023-09-20', grade: 'B+' }
-    ]
+  const downloadSubmission = async (submissionId: number) => {
+    try {
+      const response = await fetch(`${config.backendUrl}/api/${role}/submissions/${submissionId}/download`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download file');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `submission_${submissionId}.tar.gz`; // Set the desired file name
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      message.error('Failed to download file.');
+    }
   };
 
-  const [submissions, setSubmissions] = useState<Submission[]>(assignment.submissions);
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [form] = Form.useForm();
-
-  const showModal = () => {
-    setIsModalVisible(true);
+  const handleEditTestCase = (testCaseId: number) => {
+    setCurrentTestCaseId(testCaseId.toString());
+    setOpenModal('testcase');
   };
 
-  const handleCancel = () => {
-    setIsModalVisible(false);
-    form.resetFields();
+  const handleMarkSubmissions = () => {
+    message.info('Marking submissions...');
+    fetch(`${config.backendUrl}/api/lecturer/assignments/${assignmentId}/mark`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error('Failed to mark submissions');
+      }
+      refetchAssignment();
+      message.success('Submissions marked successfully!');
+    })
+      .catch((error) => {
+        message.error(`Failed to mark submissions: ${error}`);
+      });
   };
 
-  const handleOk = () => {
-    form.validateFields().then(values => {
-      const newSubmission: Submission = {
-        id: submissions.length + 1,
-        date: dayjs().format('YYYY-MM-DD'),
-        grade: 'Pending'
-      };
-      setSubmissions([...submissions, newSubmission]);
-      setIsModalVisible(false);
-      form.resetFields();
-      message.success('Submission uploaded successfully!');
-    });
-  };
+  if (isAssignmentLoading) {
+    return (
+      <Layout style={{ padding: '20px' }}>
+        <Content style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+          <Spin size="large" />
+        </Content>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout style={{ padding: '20px' }}>
+        <Content style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+          <Title level={2}>Error</Title>
+          <Paragraph>There was an error loading the course details. Please try again later.</Paragraph>
+        </Content>
+      </Layout>
+    );
+  }
 
   return (
     <Layout style={{ padding: '20px' }}>
-      <Content style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <Title level={2}>{assignment.title}</Title>
-        <Paragraph>{assignment.description}</Paragraph>
-        <Paragraph>Due Date: {assignment.dueDate}</Paragraph>
-        <Title level={3}>Overall Feedback</Title>
-        <Paragraph>{assignment.feedback}</Paragraph>
-        <Title level={3}>Past Submissions</Title>
-        <Button type="primary" onClick={showModal} style={{ marginBottom: '20px' }}>
+      <div style={bannerStyle}>
+        <div style={{ paddingTop: '10px', paddingLeft: '25px' }}>
+          <Title level={1}>{assignment.assignmentName}</Title>
+        </div>
+
+        <div style={footerLineStyle}/>
+        <Paragraph style={{ color: '#A3A3A3' }}>{assignment.description}</Paragraph>
+        <div style={footerLineStyle}/>
+        <Paragraph style={{ color: '#A3A3A3' }}>Due Date: {dayjs(assignment.dueDate).format('YYYY-MM-DD HH:mm')}</Paragraph>
+
+        {role === 'lecturer' && (
+          <>
+           <div style={footerLineStyle}/>
+            <div style={{ flexDirection: 'row' }}>
+              <Button type="primary" onClick={() => setOpenModal('edit')} style={{ marginBottom: '20px', width: '120px', alignSelf: 'center', marginRight: '10px' }}>
+                Edit Assignment
+              </Button>
+
+              <Button type="primary" onClick={() => handleEditTestCase(-1)} style={{ marginBottom: '20px', width: '120px', alignSelf: 'center', marginRight: '10px' }}>
+                Create Autotest
+              </Button>
+
+              <Button type="primary" onClick={handleMarkSubmissions} style={{ marginBottom: '20px', width: '120px', alignSelf: 'center' }}>
+                Mark Submissions
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+
+      <Title level={3}>{role === 'student' ? 'Submissions' : 'Enrolled Students'}</Title>
+      {role === 'student' && (
+        <Button type="primary" onClick={() => setOpenModal('upload')} style={{ marginBottom: '20px', width: '120px', alignSelf: 'center' }}>
           Add Submission
         </Button>
-        <List
-          grid={{ gutter: 16, column: 1 }}
-          dataSource={submissions}
-          renderItem={submission => (
-            <List.Item>
-              <Card title={`Submission ${submission.id}`}>
-                <p>Date: {submission.date}</p>
-                <p>Grade: {submission.grade}</p>
-              </Card>
-            </List.Item>
+      )}
+      <div style={listContainerStyle}>
+        <div style={{ minWidth: '80%', maxWidth: '90%', border: '1px solid #d9d9d9', padding: '30px', borderRadius: '10px' }}>
+          {role === 'student' && (
+            <List
+              className="demo-loadmore-list"
+              loading={isAssignmentLoading}
+              itemLayout="horizontal"
+              dataSource={assignment.submissions}
+              renderItem={(submission: Submission, index: number) => (
+                <List.Item style={{ width: '100%' }}
+                  actions={[
+                    <a key="list-loadmore-download" onClick={() => downloadSubmission(submission.id)}>download</a>
+                  ]}
+                >
+                  <Skeleton loading={isAssignmentLoading} active>
+                    <List.Item.Meta
+                    style={{ textAlign: 'left' }}
+                      title={`Submission ${assignment.submissions.length - index}`} // Increment the title by 1
+                      description={`Submitted on: ${format(new Date(submission.submissionTime), 'HH:mm dd/MM/yyyy')}`}
+                    />
+                  </Skeleton>
+                </List.Item>
+              )}
+            />
           )}
-        />
-      </Content>
+        </div>
+      </div>
 
-      <Modal
-        title="Add Submission"
-        visible={isModalVisible}
-        onOk={handleOk}
-        onCancel={handleCancel}
-        okText="Submit"
-        cancelText="Cancel"
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="file"
-            label="Upload File"
-            valuePropName="fileList"
-            getValueFromEvent={e => (Array.isArray(e) ? e : e && e.fileList)}
-            rules={[{ required: true, message: 'Please upload a file' }]}
-          >
-            <Upload.Dragger name="files" beforeUpload={() => false}>
-              <p className="ant-upload-drag-icon">
-                <UploadOutlined />
-              </p>
-              <p className="ant-upload-text">Click or drag file to this area to upload</p>
-              <p className="ant-upload-hint">Support for a single or bulk upload.</p>
-            </Upload.Dragger>
-          </Form.Item>
-        </Form>
-      </Modal>
+      {role === 'lecturer' && (
+        <>
+         <Title level={3}>Test Cases</Title>
+          <div style={listContainerStyle}>
+            <div style={{ minWidth: '80%', maxWidth: '90%', border: '1px solid #d9d9d9', padding: '30px', borderRadius: '10px' }}>
+                <List
+                  className="demo-loadmore-list"
+                  loading={isAssignmentLoading}
+                  itemLayout="horizontal"
+                  dataSource={assignment.testCases}
+                  renderItem={(testCase: TestCase, index: number) => (
+                    <List.Item style={{ width: '100%' }}
+                    actions={[
+                      <a key="list-loadmore-download" onClick={() => handleEditTestCase(testCase.id)}>edit</a>
+                    ]}
+                    >
+                      <Skeleton loading={isAssignmentLoading} active>
+                        <List.Item.Meta
+                          style={{ textAlign: 'left' }}
+                          title={`${index + 1}`} // Increment the title by 1
+                          description={
+                            <div>
+                              <div><strong>Input:</strong> {testCase.input}</div>
+                              <div><strong>Expected Output:</strong> {testCase.expectedOutput}</div>
+                              <div><strong>Hidden:</strong> {testCase.isHidden ? 'Yes' : 'No'}</div>
+                            </div>
+                          }
+                        />
+                      </Skeleton>
+                    </List.Item>
+                  )}
+                />
+            </div>
+          </div>
+        </>
+      )}
+
+      <AssignmentModal
+        isModalVisible={openModal === 'edit'}
+        enrolmentId={enrolmentId || ''}
+        closeModal={() => setOpenModal('')}
+        assignment={{ ...assignment, id: assignmentId }}
+        refetch={refetchAssignment}
+      />
+
+      <UploadSubmissionModal
+        isModalVisible={openModal === 'upload'}
+        closeModal={() => setOpenModal('')}
+        assignmentId={assignmentId || ''}
+        refetchAssignment={refetchAssignment}
+      />
+
+      <AutotestModal
+        isModalVisible={openModal === 'testcase'}
+        testCaseId={currentTestCaseId || ''}
+        testCases={assignment.testCases}
+        closeModal={() => setOpenModal('')}
+        assignmentId={assignmentId || ''}
+        refetchAssignment={refetchAssignment}
+      />
     </Layout>
   );
 };

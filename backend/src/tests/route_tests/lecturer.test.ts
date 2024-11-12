@@ -115,7 +115,8 @@ const generateDbData = async (): Promise<{
 			description: 'This is an example assignment for Python 3',
 			dueDate: '2024-11-20 20:00',
 			isGroupAssignment: false,
-			defaultShCmd: 'python3 main.py'
+			defaultShCmd: 'python3 main.py',
+			autoTestWeighting: 0.6,
 		}).expect(201);
 
 	const groupAssignment = await request(app)
@@ -126,7 +127,8 @@ const generateDbData = async (): Promise<{
 		description: 'This is an example assignment for Python 3',
 		dueDate: '2024-12-21 20:00',
 		isGroupAssignment: true,
-		defaultShCmd: 'python3 main.py'
+		defaultShCmd: 'python3 main.py',
+		autoTestWeighting: 0.6,
 	}).expect(201);
 
 	return {
@@ -193,7 +195,8 @@ describe('POST api/lecturer/courses/:courseId/assignments', () => {
 			description: 'This is an example assignment for Python 3',
 			dueDate: '2024-11-22 20:00',
 			isGroupAssignment: false,
-			defaultShCmd: 'python3 main.py'
+			defaultShCmd: 'python3 main.py',
+			autoTestWeighting: 0.6,
 		})
         .expect('Content-Type', /json/)
         .expect(201);
@@ -209,7 +212,7 @@ describe('POST api/lecturer/courses/:courseId/assignments', () => {
 			description: 'This is an example assignment for Python 3',
 			dueDate: '2024-11-22 20:00',
 			isGroupAssignment: false,
-            // Missing shCmd field
+            // Missing shCmd/autoTestWeighting field
 		})
         .expect('Content-Type', /json/)
         .expect({ error: 'Missing required fields' })
@@ -226,7 +229,8 @@ describe('POST api/lecturer/courses/:courseId/assignments', () => {
 			description: 'This is an example assignment for Python 3',
 			dueDate: '1999-110-220 20:00',
 			isGroupAssignment: false,
-			defaultShCmd: 'python3 main.py'
+			defaultShCmd: 'python3 main.py',
+			autoTestWeighting: 0.6,
 		})
         .expect('Content-Type', /json/)
         .expect({ error: 'Invalid due date' })
@@ -243,7 +247,8 @@ describe('POST api/lecturer/courses/:courseId/assignments', () => {
 			description: 'This is an example assignment for Python 3',
 			dueDate: '2024-11-22 20:00',
 			isGroupAssignment: false,
-			defaultShCmd: 'python3 main.py'
+			defaultShCmd: 'python3 main.py',
+			autoTestWeighting: 0.6,
 		})
         .expect('Content-Type', /json/)
         .expect({ error: 'Permission error: You are not assigned to this course' })
@@ -264,7 +269,8 @@ describe('PUT api/lecturer/courses/:courseId/assignments/:assignmentId', () => {
 			description: 'New description',
 			dueDate: '2024-11-23 20:00',
 			isGroupAssignment: false,
-			defaultShCmd: 'python3 main.py'
+			defaultShCmd: 'python3 main.py',
+			autoTestWeighting: 0.7,
         })
         .expect('Content-Type', /json/)
         .expect(200);
@@ -280,7 +286,8 @@ describe('PUT api/lecturer/courses/:courseId/assignments/:assignmentId', () => {
 			description: 'New description',
 			dueDate: '2024-11-23 20:00',
 			isGroupAssignment: false,
-			defaultShCmd: 'python3 main.py'
+			defaultShCmd: 'python3 main.py',
+			autoTestWeighting: 0.7,
         })
         .expect('Content-Type', /json/)
         .expect({ error: 'Assignment not found or does not belong to this course' })
@@ -305,8 +312,8 @@ describe('DELETE api/lecturer/assignments/:assignmentId', () => {
         .delete(`/api/lecturer/assignments/${123987}`)
         .set('authorization', `Bearer ${token1}`)
         .expect('Content-Type', /json/)
-        .expect({ error: 'Assignment not found' })
-        .expect(404);
+        .expect({ error: 'Permission error' })
+        .expect(403);
     });
 })
 
@@ -379,8 +386,8 @@ describe('POST api/lecturer/assignments/:assignmentId/testcases', () => {
 			isHidden: false,
 		})
         .expect('Content-Type', /json/)
-        .expect({ error: 'Assignment not found' })
-        .expect(400);
+        .expect({ error: 'Permission error' })
+        .expect(403);
     });
 
 	test('Error create testcase, invalid inputs not found', async () => {
@@ -409,22 +416,17 @@ describe('POST api/lecturer/assignments/:assignmentId/testcases', () => {
 			isHidden: false,
 		})
         .expect('Content-Type', /json/)
-        .expect({ error: 'Lecturer does not have permission to create tests for this assignment' })
-        .expect(400);
+        .expect({ error: 'Permission error' })
+        .expect(403);
     });
 })
 
-describe('GET api/lecturer/students', () => {
+describe('GET api/lecturer/courses/:courseId/students', () => {
     test('Successful get students in course', async () => {
         const {token1, courseOfferingId, courseOfferingTerm, courseOfferingYear} = await generateDbData();
         await request(app)
-        .get(`/api/lecturer/students`)
+        .get(`/api/lecturer/courses/${courseOfferingId}/students`)
         .set('authorization', `Bearer ${token1}`)
-		.send({
-			courseId: courseOfferingId,
-			termYear: courseOfferingYear,
-			termTerm: courseOfferingTerm,
-		})
         .expect('Content-Type', /json/)
         .expect(200);
     });
@@ -432,15 +434,10 @@ describe('GET api/lecturer/students', () => {
 	test('Error get students in course, course not found', async () => {
         const {token1, courseOfferingId, courseOfferingTerm, courseOfferingYear} = await generateDbData();
         await request(app)
-        .get(`/api/lecturer/students`)
+        .get(`/api/lecturer/courses/${123987}/students`)
         .set('authorization', `Bearer ${token1}`)
-		.send({
-			courseId: courseOfferingId + 99999,
-			termYear: courseOfferingYear,
-			termTerm: courseOfferingTerm,
-		})
         .expect('Content-Type', /json/)
-		.expect({ error: 'Course not found' })
+		.expect({ error: 'Course not found or you are not the lecturer for this course' })
         .expect(404);
     });
 })
@@ -472,7 +469,7 @@ describe('GET api/lecturer/students/:studentId', () => {
     });
 })
 
-describe('GET api/lecturer/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/view', () => {
+describe('GET api/lecturer/submissions/:submissionId/view', () => {
 	const py3FilePath = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz');
     test('Successful view submission', async () => {
         const {token1, token2, courseOfferingId, assigmentId} = await generateDbData();
@@ -486,7 +483,7 @@ describe('GET api/lecturer/courses/:courseId/assignments/:assignmentId/submissio
 		const submissionId = submission.body.submissionId;
 
         await request(app)
-        .get(`/api/lecturer/courses/${courseOfferingId}/assignments/${assigmentId}/submissions/${submissionId}/view`)
+        .get(`/api/lecturer/submissions/${submissionId}/view`)
         .set('authorization', `Bearer ${token1}`)
 		.send({
 			submissionId: submissionId,
@@ -499,13 +496,13 @@ describe('GET api/lecturer/courses/:courseId/assignments/:assignmentId/submissio
         const {token1, courseOfferingId, assigmentId} = await generateDbData();
 		const submissionId = 123
         await request(app)
-        .get(`/api/lecturer/courses/${courseOfferingId}/assignments/${assigmentId}/submissions/${submissionId}/view`)
+        .get(`/api/lecturer/submissions/${submissionId}/view`)
         .set('authorization', `Bearer ${token1}`)
 		.send({
 			submissionId: submissionId,
 		})
         .expect('Content-Type', /json/)
-		.expect({ error: 'Submission not found' })
+		.expect({ error: 'Submission not found or you are not a lecturer who can view this submission' })
         .expect(404);
     });
 })
@@ -519,4 +516,7 @@ router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submission
 
 // Upload a CSV file to update student database
 router.post('/upload-student-csv', );
+
+// Downloads a student's grade
+router.get('/assignments/:assignmentId/grades', downloadStudentGrade);
 */

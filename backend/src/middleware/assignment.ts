@@ -16,6 +16,7 @@ export const validateAssignmentData = async (
       dueDate,
       isGroupAssignment,
       defaultShCmd,
+      autoTestWeighting
     } = req.body;
 
     // Check if updating an existing assignment
@@ -28,7 +29,8 @@ export const validateAssignmentData = async (
       !description ||
       !dueDate ||
       !courseId ||
-      !defaultShCmd
+      !defaultShCmd ||
+      !autoTestWeighting
     ) {
       res.status(400).json({ error: 'Missing required fields' });
       return;
@@ -38,6 +40,12 @@ export const validateAssignmentData = async (
     const parsedDate = parseISO(dueDate);
     if (!isValid(parsedDate)) {
       res.status(400).json({ error: 'Invalid due date' });
+      return;
+    }
+
+    // Check that the due date is in the future
+    if (parsedDate <= new Date()) {
+      res.status(400).json({ error: 'Due date must be in the future' });
       return;
     }
 
@@ -81,6 +89,13 @@ export const validateAssignmentData = async (
       }
     }
 
+    const parsedAutoTestWeighting = parseFloat(autoTestWeighting);
+  
+    if ( parsedAutoTestWeighting < 0 || parsedAutoTestWeighting > 1) {
+      res.status(400).json({ error: 'autoTestWeighting must be a decimal between 0 and 1' });
+      return;
+    }
+
     // Attach validated data to req object
     req.assignmentData = {
       assignmentName,
@@ -89,6 +104,7 @@ export const validateAssignmentData = async (
       isGroupAssignment,
       courseOfferingId: teachingAssignment.id,
       defaultShCmd,
+      autoTestWeighting: parsedAutoTestWeighting,
       assignmentId: isUpdating ? parseInt(assignmentId) : undefined,
     };
 
@@ -98,3 +114,50 @@ export const validateAssignmentData = async (
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const validateLecturerPermissions = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const lecturerEmail = req.userEmail;
+    const assignmentId = parseInt(req.params.assignmentId);
+
+    const assignment = await prisma.assignment.findUnique({
+      where: {
+        id: assignmentId,
+      },
+      include: {
+        courseOffering: {
+          select: {
+            lecturerId: true,
+          },
+        },
+      },
+    });
+
+    if (!assignment) {
+      throw new Error("Assignment not found");
+    }
+
+    const lecturer = await prisma.user.findUnique({
+      where: {
+        email: lecturerEmail,
+      },
+    });
+
+    if (!lecturer) {
+      throw new Error("Lecturer not found");
+    }
+
+    if (assignment.courseOffering.lecturerId !== lecturer.zid) {
+      throw new Error("Lecturer does not have permission to access this assignment");
+    }
+
+    next();
+  } catch (error) {
+    console.error('Permission Error:', error);
+    res.status(403).json({ error: 'Permission error' });
+  }
+}

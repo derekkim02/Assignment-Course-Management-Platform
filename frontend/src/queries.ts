@@ -67,7 +67,14 @@ export const useTutoringCourses = () => {
 
 export const useEnrollment = (role: string, enrolmentId: string) => {
   return useQuery({
-    queryKey: ['course', enrolmentId],
+    queryKey: ['enrollment', enrolmentId],
     queryFn: () => fetchWithAuth(`api/${role}/courses/${enrolmentId}`, {})
+  });
+};
+
+export const useAssignment = (role: string, assignmentId: string) => {
+  return useQuery({
+    queryKey: ['assignment', assignmentId],
+    queryFn: () => fetchWithAuth(`api/${role}/assignments/${assignmentId}/view`, {})
   });
 };

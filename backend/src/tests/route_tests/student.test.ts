@@ -107,7 +107,8 @@ const generateDbData = async (): Promise<{token1: string, token2: string, assigm
 			description: 'This is an example assignment for Python 3',
 			dueDate: '2024-11-20 20:00',
 			isGroupAssignment: false,
-			defaultShCmd: 'python3 main.py'
+			defaultShCmd: 'python3 main.py',
+			autoTestWeighting: 0.6,
 		}).expect(201);
 
 	const groupAssignment = await request(app)
@@ -118,7 +119,8 @@ const generateDbData = async (): Promise<{token1: string, token2: string, assigm
 		description: 'This is an example assignment for Python 3',
 		dueDate: '2024-12-21 20:00',
 		isGroupAssignment: true,
-		defaultShCmd: 'python3 main.py'
+		defaultShCmd: 'python3 main.py',
+		autoTestWeighting: 0.6,
 	}).expect(201);
 
 	return {
@@ -140,20 +142,7 @@ describe('POST api/student/assignments/:assignmentId/submit', () => {
 			.attach('submission', py3FilePath)
 			.expect(201);
 		expect(response.body.results).toEqual([]);
-	// Test may sometimes take longer than 5 seconds (set to 10 seconds)
-	}, 10000);
-
-	// test('successful group submit assignment', async () => {
-	// 	const {token2, groupAssignmentId} = await generateDbData();
-	// 	const response = await request(app)
-	// 		.post(`/api/student/assignments/${groupAssignmentId}/group/submit`)
-	// 		.set('authorization', `Bearer ${token2}`)
-	// 		.attach('submission', py3FilePath)
-	// 		.attach('group', groupId) // make groups??
-	// 		.expect(201);
-	// 	expect(response.body.results).toEqual([]);
-	// // Test may sometimes take longer than 5 seconds (set to 10 seconds)
-	// }, 10000);
+		});
 
 	test('Error, group submission errors on individual submission', async () => {
 		const {token2, groupAssignmentId} = await generateDbData();
@@ -163,8 +152,7 @@ describe('POST api/student/assignments/:assignmentId/submit', () => {
 			.attach('submission', py3FilePath)
 			.expect(400)
 			.expect({ error: 'Group assignment submission not supported' });
-	// Test may sometimes take longer than 5 seconds (set to 10 seconds)
-	}, 10000);
+		});
 })
 
 describe('GET api/student/submissions/:submissionId/download', () => {
@@ -222,8 +210,7 @@ describe('GET api/student/submissions/:submissionId/download', () => {
 			});
 		const tarGzBuffer = getResponse.body;
 		expect(await containsMainPy(tarGzBuffer)).toBe(true);
-	// Test may sometimes take longer than 5 seconds (set to 10 seconds)
-	}, 10000);
+		});
 
 	test('Error, invalid submissionId', async () => {
 		const testFile = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz')
@@ -334,3 +321,13 @@ describe('GET api/student/courses/:courseId', () => {
 // 		// MARK SUBMISSION HERE
 // 	});
 // })
+
+/*
+// View specific assignment
+router.get('/assignments/:assignmentId/view', viewAssignment);
+
+// View all student assignments
+router.get('/assignments', viewAssignments);
+
+
+*/
