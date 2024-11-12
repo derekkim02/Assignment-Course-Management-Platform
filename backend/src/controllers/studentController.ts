@@ -60,7 +60,51 @@ export const viewMarks = async (req: Request, res: Response): Promise<void> => {
 }
 
 export const viewAssignment = async (req: Request, res: Response): Promise<void> => {
-	res.json({ assignments: [{ title: 'Assignment 1' }] });
+	const { assignmentId } = req.params;
+
+	const user = await prisma.user.findUnique({
+		where: {
+			email: req.userEmail
+		}
+	})
+
+	try {
+		const assignment = await prisma.assignment.findUnique({
+			where: {
+				id: parseInt(assignmentId),
+				courseOffering: {
+					enrolledStudents: {
+						some: {
+							email: req.userEmail,
+						}
+					}
+				},
+			},
+			include: {
+				submissions: {
+					where: {
+						studentId: user?.zid,
+					}
+				}
+
+			}
+		});
+
+		if (!assignment) {
+			res.status(404).json({ error: 'Assignment not found or you are not enrolled in the course.' });
+			return;
+		}
+
+		res.status(200).json({
+			assignmentName: assignment.name,
+			description: assignment.description,
+			dueDate: assignment.dueDate,
+			isGroupAssignment: assignment.isGroupAssignment,
+			submissions: assignment.submissions
+		});
+	} catch {
+		res.status(500).json({ error: 'Failed to fetch assignment' });
+	}
 }
 
 export const viewCourseEnrollments = async (req: Request, res: Response): Promise<void> => {
