@@ -66,6 +66,25 @@ const AssignmentDetails: React.FC = () => {
     setOpenModal('testcase');
   };
 
+  const handleMarkSubmissions = () => {
+    message.info('Marking submissions...');
+    fetch(`${config.backendUrl}/api/lecturer/assignments/${assignmentId}/mark`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error('Failed to mark submissions');
+      }
+      refetchAssignment();
+      message.success('Submissions marked successfully!');
+    })
+      .catch((error) => {
+        message.error(`Failed to mark submissions: ${error}`);
+      });
+  };
+
   if (isAssignmentLoading) {
     return (
       <Layout style={{ padding: '20px' }}>
@@ -107,8 +126,12 @@ const AssignmentDetails: React.FC = () => {
                 Edit Assignment
               </Button>
 
-              <Button type="primary" onClick={() => handleEditTestCase(-1)} style={{ marginBottom: '20px', width: '120px', alignSelf: 'center' }}>
+              <Button type="primary" onClick={() => handleEditTestCase(-1)} style={{ marginBottom: '20px', width: '120px', alignSelf: 'center', marginRight: '10px' }}>
                 Create Autotest
+              </Button>
+
+              <Button type="primary" onClick={handleMarkSubmissions} style={{ marginBottom: '20px', width: '120px', alignSelf: 'center' }}>
+                Mark Submissions
               </Button>
             </div>
           </>
@@ -173,6 +196,7 @@ const AssignmentDetails: React.FC = () => {
                             <div>
                               <div><strong>Input:</strong> {testCase.input}</div>
                               <div><strong>Expected Output:</strong> {testCase.expectedOutput}</div>
+                              <div><strong>Hidden:</strong> {testCase.isHidden ? 'Yes' : 'No'}</div>
                             </div>
                           }
                         />

@@ -101,7 +101,7 @@ router.get('/assignments/:assignmentId/submissions', viewAllSubmissions);
  */
 router.get('/submissions/:submissionId', viewSubmission);
 
-/** 
+/**
  * @route PUT /submissions/:submissionId
  * @description Mark a student submission.
  * @param {string} submissionId - Unique identifier of the submission
