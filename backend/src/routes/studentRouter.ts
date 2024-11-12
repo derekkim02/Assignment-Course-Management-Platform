@@ -10,7 +10,9 @@ import {
 	viewCourseEnrollments,
 	viewCourseEnrollmentDetails,
 	downloadSubmission,
-	viewAssignment
+	viewAssignment,
+	viewMarks,
+	viewAssignments,
 } from '../controllers/studentController';
 
 import { verifyToken } from '../middleware/jwt';
@@ -58,8 +60,22 @@ router.post('/assignments/:assignmentId/submit', validateSingleSubmission, uploa
  */
 router.post('/assignments/:assignmentId/group/submit',validateGroupSubmission, uploadSubmission, submitGroupAssignment);
 
-// View marks
-router.get('/marks', );
+/**
+ * @route GET /marks
+ * @description Fetch all marks for the student. This route is used to retrieve all marks for the student.
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object[]} 200 - List of marks
+ * @returns {string} 200.assignmentId - Unique identifier of the assignment
+ * @returns {string} 200.assignmentName - Name of the assignment
+ * @returns {string} 200.term - Term of the assignment
+ * @returns {string} 200.year - Year of the assignment
+ * @returns {boolean | null} 200.isMarked - Whether the assignment has been marked, If null, there is no submission made for this assignment.
+ * @returns {number | null} 200.autoMark - Auto-mark result, If null, the assignment has not been auto-marked.
+ * @returns {number | null} 200.styleMark - Style-mark result, If null, the assignment has not been style-marked.
+ * @returns {number | null} 200.latePenalty - Late penalty, If null, there is no submission made for this assignment.
+ * @returns {number | null} 200.finalMark - Final mark, If null, the assignment has not been marked.
+ */
+router.get('/marks', viewMarks);
 
 /**
  * @route GET /assignments/:assignmentId/view
@@ -79,11 +95,18 @@ router.get('/marks', );
  */
 router.get('/assignments/:assignmentId/view', viewAssignment);
 
-// Fetch all upcoming assignments
-router.get('/assignments/new', );
-
-// Fetch all submitted assignments
-router.get('/assignments/submitted', );
+/**
+ * @route GET /assignments
+ * @description Fetch all assignments. This route is used to retrieve all assignments for the student.
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object[]} 200 - List of assignments
+ * @returns {string} 200.assignmentId - Unique identifier of the assignment
+ * @returns {string} 200.assignmentName - Name of the assignment
+ * @returns {string} 200.dueDate - Due date of the assignment
+ * @returns {boolean} 200.isGroupAssignment - Whether the assignment is a group assignment
+ * @returns {boolean} 200.isSubmitted - Whether the assignment has been submitted
+ */
+router.get('/assignments', viewAssignments);
 
 /**
  * @route GET /courses
