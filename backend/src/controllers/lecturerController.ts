@@ -117,7 +117,6 @@ export const viewAssignment = async (req: Request, res: Response): Promise<void>
       autoTestWeighting: assignment.autoTestWeighting,
       testCases: assignment.testCases,
 			submissions: assignment.submissions,
-      autoTestWeighting: assignment.autoTestWeighting,
 		});
 
 
