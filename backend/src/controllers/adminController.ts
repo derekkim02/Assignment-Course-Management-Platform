@@ -270,3 +270,17 @@ export const createEls = async (req: Request, res: Response): Promise<void> => {
     res.status(400).json({ error: `Failed to create ELS: ${e}` });
   }
 }
+
+export const getEls = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const elsId  = parseInt(req.params.elsId);
+    const els = await prisma.eLSType.findUnique({
+      where: {
+        id: elsId
+      }
+    });
+    res.status(200).json(els);
+  } catch (e) {
+    res.status(400).json({ error: `Failed to fetch ELS: ${e}` });
+  }
+}

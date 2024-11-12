@@ -7,6 +7,7 @@ import {
 	getCourseOffering,
 	getCourseOfferings,
 	getCourses,
+	getEls,
 	getUsers,
 	importCsv,
 	updateCourseOffering
@@ -146,6 +147,19 @@ router.post('/course-offerings/:courseOfferingId/import-csv', uploadCsv, importC
  * @returns {string} 201.name - The name of the ELS
  * @returns {string} 201.extraDays - The number of extra days for the ELS
  */
-router.post('/els', createEls)
+router.post('/els', createEls);
+
+/**
+ * @route GET /els/:elsId
+ * @description Fetch a specific ELS.
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @param {string} elsId - The unique identifier of the ELS
+ * @returns {object} 200 - ELS
+ * @returns {string} 200.id - Unique identifier of the ELS
+ * @returns {string} 200.name - Name of the ELS
+ * @returns {string} 200.extraDays - Number of extra days for the ELS
+ */
+router.get('/els/:elsId', getEls);
+
 
 export default router;
