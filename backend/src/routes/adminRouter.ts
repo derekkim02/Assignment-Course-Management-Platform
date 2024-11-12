@@ -4,6 +4,7 @@ import {
 	createCourse,
 	createEls,
 	createEnrollment,
+	getAllEls,
 	getCourseOffering,
 	getCourseOfferings,
 	getCourses,
@@ -161,5 +162,15 @@ router.post('/els', createEls);
  */
 router.get('/els/:elsId', getEls);
 
+/**
+ * @route GET /els
+ * @description Fetch all ELS.
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object[]} 200 - List of ELS
+ * @returns {string} 200.id - Unique identifier of the ELS
+ * @returns {string} 200.name - Name of the ELS
+ * @returns {string} 200.extraDays - Number of extra days for the ELS
+ */
+router.get('/els', getAllEls);
 
 export default router;
