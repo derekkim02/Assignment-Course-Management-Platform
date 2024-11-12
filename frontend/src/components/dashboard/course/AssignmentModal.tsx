@@ -1,36 +1,41 @@
 import React from 'react';
-import { Modal, Form, Input, DatePicker, Checkbox, Button, message } from 'antd';
+import { Modal, Form, Input, DatePicker, Checkbox, Button, message, Slider } from 'antd';
 import dayjs from 'dayjs'; // Import dayjs
 import Cookies from 'js-cookie';
-import { config } from '../../../../config';
+import { config } from '../../../config';
+import { useNavigate } from 'react-router-dom';
 
-interface EditAssignmentModalProps {
+interface AssignmentModalProps {
   isModalVisible: boolean;
   enrolmentId: string;
   closeModal: () => void;
-  assignment: {
+  assignment?: {
     id: string;
     assignmentName: string;
     description: string;
     dueDate: string;
+    autoTestWeighting: number;
     isGroupAssignment: boolean;
     defaultShCmd: string;
   };
-  refetchAssignment: () => void;
+  refetch: () => void;
 }
 
-const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({ isModalVisible, enrolmentId, closeModal, assignment, refetchAssignment }) => {
+const AssignmentModal: React.FC<AssignmentModalProps> = ({ isModalVisible, enrolmentId, closeModal, assignment, refetch }) => {
   const [form] = Form.useForm();
+  const token = Cookies.get('token') || '';
+  const navigate = useNavigate();
 
-  const handleOk = async () => {
+  const isEditing = Boolean(assignment);
+
+  const handleEdit = async () => {
     try {
       const values = await form.validateFields();
       await updateAssignment(values);
-      refetchAssignment();
+      refetch();
       closeModal();
       message.success('Assignment updated successfully.');
     } catch (error) {
-      console.error('Failed to update assignment:', error);
       message.error('Failed to update assignment.');
     }
   };
@@ -42,10 +47,11 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({ isModalVisibl
         assignmentName: values.title,
         description: values.description,
         dueDate: values.dueDate,
-        isGroupAssignment: values.isGroupAssignment,
+        isGroupAssignment: Boolean(values.isGroupAssignment),
+        autoTestWeighting: values.autoTestWeighting / 100,
         defaultShCmd: values.defaultShCmd
       };
-      const response = await fetch(`${config.backendUrl}/api/lecturer/courses/${enrolmentId}/assignments/${assignment.id}`, {
+      const response = await fetch(`${config.backendUrl}/api/lecturer/courses/${enrolmentId}/assignments/${assignment?.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -57,8 +63,6 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({ isModalVisibl
       if (!response.ok) {
         throw new Error('Failed to update assignment');
       }
-      const result = await response.json();
-      console.log('Update successful:', result);
     } catch (error) {
       console.error('Error updating assignment:', error);
       throw error;
@@ -68,7 +72,7 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({ isModalVisibl
   const handleDelete = async () => {
     const token = Cookies.get('token') || '';
     try {
-      const response = await fetch(`${config.backendUrl}/api/lecturer/assignments/${assignment.id}`, {
+      const response = await fetch(`${config.backendUrl}/api/lecturer/assignments/${assignment?.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -79,13 +83,41 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({ isModalVisibl
       if (!response.ok) {
         throw new Error('Failed to delete assignment');
       }
-      refetchAssignment();
+      refetch();
       closeModal();
-
       message.success('Assignment deleted successfully.');
+      navigate(-1);
     } catch (error) {
       message.error('Failed to delete assignment.');
     }
+  };
+
+  const HandleCreate = () => {
+    form.validateFields().then(values => {
+      const payload = {
+        assignmentName: values.title,
+        description: values.description,
+        dueDate: values.dueDate,
+        isGroupAssignment: Boolean(values.isGroupAssignment),
+        defaultShCmd: values.defaultShCmd,
+        autoTestWeighting: values.autoTestWeighting / 100,
+      };
+
+      fetch(`${config.backendUrl}/api/lecturer/courses/${enrolmentId}/assignments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      }).then(() => {
+        refetch();
+        form.resetFields();
+      });
+      closeModal();
+    }).catch(() => {
+      // Do nothing on validation error
+    });
   };
 
   return (
@@ -95,14 +127,16 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({ isModalVisibl
       onCancel={closeModal}
       footer={
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Button key="delete" type="primary" danger onClick={handleDelete}>
-            Delete
-          </Button>
+          {isEditing &&
+            <Button key="delete" type="primary" danger onClick={handleDelete}>
+              Delete
+            </Button>
+          }
           <div>
             <Button key="cancel" onClick={closeModal} style={{ marginRight: '8px' }}>
               Cancel
             </Button>
-            <Button key="save" type="primary" onClick={handleOk}>
+            <Button key="save" type="primary" onClick={isEditing ? handleEdit : HandleCreate}>
               Save
             </Button>
           </div>
@@ -113,11 +147,12 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({ isModalVisibl
         form={form}
         layout="vertical"
         initialValues={{
-          title: assignment.assignmentName,
-          description: assignment.description,
-          dueDate: assignment.dueDate ? dayjs(assignment.dueDate) : null,
-          isGroupAssignment: assignment.isGroupAssignment,
-          defaultShCmd: assignment.defaultShCmd,
+          title: assignment?.assignmentName,
+          description: assignment?.description,
+          dueDate: assignment?.dueDate ? dayjs(assignment?.dueDate) : null,
+          autoTestWeighting: assignment ? assignment.autoTestWeighting * 100 : 0,
+          isGroupAssignment: assignment?.isGroupAssignment,
+          defaultShCmd: assignment?.defaultShCmd,
         }}
       >
         <Form.Item
@@ -134,6 +169,24 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({ isModalVisibl
         >
           <Input.TextArea />
         </Form.Item>
+
+        <Form.Item
+            name="autoTestWeighting"
+            label="Autotesting Weighting"
+            rules={[{ required: true, message: 'Please set the autotesting weighting' }]}
+          >
+            <Slider
+              min={0}
+              max={100}
+              marks={{
+                0: '0%',
+                25: '25%',
+                50: '50%',
+                75: '75%',
+                100: '100%',
+              }}
+            />
+          </Form.Item>
         <Form.Item
           name="dueDate"
           label="Due Date"
@@ -160,4 +213,4 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({ isModalVisibl
   );
 };
 
-export default EditAssignmentModal;
+export default AssignmentModal;

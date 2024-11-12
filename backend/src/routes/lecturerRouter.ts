@@ -124,6 +124,7 @@ router.delete('/assignments/:assignmentId', validateLecturerPermissions, deleteA
  * @returns {string} 200.description - Description of the assignment
  * @returns {string} 200.dueDate - Due date of the assignment
  * @returns {boolean} 200.isGroupAssignment - Group assignment status
+ * @returns {float} 200.autoTestWeighting - Weighting of the auto tests.
  * @returns {string} 200.defaultShCmd - Default shell command for the assignment
  * @returns {string} 200.autoTestExecutable - Auto test executable for the assignment
  * @returns {object[]} 200.testCases - List of test cases for the assignment
