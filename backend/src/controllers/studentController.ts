@@ -56,7 +56,90 @@ const handleAssignmentSubmission = async (req: Request, res: Response, isGroupAs
 }
 
 export const viewMarks = async (req: Request, res: Response): Promise<void> => {
-	res.json({ assignment: { title: 'Assignment 1' } });
+	try {
+		const data = await prisma.user.findUnique({
+			where: {
+				email: req.userEmail
+			},
+			include: {
+				submissions: {
+					include: {
+						assignment: true,
+					}
+				},
+				groups: {
+					include: {
+						submissions: {
+							include: {
+								assignment: true,
+							}
+						}
+					}
+				},
+				coursesEnrolled: {
+					include: {
+						course: true,
+						term: true,
+						assignments: true,
+					}
+				}
+			}
+		});
+		if (!data) {
+			res.status(404).json({ error: 'User\'s data does not exist' });
+			return;
+		}
+
+		const assignments = data.coursesEnrolled.flatMap(enrolment => 
+			enrolment.assignments.map(assignment => ({
+				id: assignment.id,
+				name: assignment.name,
+				isGroupAssignment: assignment.isGroupAssignment,
+				term: enrolment.term.term,
+				year: enrolment.term.year,
+			}))
+		);
+
+		const marks = assignments.map(assignment => {
+			const submission = () => {
+				try {
+					return data.submissions
+						.filter(submission => submission.assignmentId === assignment.id)
+						.reduce((prev, current) => (prev.submissionTime > current.submissionTime) ? prev : current);
+				} catch {
+					return null;
+				}
+			}
+			const groupSubmission = () => {
+				try {
+					return data.groups
+						.flatMap(group => group.submissions)
+						.filter(submission => submission.assignmentId === assignment.id)
+						.reduce((prev, current) => (prev.submissionTime > current.submissionTime) ? prev : current);
+				} catch {
+					return null;
+				}
+			}
+
+			const latestSubmission = assignment.isGroupAssignment ? groupSubmission() : submission();
+
+			return {
+				assignmentId: assignment.id,
+				assignmentName: assignment.name,
+				term: assignment.term,
+				year: assignment.year,
+				isMarked: latestSubmission ? latestSubmission.isMarked : null,
+				autoMark: latestSubmission ? latestSubmission.autoMarkResult : null,
+				styleMark:  latestSubmission ? latestSubmission.styleMarkResult : null,
+				latePenalty: latestSubmission ? latestSubmission.latePenalty : null,
+				finalMark: latestSubmission ? latestSubmission.finalMark: null,
+			}
+		});
+
+		res.status(200).json(marks);
+	} catch {
+		res.status(500).json({ error: 'Failed to fetch marks' });
+	}
 }
 
 export const viewAssignment = async (req: Request, res: Response): Promise<void> => {
