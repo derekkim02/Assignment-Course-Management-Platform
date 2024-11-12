@@ -16,6 +16,7 @@ export const validateAssignmentData = async (
       dueDate,
       isGroupAssignment,
       defaultShCmd,
+      autoTestWeighting
     } = req.body;
 
     // Check if updating an existing assignment
@@ -28,7 +29,8 @@ export const validateAssignmentData = async (
       !description ||
       !dueDate ||
       !courseId ||
-      !defaultShCmd
+      !defaultShCmd ||
+      !autoTestWeighting
     ) {
       res.status(400).json({ error: 'Missing required fields' });
       return;
@@ -87,6 +89,13 @@ export const validateAssignmentData = async (
       }
     }
 
+    const parsedAutoTestWeighting = parseFloat(autoTestWeighting);
+  
+    if ( parsedAutoTestWeighting < 0 || parsedAutoTestWeighting > 1) {
+      res.status(400).json({ error: 'autoTestWeighting must be a decimal between 0 and 1' });
+      return;
+    }
+
     // Attach validated data to req object
     req.assignmentData = {
       assignmentName,
@@ -95,6 +104,7 @@ export const validateAssignmentData = async (
       isGroupAssignment,
       courseOfferingId: teachingAssignment.id,
       defaultShCmd,
+      autoTestWeighting: parsedAutoTestWeighting,
       assignmentId: isUpdating ? parseInt(assignmentId) : undefined,
     };
 
