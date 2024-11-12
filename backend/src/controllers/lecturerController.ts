@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import prisma from '../prismaClient';
 import AutotestService from "../services/autotestService";
 import LatePenaltyService from "../services/latepenaltyService";
+import { stringify } from "csv-stringify";
 
 export const createAssignment = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -104,7 +105,18 @@ export const viewAssignment = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    res.status(200).json(assignment);
+    res.status(200).json({
+			assignmentName: assignment.name,
+			description: assignment.description,
+			dueDate: assignment.dueDate,
+			isGroupAssignment: assignment.isGroupAssignment,
+      defaultShCmd: assignment.defaultShCmd,
+      autoTestExecutable: assignment.autoTestExecutable,
+      testCases: assignment.testCases,
+			submissions: assignment.submissions
+		});
+
+
   } catch {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -387,7 +399,7 @@ export const markAllSubmissions = async (req: Request, res: Response): Promise<v
       const latepenaltyService = new LatePenaltyService(data.dueDate, submission.submissionTime, penaltyStrategy , extraDays);
 
       autotestService.runTests().then((results) => {
-        const score = results.length === 0 ? results.filter(result => result.passed).length / results.length : 100;
+        const score = results.length !== 0 ? results.filter(result => result.passed).length / results.length : 100;
 
         prisma.submission.update({
           where: {
@@ -425,5 +437,76 @@ export const downloadStudentSubmission = async (req: Request, res: Response): Pr
     res.download(submission.filePath);
   } catch {
     res.status(500).json({ error: 'Failed to download submission' });
+  }
+}
+
+export const downloadStudentGrade = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const assignmentId = parseInt(req.params.assignmentId);
+
+    const data = await prisma.assignment.findUnique({
+      where: {
+        id: assignmentId,
+        courseOffering: {
+          lecturer: {
+            email: req.userEmail
+          }
+        }
+      },
+      include: {
+        submissions: true,
+      },
+    });
+
+    if (!data) {
+      res.status(404).json({ error: 'Assignment not found or you are not the lecturer for this course' });
+      return;
+    }
+
+    const records = data.submissions.reduce((acc, submission) => {
+      const submitterId = data.isGroupAssignment ? submission.groupId : submission.studentId;
+      const existingSubmission = acc.find(s => (data.isGroupAssignment ? s.groupId : s.studentId) === submitterId);
+
+      if (!existingSubmission || submission.submissionTime > existingSubmission.submissionTime) {
+        acc.filter(s => data.isGroupAssignment ? s.groupId : s.studentId !== submitterId);
+        acc.push(submission);
+      }
+
+      return acc;
+    }, [] as typeof data.submissions).map(submission => ({
+      submitterId: data.isGroupAssignment ? submission.groupId : submission.studentId,
+      submissionTime: submission.submissionTime,
+      isMarked: submission.isMarked,
+      autoMark: submission.autoMarkResult,
+      styleMark: submission.styleMarkResult,
+      finalMark: submission.finalMark,
+      latePenalty: submission.latePenalty,
+    }));
+
+    stringify(records, {
+      header: true,
+      columns: [
+        { key: 'submitterId', header: 'Submitter ID' },
+        { key: 'submissionTime', header: 'Submission Time' },
+        { key: 'isMarked', header: 'Marked' },
+        { key: 'autoMark', header: 'Auto Mark' },
+        { key: 'styleMark', header: 'Style Mark' },
+        { key: 'finalMark', header: 'Final Mark' },
+        { key: 'latePenalty', header: 'Late Penalty' },
+      ],
+    }, (err, output) => {
+      if (err) {
+        res.status(500).json({ error: 'Failed to generate CSV' });
+        return;
+      }
+
+      res
+        .header('Content-Type', 'text/csv')
+        .header('Content-Disposition', `attachment; filename=${data.id}-${Date.now()}-grades.csv`)
+        .status(200).send(output);
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: (e as Error).message });
   }
 }
