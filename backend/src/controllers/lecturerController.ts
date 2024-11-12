@@ -59,6 +59,7 @@ export const updateAssignment = async (req: Request, res: Response): Promise<voi
       description,
       dueDate,
       isGroupAssignment,
+      autoTestWeighting,
       assignmentId,
     } = req.assignmentData;
 
@@ -76,6 +77,7 @@ export const updateAssignment = async (req: Request, res: Response): Promise<voi
         description: description,
         dueDate: dueDate,
         isGroupAssignment: isGroupAssignment,
+        autoTestWeighting: autoTestWeighting,
       },
     });
 
@@ -114,7 +116,8 @@ export const viewAssignment = async (req: Request, res: Response): Promise<void>
       autoTestExecutable: assignment.autoTestExecutable,
       autoTestWeighting: assignment.autoTestWeighting,
       testCases: assignment.testCases,
-			submissions: assignment.submissions
+			submissions: assignment.submissions,
+      autoTestWeighting: assignment.autoTestWeighting,
 		});
 
 
@@ -164,6 +167,74 @@ export const createTest = async (req: Request, res: Response): Promise<void> => 
 	}
 }
 
+export const updateTest = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const testCaseId = parseInt(req.params.testId);
+    const { input, output, isHidden } = req.body;
+
+    // Sanitize and validate inputs
+    if (!input || !output || typeof isHidden !== 'boolean') {
+      throw new Error("Invalid input or outputs");
+    }
+
+    // Update the test case
+    const updatedTestCase = await prisma.testCase.update({
+      where: {
+        id: testCaseId,
+        assignment: {
+          courseOffering: {
+            lecturer: {
+              email: req.userEmail
+            }
+          }
+        }
+      },
+      data: {
+        input: input,
+        expectedOutput: output,
+        isHidden: isHidden,
+      }
+    });
+
+    if (!updatedTestCase) {
+      res.status(404).json({ error: 'Test case not found or you are not the lecturer for this assignment' });
+      return;
+    }
+
+    res.status(201).json(updatedTestCase);
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
+}
+
+export const deleteTest = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const testCaseId = parseInt(req.params.testId);
+
+    const data = await prisma.testCase.delete({
+      where: {
+        id: testCaseId,
+        assignment: {
+          courseOffering: {
+            lecturer: {
+              email: req.userEmail
+            }
+          }
+        }
+      }
+    });
+
+    if (!data) {
+      res.status(404).json({ error: 'Test case not found or you are not the lecturer for this assignment' });
+      return;
+    }
+    
+    res.status(200).json({ message: 'Test case deleted' });
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
+}
+
 export const viewAllSubmissions = async (req: Request, res: Response): Promise<void> => {
   try {
     const assignmentId = parseInt(req.params.assignmentId);
@@ -182,11 +253,11 @@ export const viewAllSubmissions = async (req: Request, res: Response): Promise<v
     }
 
     const response = assignment.submissions.map(submission => ({
-      submissionId: submission.id,
-      submitterId: assignment.isGroupAssignment ? submission.groupId : submission.studentId,
-      submissionTime: submission.submissionTime,
-      autoMarkResult: submission.autoMarkResult,
-      latePenalty: submission.latePenalty,
+      id: submission.id,
+			studentId: submission.studentId,
+			groupId: submission.groupId,
+			submissionTime: submission.submissionTime,
+			isMarked: submission.isMarked,
     }));
 
     res.status(200).json(response);
@@ -197,14 +268,40 @@ export const viewAllSubmissions = async (req: Request, res: Response): Promise<v
 
 export const viewSubmission =  async (req: Request, res: Response): Promise<void> => {
   try {
-    const { submissionId } = req.body;
-    const submission = await prisma.submission.findUnique({where: {id: parseInt(submissionId)}});
+    const submissionId = parseInt(req.params.submissionId);
+    const submission = await prisma.submission.findUnique({
+      where: {
+        id: submissionId,
+        assignment: {
+          courseOffering: {
+            lecturer: {
+              email: req.userEmail
+            },
+          },
+        }
+      }
+    });
 
     if (!submission) {
-      res.status(404).json({ error: 'Submission not found' });
+      res.status(404).json({ error: 'Submission not found or you are not a lecturer who can view this submission' });
       return;
     }
-    res.status(200).json(submission);
+
+    const response = {
+			id: submission.id,
+			studentId: submission.studentId,
+			groupId: submission.groupId,
+			submissionTime: submission.submissionTime,
+			submissionType: submission.submissionType,
+			isMarked: submission.isMarked,
+			automark: submission.autoMarkResult,
+			stylemark: submission.styleMarkResult,
+			finalMark: submission.finalMark,
+			comments: submission.markerComments,
+			latePenalty: submission.latePenalty
+		};
+
+    res.status(200).json(response);
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
   }
