@@ -95,16 +95,12 @@ export const viewAssignment = async (req: Request, res: Response): Promise<void>
 			return;
 		}
 
-		const sortedSubmissions = assignment.submissions.sort((a, b) => {
-			return new Date(b.submissionTime).getTime() - new Date(a.submissionTime).getTime();
-		});
-
 		res.status(200).json({
 			assignmentName: assignment.name,
 			description: assignment.description,
 			dueDate: assignment.dueDate,
 			isGroupAssignment: assignment.isGroupAssignment,
-			submissions: sortedSubmissions
+			submissions: assignment.submissions
 		});
 	} catch {
 		res.status(500).json({ error: 'Failed to fetch assignment' });
