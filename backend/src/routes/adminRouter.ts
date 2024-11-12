@@ -12,6 +12,7 @@ import {
 	getEls,
 	getUsers,
 	importCsv,
+	removeUserFromEls,
 	updateCourseOffering,
 	updateEls
 } from '../controllers/adminController';
@@ -199,5 +200,14 @@ router.put('/els/:elsId', updateEls);
  * @returns {string} 201.endDate - The end date of the ELS
  */
 router.post('/users/:userId/els', addUserToEls);
+
+/**
+ * @route DELETE /users/:userId/els
+ * @description Remove a user from an ELS.
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @param {string} userId - The unique identifier of the user
+ * @returns {object} 200 - Success message
+ */
+router.delete('/users/:userId/els', removeUserFromEls);
 
 export default router;

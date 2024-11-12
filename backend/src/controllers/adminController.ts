@@ -342,3 +342,24 @@ export const addUserToEls = async (req: Request, res: Response): Promise<void> =
     res.status(400).json({ error: `Failed to add user to ELS: ${e}` });
   }
 }
+
+export const removeUserFromEls = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = parseInt(req.params.userId);
+
+    const elsDuration = await prisma.eLSDuration.delete({
+      where: {
+        studentId: userId,
+      },
+    });
+
+    if (!elsDuration) {
+      res.status(404).json({ error: 'This user does not have a ELS' });
+      return;
+    }
+
+    res.status(200).json({ message: 'User removed from ELS successfully' });
+  } catch (e) {
+    res.status(400).json({ error: `Failed to remove user from ELS: ${e}` });
+  }
+}
