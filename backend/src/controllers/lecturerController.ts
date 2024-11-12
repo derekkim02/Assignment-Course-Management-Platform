@@ -59,6 +59,7 @@ export const updateAssignment = async (req: Request, res: Response): Promise<voi
       description,
       dueDate,
       isGroupAssignment,
+      autoTestWeighting,
       assignmentId,
     } = req.assignmentData;
 
@@ -76,6 +77,7 @@ export const updateAssignment = async (req: Request, res: Response): Promise<voi
         description: description,
         dueDate: dueDate,
         isGroupAssignment: isGroupAssignment,
+        autoTestWeighting: autoTestWeighting,
       },
     });
 
@@ -113,7 +115,8 @@ export const viewAssignment = async (req: Request, res: Response): Promise<void>
       defaultShCmd: assignment.defaultShCmd,
       autoTestExecutable: assignment.autoTestExecutable,
       testCases: assignment.testCases,
-			submissions: assignment.submissions
+			submissions: assignment.submissions,
+      autoTestWeighting: assignment.autoTestWeighting,
 		});
 
 
@@ -181,11 +184,11 @@ export const viewAllSubmissions = async (req: Request, res: Response): Promise<v
     }
 
     const response = assignment.submissions.map(submission => ({
-      submissionId: submission.id,
-      submitterId: assignment.isGroupAssignment ? submission.groupId : submission.studentId,
-      submissionTime: submission.submissionTime,
-      autoMarkResult: submission.autoMarkResult,
-      latePenalty: submission.latePenalty,
+      id: submission.id,
+			studentId: submission.studentId,
+			groupId: submission.groupId,
+			submissionTime: submission.submissionTime,
+			isMarked: submission.isMarked,
     }));
 
     res.status(200).json(response);
@@ -196,14 +199,40 @@ export const viewAllSubmissions = async (req: Request, res: Response): Promise<v
 
 export const viewSubmission =  async (req: Request, res: Response): Promise<void> => {
   try {
-    const { submissionId } = req.body;
-    const submission = await prisma.submission.findUnique({where: {id: parseInt(submissionId)}});
+    const submissionId = parseInt(req.params.submissionId);
+    const submission = await prisma.submission.findUnique({
+      where: {
+        id: submissionId,
+        assignment: {
+          courseOffering: {
+            lecturer: {
+              email: req.userEmail
+            },
+          },
+        }
+      }
+    });
 
     if (!submission) {
-      res.status(404).json({ error: 'Submission not found' });
+      res.status(404).json({ error: 'Submission not found or you are not a lecturer who can view this submission' });
       return;
     }
-    res.status(200).json(submission);
+
+    const response = {
+			id: submission.id,
+			studentId: submission.studentId,
+			groupId: submission.groupId,
+			submissionTime: submission.submissionTime,
+			submissionType: submission.submissionType,
+			isMarked: submission.isMarked,
+			automark: submission.autoMarkResult,
+			stylemark: submission.styleMarkResult,
+			finalMark: submission.finalMark,
+			comments: submission.markerComments,
+			latePenalty: submission.latePenalty
+		};
+
+    res.status(200).json(response);
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
   }

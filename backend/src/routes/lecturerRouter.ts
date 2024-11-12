@@ -74,6 +74,7 @@ router.get('/courses/:courseId',viewLecturedCourseDetails);
  * @body {string} dueDate - Due date of the assignment in '"YYYY-MM-DD HH:mm"' format
  * @body {boolean} isGroupAssignment - Whether the assignment is a group assignment
  * @body {string} defaultShCmd - Default shell command for the assignment
+ * @body {string} autoTestWeighting - Weighting of the auto test
  * @returns {object} 201 - Created assignment details
  * @returns {number} 201.assignmentId - Unique identifier of the created assignment
  * @returns {string} 201.assignmentName - Name of the assignment
@@ -94,6 +95,7 @@ router.post('/courses/:courseId/assignments', validateAssignmentData, createAssi
  * @body {string} dueDate - Updated due date in "YYYY-MM-DD HH:mm" format
  * @body {boolean} isGroupAssignment - Updated group assignment status
  * @body {string} defaultShCmd - Updated default shell command
+ * @body {string} autoTestWeighting - Updated weighting of the auto test
  * @returns {object} 200 - Updated assignment details
  * @returns {number} 200.assignmentId - Unique identifier of the assignment
  * @returns {string} 200.assignmentName - Name of the assignment
@@ -126,6 +128,7 @@ router.delete('/assignments/:assignmentId', validateLecturerPermissions, deleteA
  * @returns {boolean} 200.isGroupAssignment - Group assignment status
  * @returns {string} 200.defaultShCmd - Default shell command for the assignment
  * @returns {string} 200.autoTestExecutable - Auto test executable for the assignment
+ * @returns {string} 200.autoTestWeighting - Weighting of the auto test
  * @returns {object[]} 200.testCases - List of test cases for the assignment
  * @returns {object[]} 200.submissions - List of submissions for the assignment
  * @returns {object} 404 - Assignment not found
@@ -155,11 +158,12 @@ router.post('/assignments/:assignmentId/testcases', validateLecturerPermissions,
  * @description View all submissions for a specific assignment.
  * @param {string} assignmentId - Unique identifier of the assignment.
  * @header {string} Authorization - Bearer token for authentication. Format: `Bearer {token}`.
- * @returns {object[]} 200 - List of submissions.
- * @returns {number} 200.submissionId - Unique identifier of the submission.
- * @returns {string} 200.submitterId - Identifier of the student or group who submitted.
- * @returns {string} 200.submissionTime - Timestamp of the submission.
- * @returns {boolean} 200.isGroupSubmission - Indicates if the submission is from a group.
+ * @returns {object[]} 200 - List of submissions
+ * @returns {number} 200.id - Unique identifier of the submission
+ * @returns {number?} 200.studentId - Unique identifier of the student
+ * @returns {number?} 200.groupId - Unique identifier of the group
+ * @returns {DateTime} 200.submissionTime - Time of submission
+ * @returns {boolean} 200.isMarked - Whether the submission has been marked
  */
 router.get('/assignments/:assignmentId/submissions', viewAllSubmissions);
 
@@ -168,10 +172,18 @@ router.get('/assignments/:assignmentId/submissions', viewAllSubmissions);
  * @description View the details of a specific submission.
  * @param {string} submissionId - Unique identifier of the submission.
  * @header {string} Authorization - Bearer token for authentication. Format: `Bearer {token}`.
- * @returns {object} 200 - Details of the submission.
- * @returns {number} 200.submissionId - Unique identifier of the submission.
- * @returns {string} 200.submitterId - Identifier of the student or group who submitted.
- * @returns {string} 200.submissionTime - Timestamp of the submission.
+ * @returns {object} 200 - Submission details
+ * @returns {number} 200.id - Unique identifier of the submission
+ * @returns {number?} 200.studentId - Unique identifier of the student
+ * @returns {number?} 200.groupId - Unique identifier of the group
+ * @returns {DateTime} 200.submissionTime - Time of submission
+ * @returns {SubmissionType} 200.submissionType - Type of submission
+ * @returns {boolean} 200.isMarked - Whether the submission has been marked
+ * @returns {number?} 200.automark - Automark result
+ * @returns {number?} 200.stylemark - Stylemark result
+ * @returns {number?} 200.finalMark - Final mark
+ * @returns {string?} 200.comments - Marker comments
+ * @returns {number?} 200.latePenalty - Late penalty
  */
 router.get('/submissions/:submissionId/view', viewSubmission);
 
