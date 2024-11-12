@@ -178,15 +178,15 @@ router.get('/submissions/:submissionId/view', viewSubmission);
 /**
  * @route GET /students
  * @description Search for students in a specific course.
- * @query {string} courseId - Unique identifier of the course.
- * @query {string} [searchTerm] - Optional search term to filter students.
  * @header {string} Authorization - Bearer token for authentication. Format: `Bearer {token}`.
+ * @param {string} courseId - Unique identifier of the course offering.
  * @returns {object[]} 200 - List of students.
  * @returns {string} 200.zid - ZID of the student.
- * @returns {string} 200.name - Name of the student.
+ * @returns {string} 200.fistName - First name of the student.
+ * @returns {string} 200.lastName - Last name of the student.
  * @returns {string} 200.email - Email of the student.
  */
-router.get('/students', getStudentsInCourse);
+router.get('/courses/:courseId/students', getStudentsInCourse);
 
 /**
  * @route GET /students/:studentId

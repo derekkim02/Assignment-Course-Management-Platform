@@ -211,26 +211,32 @@ export const viewSubmission =  async (req: Request, res: Response): Promise<void
 
 export const getStudentsInCourse =  async (req: Request, res: Response): Promise<void> => {
   try {
-    const { courseId, termYear, termTerm } = req.body;
-    const courseOffering = await prisma.courseOffering.findUnique({
+    const offeringId = parseInt(req.params.offeringId);
+    const data = await prisma.courseOffering.findUnique({
       where: {
-        courseId_termYear_termTerm: {
-          courseId: courseId,
-          termYear: termYear,
-          termTerm: termTerm,
-        },
+        id: offeringId,
+        lecturer: {
+          email: req.userEmail
+        }
       },
       include: {
         enrolledStudents: true,
       },
     });
 
-    if (!courseOffering) {
-      res.status(404).json({ error: 'Course not found' });
+    if (!data) {
+      res.status(404).json({ error: 'Course not found or you are not the lecturer for this course' });
       return;
     }
+    
+    const response = data.enrolledStudents.map(student => ({
+      zid: student.zid,
+      firstName: student.firstName,
+      lastName: student.lastName,
+      email: student.email,
+    }));
 
-    res.status(200).json(courseOffering.enrolledStudents);
+    res.status(200).json(response);
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
   }
