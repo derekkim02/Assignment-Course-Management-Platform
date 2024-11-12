@@ -18,7 +18,8 @@ import {
 	markAllSubmissions,
 	downloadStudentSubmission,
 	downloadStudentGrade,
-	updateTest
+	updateTest,
+	deleteTest
 } from '../controllers/lecturerController';
 
 const router = express.Router();
@@ -170,6 +171,17 @@ router.post('/assignments/:assignmentId/testcases', validateLecturerPermissions,
  * @returns {number} 200.assignmentId - Unique identifier of the assignment.
  */
 router.put('/testcases/:testId', updateTest);
+
+/**
+ * @route DELETE /testcases/:testId
+ * @description Delete a test case for a specific assignment.
+ * @param {string} testId - Unique identifier of the test case.
+ * @header {string} Authorization - Bearer token for authentication. Format: `Bearer {token}`.
+ * @returns {object} 200 - Deletion confirmation
+ * @returns {string} 200.message - Success message
+ * @returns {object} 404 - Test case not found
+ */
+router.delete('/testcases/:testId', deleteTest);
 
 /**
  * @route GET /assignments/:assignmentId/submissions
