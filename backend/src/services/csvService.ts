@@ -1,6 +1,7 @@
 import fs from 'fs';
 import csv from 'csv-parser';
 import prisma from '../prismaClient';
+import bcrypt from 'bcrypt';
 import { Day, User, Class } from '@prisma/client';
 interface SMSCsvRow {
 	fullname: string;
@@ -46,6 +47,9 @@ class CsvService {
 	}
 
 	public async importSMSCsvToDbForCourseOffering(courseOfferingId: number): Promise<void> {
+		const defaultPassword = 'default_password';
+		const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
 		return new Promise<void>((resolve, reject) => {
 			const students: User[] = [];
 			const tutors: User[] = [];
@@ -61,7 +65,7 @@ class CsvService {
 			.on('data', (data: SMSCsvRow) => {
 				const { firstName, lastName } = splitFullName(data.fullname);
 				const { firstName: tutorFirstName, lastName: tutorLastName } = splitFullName(data.tutorName);
-				const defaultPassword = 'default_password';
+				
 				const studentId = parseInt(data.zId.replace('z', ''), 10);
 				const tutorId = parseInt(data.tutorId.replace('z', ''), 10);
 				const classId = parseInt(data.classId, 10);
@@ -72,7 +76,7 @@ class CsvService {
 					firstName,
 					lastName,
 					email: data.email,
-					password: defaultPassword,
+					password: hashedPassword,
 					isAdmin: false,
 				});
 
@@ -81,7 +85,7 @@ class CsvService {
 					firstName: tutorFirstName,
 					lastName: tutorLastName,
 					email: data.tutorEmail,
-					password: defaultPassword,
+					password: hashedPassword,
 					isAdmin: false,
 				});
 
