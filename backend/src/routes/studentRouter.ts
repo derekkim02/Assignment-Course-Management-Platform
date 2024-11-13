@@ -81,7 +81,7 @@ router.get('/marks', viewMarks);
  * @route GET /assignments/:assignmentId/view
  * @description View assignment details. This route is used to retrieve the details of a specific assignment, including its submissions.
  * @param {string} assignmentId - Unique identifier of the assignment
- * @header {strinwg} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @returns {object} 200 - Assignment details
  * @returns {string} 200.assignmentName - Name of the assignment
  * @returns {string} 200.description - Description of the assignment

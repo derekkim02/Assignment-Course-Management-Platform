@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Layout, Typography, List, Button, Spin, Skeleton, message } from 'antd';
+import { Layout, Typography, List, Button, Spin, Skeleton, message, Pagination } from 'antd';
 import dayjs from 'dayjs';
 import { bannerStyle, footerLineStyle, listContainerStyle } from '../styles';
-import { useAssignment } from '../../../../queries';
+import { useEnrollment, useAssignment } from '../../../../queries';
 import { format } from 'date-fns';
 import UploadSubmissionModal from './UploadSubmissionModal';
 import { config } from '../../../../config';
 import Cookies from 'js-cookie';
 import AutotestModal from './AutotestModal';
+import MarkingModal from './MarkingModal';
 import AssignmentModal from '../AssignmentModal';
+import { useWatch } from 'antd/es/form/Form';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -17,6 +19,8 @@ const { Title, Paragraph } = Typography;
 interface Submission {
   id: number;
   submissionTime: string;
+  studentId: number;
+  isMarked: boolean;
 }
 
 interface TestCase {
@@ -26,12 +30,36 @@ interface TestCase {
   isHidden: boolean;
 }
 
+interface User {
+  zid: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 const AssignmentDetails: React.FC = () => {
-  const { role, enrolmentId, assignmentId } = useParams<{ role: string, enrolmentId: string, assignmentId: string }>();
-  const { data: assignment, isLoading: isAssignmentLoading, error, refetch: refetchAssignment } = useAssignment(role || '', assignmentId || '');
+  const { role, enrolmentId, assignmentId } = useParams<{
+    role: string;
+    enrolmentId: string;
+    assignmentId: string;
+  }>();
+  const { data: assignment, isLoading: isAssignmentLoading, error: assignmentError, refetch: refetchAssignment } = useAssignment(role || '', assignmentId || '');
+  const { data: courseOffering, refetch: refetchCourseOffering } = useEnrollment(role || '', enrolmentId || '');
   const token = Cookies.get('token') || '';
   const [openModal, setOpenModal] = useState<string>('');
   const [currentTestCaseId, setCurrentTestCaseId] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [filteredStudents, setFilteredStudents] = useState<User[]>(courseOffering?.students || []);
+  const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>(assignment?.submissions || []);
+  const [viewSubmissions, setViewSubmissions] = useState(false);
+  const [titleCard, setTitleCard] = useState(role === 'student' ? 'Submissions' : 'Enrolled Students');
+  const [submissionId, setSubmissionId] = useState('');
+
+  // Runs on page load and whenever courseOffering changes
+  useEffect(() => {
+    handlePageChange(1, pageSize);
+  }, [courseOffering]);
 
   const downloadSubmission = async (submissionId: number) => {
     try {
@@ -61,7 +89,15 @@ const AssignmentDetails: React.FC = () => {
     }
   };
 
+  const handleMarkSubmission = async (submissionId: number) => {
+    setSubmissionId(submissionId.toString());
+
+    setOpenModal('marking');
+    // Mark the submission
+  };
+
   const handleEditTestCase = (testCaseId: number) => {
+    console.log(courseOffering)
     setCurrentTestCaseId(testCaseId.toString());
     setOpenModal('testcase');
   };
@@ -85,6 +121,32 @@ const AssignmentDetails: React.FC = () => {
       });
   };
 
+  const handleViewSubmissions = (zid: number, name: string) => {
+    const filter: Submission[] = assignment.submissions.filter((sub: Submission) => sub.studentId === zid);
+    setFilteredSubmissions(filter);
+
+    setTitleCard(`${name}'s Submissions`);
+    setViewSubmissions(true);
+  };
+
+  // Handle pagination
+  const handlePageChange = (page: number, size?: number) => {
+    refetchCourseOffering();
+    setCurrentPage(page);
+    // Use the provided size or fall back to current pageSize
+    const newSize = size || pageSize;
+    if (size) {
+      setPageSize(size);
+    }
+
+    // const filtered = courseOffering?.students.slice(
+    //   (page - 1) * newSize,
+    //   page * newSize
+    // );
+    // setFilteredStudents(filtered);
+    setFilteredStudents([]);
+  };
+
   if (isAssignmentLoading) {
     return (
       <Layout style={{ padding: '20px' }}>
@@ -95,7 +157,7 @@ const AssignmentDetails: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (assignmentError) {
     return (
       <Layout style={{ padding: '20px' }}>
         <Content style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
@@ -138,24 +200,27 @@ const AssignmentDetails: React.FC = () => {
         )}
       </div>
 
-      <Title level={3}>{role === 'student' ? 'Submissions' : 'Enrolled Students'}</Title>
+        <Title level={3}>{titleCard}</Title>
       {role === 'student' && (
         <Button type="primary" onClick={() => setOpenModal('upload')} style={{ marginBottom: '20px', width: '120px', alignSelf: 'center' }}>
           Add Submission
         </Button>
       )}
       <div style={listContainerStyle}>
-        <div style={{ minWidth: '80%', maxWidth: '90%', border: '1px solid #d9d9d9', padding: '30px', borderRadius: '10px' }}>
-          {role === 'student' && (
+        <div style={{ minWidth: '80%', maxWidth: '90%', border: '1px solid #d9d9d9', borderRadius: '10px' }}>
+          {(role === 'student' || (role === 'lecturer' && viewSubmissions)) && (
             <List
               className="demo-loadmore-list"
               loading={isAssignmentLoading}
               itemLayout="horizontal"
-              dataSource={assignment.submissions}
+              dataSource={filteredSubmissions}
               renderItem={(submission: Submission, index: number) => (
-                <List.Item style={{ width: '100%' }}
+                <List.Item style={{ paddingRight: '10px', paddingLeft: '10px', width: '100%' }}
                   actions={[
-                    <a key="list-loadmore-download" onClick={() => downloadSubmission(submission.id)}>download</a>
+                    <>
+                      <a key="list-loadmore-download" onClick={() => downloadSubmission(submission.id)}>Download</a>
+                      {role === 'lecturer' && (<><br /><a onClick={() => handleMarkSubmission(submission.id)}>{submission.isMarked ? 'Remark' : 'Mark'}</a></>)}
+                    </>
                   ]}
                 >
                   <Skeleton loading={isAssignmentLoading} active>
@@ -169,10 +234,41 @@ const AssignmentDetails: React.FC = () => {
               )}
             />
           )}
+          {role === 'lecturer' && !viewSubmissions && (
+            <>
+              <List
+                className="demo-loadmore-list"
+                itemLayout="horizontal"
+                dataSource={filteredStudents}
+                renderItem={(student: { zid: number; firstName: string; lastName: string; email: string }) => (
+                  <List.Item onClick={() => handleViewSubmissions(student.zid, `${student.firstName} ${student.lastName}`)}>
+                    <List.Item.Meta
+                      title={`${student.firstName} ${student.lastName}`}
+                      description={
+                        <>
+                          Email: {student.email}
+                          <br />
+                          ZID: {student.zid}
+                        </>
+                      }
+                    />
+                  </List.Item>
+                )}
+              />
+              {/* <Pagination
+                defaultCurrent={1}
+                current={currentPage}
+                pageSize={pageSize}
+                total={courseOffering?.students.length}
+                align="center"
+                onChange={handlePageChange}
+              />; */}
+            </>
+          )}
         </div>
       </div>
 
-      {role === 'lecturer' && (
+      {role === 'lecturer' && !viewSubmissions && (
         <>
          <Title level={3}>Test Cases</Title>
           <div style={listContainerStyle}>
@@ -191,7 +287,7 @@ const AssignmentDetails: React.FC = () => {
                       <Skeleton loading={isAssignmentLoading} active>
                         <List.Item.Meta
                           style={{ textAlign: 'left' }}
-                          title={`${index + 1}`} // Increment the title by 1
+                          title={`Test ${index + 1}`} // Increment the title by 1
                           description={
                             <div>
                               <div><strong>Input:</strong> {testCase.input}</div>
@@ -231,6 +327,15 @@ const AssignmentDetails: React.FC = () => {
         closeModal={() => setOpenModal('')}
         assignmentId={assignmentId || ''}
         refetchAssignment={refetchAssignment}
+      />
+
+      <MarkingModal
+        isModalVisible={openModal === 'marking'}
+        submissionId={submissionId || ''}
+        role={role || ''}
+        closeModal={() => setOpenModal('')}
+        refetchAssignment={refetchAssignment}
+
       />
     </Layout>
   );

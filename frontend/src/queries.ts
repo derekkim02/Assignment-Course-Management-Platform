@@ -78,3 +78,10 @@ export const useAssignment = (role: string, assignmentId: string) => {
     queryFn: () => fetchWithAuth(`api/${role}/assignments/${assignmentId}/view`, {})
   });
 };
+
+// export const useGetCourseOffering = (role: string, assignmentId: string) => {
+//   return useQuery({
+//     queryKey: ['assignment', assignmentId],
+//     queryFn: () => fetchWithAuth(`api/${role}/courses/$enrolment/submissions`, {})
+//   });
+// };
