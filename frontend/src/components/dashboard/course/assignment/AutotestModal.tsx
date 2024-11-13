@@ -14,7 +14,7 @@ interface AutotestModalProps {
 
 const AutotestModal: React.FC<AutotestModalProps> = ({ isModalVisible, assignmentId, testCaseId, testCases, closeModal, refetchAssignment }) => {
   const [form] = Form.useForm();
-
+  const token = Cookies.get('token') || '';
   const testCase = testCases ? testCases.find((testCase) => testCase.id === parseInt(testCaseId)) : null;
 
   useEffect(() => {
@@ -34,44 +34,71 @@ const AutotestModal: React.FC<AutotestModalProps> = ({ isModalVisible, assignmen
     closeModal();
   };
 
-  const handleOk = async () => {
+  const handleCreate = async () => {
     try {
       const values = await form.validateFields();
-      await createTestCase(values);
-      refetchAssignment();
-      closeModalWrapper();
-      message.success('Test case created successfully.');
+      sendRequest(`${config.backendUrl}/api/lecturer/assignments/${assignmentId}/testcases`, 'POST', values).then(() => {
+        refetchAssignment();
+        closeModalWrapper();
+        message.success('Test case created successfully.');
+      });
     } catch (error) {
       message.error('Failed to create test case.');
     }
   };
 
-  const createTestCase = async (values: any) => {
-    const token = Cookies.get('token') || '';
+  const handleEdit = async () => {
+    try {
+      const values = await form.validateFields();
+      sendRequest(`${config.backendUrl}/api/lecturer/testcases/${testCaseId}`, 'PUT', values).then(() => {
+        refetchAssignment();
+        closeModalWrapper();
+        message.success('Test case updated successfully.');
+      });
+    } catch (error) {
+      message.error('Failed to update test case.');
+    }
+  };
 
+  const sendRequest = (url: string, method: string, values: any) => {
     const payload = {
       input: values.input,
       output: values.output,
-      isHidden: values.isHidden || false,
+      isHidden: Boolean(values.isHidden),
     };
-    const response = await fetch(`${config.backendUrl}/api/lecturer/assignments/${assignmentId}/testcases`, {
-      method: 'POST',
+
+    return fetch(url, {
+      method,
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(payload),
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error('Failed');
+      }
+      return response.json();
     });
-
-    if (!response.ok) {
-      throw new Error('Failed to create test case');
-    }
-    const result = await response.json();
-    message.success('Creation successful:', result);
   };
 
   const handleDelete = async () => {
-    console.log('Delete test case:', testCaseId);
+    fetch(`${config.backendUrl}/api/lecturer/testcases/${testCaseId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    ).then((response) => {
+      if (!response.ok) {
+        throw new Error('Failed to delete test case');
+      }
+      refetchAssignment();
+      closeModalWrapper();
+      message.success('Test case deleted successfully.');
+    });
   };
 
   return (
@@ -89,7 +116,7 @@ const AutotestModal: React.FC<AutotestModalProps> = ({ isModalVisible, assignmen
           <Button key="cancel" onClick={closeModalWrapper} style={{ marginRight: '8px' }}>
             Cancel
           </Button>
-          <Button key="save" type="primary" onClick={handleOk}>
+          <Button key="save" type="primary" onClick={testCase ? handleEdit : handleCreate}>
             Save
           </Button>
         </div>

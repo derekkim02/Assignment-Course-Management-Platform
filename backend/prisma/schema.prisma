@@ -179,6 +179,7 @@ model Group {
 
 model ELSType {
   id                Int                @id @default(autoincrement())
+  name              String
   // How many extra days are allowed for the assignment
   extraDays         Int                @default(0)
 
