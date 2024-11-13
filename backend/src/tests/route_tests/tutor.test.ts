@@ -165,3 +165,171 @@ const generateDbData = async (): Promise<{
 		studentId: zid2,
 	};
 }
+/*
+describe('GET api/tutor/courses', () => {
+	test('Successful view tutor courses', async () => {
+		const {token3} = await generateDbData();
+		await request(app)
+		.get(`/api/tutor/courses`)
+		.set('authorization', `Bearer ${token3}`)
+		.expect('Content-Type', /json/)
+		.expect(200)
+	});
+})
+
+describe('GET api/tutor/courses/:courseId', () => {
+	test('Successful view specific tutor course details', async () => {
+		const {token3, courseOfferingId} = await generateDbData();
+		await request(app)
+		.get(`/api/tutor/courses/${courseOfferingId}`)
+		.set('authorization', `Bearer ${token3}`)
+		.expect('Content-Type', /json/)
+		.expect(200)
+	});
+
+    test('Error view specific tutor course details, invalid course id', async () => {
+		const {token3} = await generateDbData();
+		await request(app)
+		.get(`/api/tutor/courses/${123987}`)
+		.set('authorization', `Bearer ${token3}`)
+		.expect('Content-Type', /json/)
+        .expect({ error: 'Course not found or you are not the tutor for this course' })
+		.expect(404)
+	});
+})
+
+describe('GET api/tutor/assignments/:assignmentId', () => {
+	test('Successful view specific assignment details', async () => {
+		const {token3, assigmentId} = await generateDbData();
+		await request(app)
+		.get(`/api/tutor/assignments/${assigmentId}`)
+		.set('authorization', `Bearer ${token3}`)
+		.expect('Content-Type', /json/)
+		.expect(200)
+	});
+
+	test('Error view specific assignment details, invalid assignmentId', async () => {
+		const {token3} = await generateDbData();
+		await request(app)
+		.get(`/api/tutor/assignments/${123987}`)
+		.set('authorization', `Bearer ${token3}`)
+		.expect('Content-Type', /json/)
+		.expect({ error: 'Assignment not found or you are not the tutor for this course' })
+		.expect(404)
+	});
+})
+
+describe('GET api/tutor/assignments/:assignmentId/submissions', () => {
+	const py3FilePath = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz');
+    test('Successful view all submissions', async () => {
+        const {token3, token2, assigmentId} = await generateDbData();
+
+		// Submits
+		await request(app)
+			.post(`/api/student/assignments/${assigmentId}/submit`)
+			.set('authorization', `Bearer ${token2}`)
+			.attach('submission', py3FilePath)
+			.expect(201);
+
+        await request(app)
+        .get(`/api/tutor/assignments/${assigmentId}/submissions`)
+        .set('authorization', `Bearer ${token3}`)
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+
+	test('Error view all submissions, invalid assignment id', async () => {
+        const {token3} = await generateDbData();
+        await request(app)
+        .get(`/api/lecturer/assignments/${123987}/submissions`)
+        .set('authorization', `Bearer ${token3}`)
+        .expect('Content-Type', /json/)
+		.expect({ error: 'Assignment not found' })
+        .expect(404);
+    });
+})
+
+describe('GET api/tutor/submissions/:submissionId/', () => {
+	const py3FilePath = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz');
+    test('Successful view submission', async () => {
+        const {token3, token2, assigmentId} = await generateDbData();
+
+		// Submits
+		const submission = await request(app)
+			.post(`/api/student/assignments/${assigmentId}/submit`)
+			.set('authorization', `Bearer ${token2}`)
+			.attach('submission', py3FilePath)
+			.expect(201);
+		const submissionId = submission.body.submissionId;
+
+        await request(app)
+        .get(`/api/tutor/submissions/${submissionId}`)
+        .set('authorization', `Bearer ${token3}`)
+		.send({
+			submissionId: submissionId,
+		})
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+
+	test('Error view submission, submission not found', async () => {
+        const {token3} = await generateDbData();
+		const submissionId = 123
+        await request(app)
+        .get(`/api/tutor/submissions/${submissionId}`)
+        .set('authorization', `Bearer ${token3}`)
+		.send({
+			submissionId: submissionId,
+		})
+        .expect('Content-Type', /json/)
+		.expect({ error: 'Submission not found or you are not the tutor for this course' })
+        .expect(404);
+    });
+})
+*/
+
+// describe('PUT api/tutor/submissions/:submissionId/', () => {
+//     const py3FilePath = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz');
+//     test('Successful mark assignment', async () => {
+//         const {token2, token3, assigmentId} = await generateDbData();
+
+//         const submission = await request(app)
+// 			.post(`/api/student/assignments/${assigmentId}/submit`)
+// 			.set('authorization', `Bearer ${token2}`)
+// 			.attach('submission', py3FilePath)
+// 			.expect(201);
+// 		const submissionId = submission.body.submissionId;
+
+//         //router.put('submissions/:submissionId', markSubmission);
+//         await request(app)
+//         .put(`/api/tutor/submissions/${submissionId}`)
+//         .set('authorization', `Bearer ${token3}`)
+//         .send({
+//             styleMark: 5,
+//             comments: 'Example tutor comment on submission',
+//         })
+//         .expect('Content-Type', /json/)
+//         .expect({ message: 'Submissions marked' })
+//         .expect(200);
+//     });
+
+//     test('Error mark assignment, assignment not found', async () => {
+//         const {token3} = await generateDbData();
+//         await request(app)
+//         .put(`/api/tutor/submissions/${123987}`)
+//         .set('authorization', `Bearer ${token3}`)
+//         .send({
+//             styleMark: 5,
+//             comments: 'Example tutor comment on submission',
+//         })
+//         .expect('Content-Type', /json/)
+//         .expect({ error: 'Assignment not found or you are not the lecturer for this course' })
+//         .expect(404);
+//     });
+// })
+
+/*
+router.put('submissions/:submissionId', markSubmission);
+router.get('/submissions/:submissionId/download', downloadSubmission);
+router.get('/courses/:courseId/students', viewStudents);
+*/
