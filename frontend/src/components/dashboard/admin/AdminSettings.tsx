@@ -37,7 +37,7 @@ const AdminSettings: React.FC = () => {
   const { data: courses, isLoading: isLoadingCourses, refetch: refetchCourses } = useCourses('IgiveAdmin');
   const { data: courseOfferings, isLoading: isLoadingCourseOfferings } = useAdminCourseOfferings();
 
-  const [bottom] = useState<TablePaginationPosition<User>>('bottomRight');
+  const [paginationPos] = useState<TablePaginationPosition<User>>('bottomRight');
 
   const [currentCourseOfferingId, setCurrentCourseOfferingId] = useState('1');
 
@@ -132,7 +132,7 @@ const AdminSettings: React.FC = () => {
           columns={userColumns}
           rowKey="zid"
           loading={isLoadingUsers}
-          pagination={{ position: [bottom] }}
+          pagination={{ position: [paginationPos] }}
           scroll={{ x: 'max-content' }}
         />
         <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px', marginBottom: '20px' }}>
