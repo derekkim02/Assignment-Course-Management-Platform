@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Layout, Table, Button, message, Collapse } from 'antd';
+import type { TableProps } from 'antd';
 import { useUsers, useCourses, useAdminCourseOfferings } from '../../../queries';
 import Cookies from 'js-cookie';
 import { config } from '../../../config';
@@ -24,11 +25,19 @@ interface Course {
   term: string;
 }
 
+type ColumnsType<T extends object> = TableProps<T>['columns'];
+type TablePagination<T extends object> = NonNullable<Exclude<TableProps<T>['pagination'], boolean>>;
+type TablePaginationPosition<T extends object> = NonNullable<
+  TablePagination<T>['position']
+>[number];
+
 const AdminSettings: React.FC = () => {
   const token = Cookies.get('token') || '';
   const { data: users, isLoading: isLoadingUsers, refetch: refetchUsers } = useUsers();
   const { data: courses, isLoading: isLoadingCourses, refetch: refetchCourses } = useCourses('IgiveAdmin');
   const { data: courseOfferings, isLoading: isLoadingCourseOfferings } = useAdminCourseOfferings();
+
+  const [bottom] = useState<TablePaginationPosition<User>>('bottomRight');
 
   const [currentCourseOfferingId, setCurrentCourseOfferingId] = useState('1');
 
@@ -123,7 +132,7 @@ const AdminSettings: React.FC = () => {
           columns={userColumns}
           rowKey="zid"
           loading={isLoadingUsers}
-          pagination={false}
+          pagination={{ position: [bottom] }}
           scroll={{ x: 'max-content' }}
         />
         <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px', marginBottom: '20px' }}>
