@@ -4,6 +4,8 @@ import request from 'supertest';
 import app from '../../app';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import tar from 'tar-stream';
+import zlib from 'zlib';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -423,7 +425,7 @@ describe('POST api/lecturer/assignments/:assignmentId/testcases', () => {
 
 describe('GET api/lecturer/courses/:courseId/students', () => {
     test('Successful get students in course', async () => {
-        const {token1, courseOfferingId, courseOfferingTerm, courseOfferingYear} = await generateDbData();
+        const {token1, courseOfferingId} = await generateDbData();
         await request(app)
         .get(`/api/lecturer/courses/${courseOfferingId}/students`)
         .set('authorization', `Bearer ${token1}`)
@@ -432,7 +434,7 @@ describe('GET api/lecturer/courses/:courseId/students', () => {
     });
 
 	test('Error get students in course, course not found', async () => {
-        const {token1, courseOfferingId, courseOfferingTerm, courseOfferingYear} = await generateDbData();
+        const {token1} = await generateDbData();
         await request(app)
         .get(`/api/lecturer/courses/${123987}/students`)
         .set('authorization', `Bearer ${token1}`)
@@ -472,7 +474,7 @@ describe('GET api/lecturer/students/:studentId', () => {
 describe('GET api/lecturer/submissions/:submissionId/view', () => {
 	const py3FilePath = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz');
     test('Successful view submission', async () => {
-        const {token1, token2, courseOfferingId, assigmentId} = await generateDbData();
+        const {token1, token2, assigmentId} = await generateDbData();
 
 		// Submits
 		const submission = await request(app)
@@ -493,7 +495,7 @@ describe('GET api/lecturer/submissions/:submissionId/view', () => {
     });
 
 	test('Error view submission, submission not found', async () => {
-        const {token1, courseOfferingId, assigmentId} = await generateDbData();
+        const {token1} = await generateDbData();
 		const submissionId = 123
         await request(app)
         .get(`/api/lecturer/submissions/${submissionId}/view`)
@@ -507,16 +509,143 @@ describe('GET api/lecturer/submissions/:submissionId/view', () => {
     });
 })
 
-/*
-// View all submissions for an assignment
-router.get('/courses/:courseId/assignments/:assignmentId/submissions', );
+describe('GET api/lecturer/assignments/:assignmentId/submissions', () => {
+	const py3FilePath = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz');
+    test('Successful view all submissions', async () => {
+        const {token1, token2, assigmentId} = await generateDbData();
 
-// Download a student submission
-router.get('/courses/:courseId/assignments/:assignmentId/submissions/:submissionId/download', );
+		// Submits
+		await request(app)
+			.post(`/api/student/assignments/${assigmentId}/submit`)
+			.set('authorization', `Bearer ${token2}`)
+			.attach('submission', py3FilePath)
+			.expect(201);
 
-// Upload a CSV file to update student database
-router.post('/upload-student-csv', );
+        await request(app)
+        .get(`/api/lecturer/assignments/${assigmentId}/submissions`)
+        .set('authorization', `Bearer ${token1}`)
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
 
-// Downloads a student's grade
-router.get('/assignments/:assignmentId/grades', downloadStudentGrade);
-*/
+	test('Error view all submissions, invalid assignment id', async () => {
+        const {token1} = await generateDbData();
+        await request(app)
+        .get(`/api/lecturer/assignments/${123987}/submissions`)
+        .set('authorization', `Bearer ${token1}`)
+        .expect('Content-Type', /json/)
+		.expect({ error: 'Assignment not found' })
+        .expect(404);
+    });
+})
+
+describe('GET api/lecturer/submissions/:submissionId/download', () => {
+	async function containsMainPy(tarGzBuffer: Buffer): Promise<boolean> {
+		return new Promise((resolve, reject) => {
+			const extract = tar.extract();
+			const gunzip = zlib.createGunzip();
+
+			let mainPyFound = false;
+
+			extract.on('entry', (header, stream, next) => {
+				// Check if the file name is 'main.py'
+				if (header.name.endsWith('main.py')) {
+					mainPyFound = true;
+					stream.resume(); // Proceed to next file
+				} else {
+					stream.resume(); // Resume to next file if not 'main.py'
+				}
+				stream.on('end', next);
+			});
+
+			extract.on('finish', () => resolve(mainPyFound));
+			extract.on('error', reject);
+			gunzip.on('error', reject);
+
+			// Pipe the tar.gz data through gunzip and into tar-stream
+			gunzip.pipe(extract);
+			gunzip.end(tarGzBuffer);
+		});
+	}
+	test('Successful lecturer get submission', async () => {
+		const testFile = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz')
+		const {token1, token2, assigmentId} = await generateDbData();
+		const submission = await request(app)
+			.post(`/api/student/assignments/${assigmentId}/submit`)
+			.set('authorization', `Bearer ${token2}`)
+			.attach('submission', testFile)
+			.expect(201);
+		const submissionId = submission.body.submissionId;
+		const getResponse = await request(app)
+			.get(`/api/lecturer/submissions/${submissionId}/download`)
+			.set('authorization', `Bearer ${token1}`)
+			.expect('Content-Type', 'application/gzip')
+			.expect(200)
+			.buffer()
+			.parse((res, callback) => {
+				res.setEncoding('binary');
+				let data = '';
+				res.on('data', (chunk) => {
+					data += chunk;
+				});
+				res.on('end', () => {
+					callback(null, Buffer.from(data, 'binary'));
+				});
+			});
+		const tarGzBuffer = getResponse.body;
+		expect(await containsMainPy(tarGzBuffer)).toBe(true);
+		});
+
+	test('Error lecturer get submission, invalid submissionId', async () => {
+		const {token1} = await generateDbData();
+		await request(app)
+			.get(`/api/lecturer/submissions/${123987}/download`) // Invalid submissionId
+			.set('authorization', `Bearer ${token1}`)
+			.expect('Content-Type', /json/)
+			.expect(404)
+			.expect({ error: 'Submission not found' });
+	});
+});
+
+const class1 = path.join(__dirname, '..', 'sample_csv', 'class1.csv');
+describe('POST /api/lecturer/course-offerings/:courseOfferings/upload-student-csv', () => {
+	test('Successful import from csv from lecturer route', async () => {
+		const {token1, courseOfferingId} = await generateDbData();
+
+		await request(app).post(`/api/lecturer/course-offerings/${courseOfferingId}/upload-student-csv`)
+			.set('Authorization', `Bearer ${token1}`)
+			.attach('csv', class1)
+			.expect(201);
+
+		const courseOffering = await request(app).get('/api/admin/course-offerings/1')
+			.set('Authorization', `Bearer ${token1}`)
+			.expect(200);
+
+		const users = await request(app).get('/api/admin/users')
+			.set('Authorization', `Bearer ${token1}`)
+			.expect(200);
+
+		expect(users.body.length).toBe(221);
+		expect(courseOffering.body.students.length).toBe(213);
+	});
+});
+
+describe('GET api/lecturer/assignments/:assignmentId/grades', () => {
+	test('Successful lecturer get grade', async () => {
+		const testFile = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz')
+		const {token1, token2, assigmentId} = await generateDbData();
+
+		// Submits
+		await request(app)
+			.post(`/api/student/assignments/${assigmentId}/submit`)
+			.set('authorization', `Bearer ${token2}`)
+			.attach('submission', testFile)
+			.expect(201);
+
+			await request(app)
+			.get(`/api/lecturer/assignments/${assigmentId}/grades`)
+			.set('authorization', `Bearer ${token1}`)
+			.expect('Content-Type', /text\/csv/)
+			.expect(200)
+		});
+});

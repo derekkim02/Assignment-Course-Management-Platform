@@ -308,26 +308,57 @@ describe('GET api/student/courses/:courseId', () => {
 	});
 })
 
-// describe('GET api/student/marks', () => {
-// 	test('Successful view marks', async () => {
-// 		const testFile = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz')
-// 		const {token2, assigmentId} = await generateDbData();
-// 		const submission = await request(app)
-// 			.post(`/api/student/assignments/${assigmentId}/submit`)
-// 			.set('authorization', `Bearer ${token2}`)
-// 			.attach('submission', testFile)
-// 			.expect(201);
-// 		const submissionId = submission.body.submissionId;
-// 		// MARK SUBMISSION HERE
-// 	});
-// })
+describe('GET api/student/marks', () => {
+	test('Successful view marks', async () => {
+		const testFile = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz')
+		const {token1, token2, assigmentId} = await generateDbData();
+		await request(app)
+			.post(`/api/student/assignments/${assigmentId}/submit`)
+			.set('authorization', `Bearer ${token2}`)
+			.attach('submission', testFile)
+			.expect(201);
+		// MARKS SUBMISSIONS
+		await request(app)
+        .post(`/api/lecturer/assignments/${assigmentId}/mark`)
+        .set('authorization', `Bearer ${token1}`)
+        .expect(200);
 
-/*
-// View specific assignment
-router.get('/assignments/:assignmentId/view', viewAssignment);
+		await request(app)
+        .get(`/api/student/marks`)
+        .set('authorization', `Bearer ${token2}`)
+		.expect('Content-Type', /json/)
+        .expect(200);
+	});
+})
 
-// View all student assignments
-router.get('/assignments', viewAssignments);
+describe('GET api/student/assignments/:assignmentId/view', () => {
+	test('Successful view specific assignment details', async () => {
+		const {token2, assigmentId} = await generateDbData();
+		await request(app)
+		.get(`/api/student/assignments/${assigmentId}/view`)
+		.set('authorization', `Bearer ${token2}`)
+		.expect('Content-Type', /json/)
+		.expect(200)
+	});
 
+	test('Error view specific assignment details, invalid assignmentId', async () => {
+		const {token2} = await generateDbData();
+		await request(app)
+		.get(`/api/student/assignments/${123987}/view`)
+		.set('authorization', `Bearer ${token2}`)
+		.expect('Content-Type', /json/)
+		.expect({ error: 'Assignment not found or you are not enrolled in the course.' })
+		.expect(404)
+	});
+})
 
-*/
+describe('GET api/student/assignment', () => {
+	test('Successful view all assignment details', async () => {
+		const {token2} = await generateDbData();
+		await request(app)
+		.get(`/api/student/assignments`)
+		.set('authorization', `Bearer ${token2}`)
+		.expect('Content-Type', /json/)
+		.expect(200)
+	});
+})
