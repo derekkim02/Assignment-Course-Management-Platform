@@ -1,4 +1,4 @@
-import {beforeEach, describe, expect, test} from '@jest/globals';
+import {beforeEach, describe, test} from '@jest/globals';
 import { resetDatabase } from '../utils';
 import request from 'supertest';
 import app from '../../app';
@@ -17,7 +17,6 @@ const generateDbData = async (): Promise<{
 	token2: string,
     token3: string,
 	assigmentId: number,
-	groupAssignmentId: number,
 	courseId: number,
 	courseOfferingId: number,
 	courseOfferingTerm: number,
@@ -140,24 +139,11 @@ const generateDbData = async (): Promise<{
 			autoTestWeighting: 0.6,
 		}).expect(201);
 
-	const groupAssignment = await request(app)
-	.post(`/api/lecturer/courses/${courseOffering.body.id}/assignments`)
-	.set('authorization', `Bearer ${token1}`)
-	.send({
-		assignmentName: 'Python 3 Example',
-		description: 'This is an example assignment for Python 3',
-		dueDate: '2024-12-21 20:00',
-		isGroupAssignment: true,
-		defaultShCmd: 'python3 main.py',
-		autoTestWeighting: 0.6,
-	}).expect(201);
-
 	return {
 		token1,
 		token2,
         token3,
 		assigmentId: assignment.body.id,
-		groupAssignmentId: groupAssignment.body.id,
 		courseId: course.body.id,
 		courseOfferingId: courseOffering.body.id,
 		courseOfferingTerm: courseOffering.body.termTerm,
@@ -165,7 +151,7 @@ const generateDbData = async (): Promise<{
 		studentId: zid2,
 	};
 }
-/*
+
 describe('GET api/tutor/courses', () => {
 	test('Successful view tutor courses', async () => {
 		const {token3} = await generateDbData();
@@ -286,50 +272,108 @@ describe('GET api/tutor/submissions/:submissionId/', () => {
         .expect(404);
     });
 })
-*/
 
-// describe('PUT api/tutor/submissions/:submissionId/', () => {
-//     const py3FilePath = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz');
-//     test('Successful mark assignment', async () => {
-//         const {token2, token3, assigmentId} = await generateDbData();
 
-//         const submission = await request(app)
-// 			.post(`/api/student/assignments/${assigmentId}/submit`)
-// 			.set('authorization', `Bearer ${token2}`)
-// 			.attach('submission', py3FilePath)
-// 			.expect(201);
-// 		const submissionId = submission.body.submissionId;
+///////////////////router.put('submissions/:submissionId', markSubmission);
+describe('PUT api/tutor/submissions/:submissionId/', () => {
+    const py3FilePath = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz');
+    test('Successful mark assignment', async () => {
+        const {token1, token2, token3, assigmentId} = await generateDbData();
 
-//         //router.put('submissions/:submissionId', markSubmission);
-//         await request(app)
-//         .put(`/api/tutor/submissions/${submissionId}`)
-//         .set('authorization', `Bearer ${token3}`)
-//         .send({
-//             styleMark: 5,
-//             comments: 'Example tutor comment on submission',
-//         })
-//         .expect('Content-Type', /json/)
-//         .expect({ message: 'Submissions marked' })
-//         .expect(200);
-//     });
+        const submission = await request(app)
+			.post(`/api/student/assignments/${assigmentId}/submit`)
+			.set('authorization', `Bearer ${token2}`)
+			.attach('submission', py3FilePath)
+			.expect(201);
+		const submissionId = submission.body.submissionId;
 
-//     test('Error mark assignment, assignment not found', async () => {
-//         const {token3} = await generateDbData();
-//         await request(app)
-//         .put(`/api/tutor/submissions/${123987}`)
-//         .set('authorization', `Bearer ${token3}`)
-//         .send({
-//             styleMark: 5,
-//             comments: 'Example tutor comment on submission',
-//         })
-//         .expect('Content-Type', /json/)
-//         .expect({ error: 'Assignment not found or you are not the lecturer for this course' })
-//         .expect(404);
-//     });
-// })
+        await request(app)
+        .post(`/api/lecturer/assignments/${assigmentId}/testcases`)
+        .set('authorization', `Bearer ${token1}`)
+		.send({
+			input: 'input string',
+			output: 'output string',
+			isHidden: false,
+		})
+        .expect(201);
+        // Marks
+        await request(app)
+        .post(`/api/lecturer/assignments/${assigmentId}/mark`)
+        .set('authorization', `Bearer ${token1}`)
+        .expect(200);
 
-/*
-router.put('submissions/:submissionId', markSubmission);
-router.get('/submissions/:submissionId/download', downloadSubmission);
-router.get('/courses/:courseId/students', viewStudents);
-*/
+        await request(app)
+        .put(`/api/tutor/submissions/${submissionId}`)
+        .set('authorization', `Bearer ${token3}`)
+        .send({
+            styleMark: 5,
+            comments: 'Example tutor comment on submission',
+        })
+        .expect('Content-Type', /json/)
+        // .expect({ message: 'Submissions marked' })
+        // .expect(200);
+    });
+
+    test('Error mark assignment, assignment not found', async () => {
+        const {token3} = await generateDbData();
+        await request(app)
+        .put(`/api/tutor/submissions/${123987}`)
+        .set('authorization', `Bearer ${token3}`)
+        .send({
+            styleMark: 5,
+            comments: 'Example tutor comment on submission',
+        })
+        .expect('Content-Type', /json/)
+        .expect({ error: 'Submission does not exist or you are not the tutor for this course' })
+        .expect(404);
+    });
+})
+
+describe('GET api/tutor/submissions/:submissionId/download', () => {
+	test('Successful tutor get submission', async () => {
+		const testFile = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz')
+		const {token3, token2, assigmentId} = await generateDbData();
+		const submission = await request(app)
+			.post(`/api/student/assignments/${assigmentId}/submit`)
+			.set('authorization', `Bearer ${token2}`)
+			.attach('submission', testFile)
+			.expect(201);
+		const submissionId = submission.body.submissionId;
+		await request(app)
+			.get(`/api/tutor/submissions/${submissionId}/download`)
+			.set('authorization', `Bearer ${token3}`)
+			.expect('Content-Type', 'application/gzip')
+			.expect(200)
+		});
+
+	test('Error lecturer get submission, invalid submissionId', async () => {
+		const {token3} = await generateDbData();
+		await request(app)
+			.get(`/api/tutor/submissions/${123987}/download`) // Invalid submissionId
+			.set('authorization', `Bearer ${token3}`)
+			.expect('Content-Type', /json/)
+			.expect(404)
+			.expect({ error: 'Submission not found or you are not the tutor for this course' });
+	});
+});
+
+describe('GET api/tutor/courses/:courseId/students', () => {
+    test('Successful get students in course', async () => {
+        const {token3, courseOfferingId} = await generateDbData();
+        await request(app)
+        .get(`/api/tutor/courses/${courseOfferingId}/students`)
+        .set('authorization', `Bearer ${token3}`)
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+
+	test('Error get students in course, course not found', async () => {
+        const {token3} = await generateDbData();
+        await request(app)
+        .get(`/api/tutor/courses/${123987}/students`)
+        .set('authorization', `Bearer ${token3}`)
+        .expect('Content-Type', /json/)
+		.expect({ error: 'Course not found or you are not the tutor for this course' })
+        .expect(404);
+    });
+})
