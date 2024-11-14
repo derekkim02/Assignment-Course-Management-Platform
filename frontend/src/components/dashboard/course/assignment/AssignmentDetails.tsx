@@ -155,11 +155,12 @@ const AssignmentDetails: React.FC = () => {
         if (!response.ok) {
           throw new Error('Failed to collect grades!');
         }
+        // console.log(response);
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `assignment${assignmentId}_grades.tar.gz`; // Set the desired file name
+        a.download = `assignment${assignmentId}_grades.csv`; // Set the desired file name
         document.body.appendChild(a);
         a.click();
         a.remove();
