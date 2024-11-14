@@ -313,6 +313,26 @@ export const updateEls = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
+export const deleteEls = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const elsId = parseInt(req.params.elsId);
+    await prisma.eLSDuration.deleteMany({
+      where: {
+        elsTypeId: elsId
+      }
+    });
+
+    await prisma.eLSType.delete({
+      where: {
+        id: elsId
+      }
+    });
+    res.status(200).json({ message: 'ELS deleted successfully' });
+  } catch (e) {
+    res.status(400).json({ error: `Failed to delete ELS: ${e}` });
+  }
+}
+
 export const addUserToEls = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = parseInt(req.params.userId);

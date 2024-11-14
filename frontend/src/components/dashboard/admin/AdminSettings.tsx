@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Layout, Table, Button, message, Collapse } from 'antd';
+import { Layout, Table, Button, message, Collapse, Spin, Empty } from 'antd';
 import type { TableProps } from 'antd';
-import { useUsers, useCourses, useAdminCourseOfferings } from '../../../queries';
+import { useUsers, useCourses, useAdminCourseOfferings, useElsList } from '../../../queries';
 import Cookies from 'js-cookie';
 import { config } from '../../../config';
 import CreateCourseModal from './CreateCourseModal';
 import CreateCourseOfferingModal from './CreateCourseOfferingModal';
 import EditCourseOfferingModal from './EditCourseOfferingModal';
-import CreateElsModal from './CreateElsModal';
+import EditElsStudentModal from './EditElsStudentModal';
+import ElsModal from './ElsModal';
 
 const { Content } = Layout;
 const { Panel } = Collapse;
@@ -32,15 +33,24 @@ type TablePaginationPosition<T extends object> = NonNullable<
   TablePagination<T>['position']
 >[number];
 
+interface Els {
+  id: string;
+  name: string;
+}
+
 const AdminSettings: React.FC = () => {
   const token = Cookies.get('token') || '';
   const { data: users, isLoading: isLoadingUsers, refetch: refetchUsers } = useUsers();
   const { data: courses, isLoading: isLoadingCourses, refetch: refetchCourses } = useCourses('IgiveAdmin');
   const { data: courseOfferings, isLoading: isLoadingCourseOfferings } = useAdminCourseOfferings();
+  const { data: elsList, isLoading: isElsListLoading, refetch: refetchElsList } = useElsList();
 
   const [paginationPos] = useState<TablePaginationPosition<User>>('bottomRight');
   const [currentCourseOfferingId, setCurrentCourseOfferingId] = useState('1');
   const [openModal, setOpenModal] = useState('');
+  const [editElsStudentId, setEditElsStudentId] = useState<number>(-1);
+
+  const [currentElsId, setCurrentElsId] = useState<string>('');
 
   const handleRoleChange = async (zid: number, isAdmin: boolean) => {
     try {
@@ -67,7 +77,8 @@ const AdminSettings: React.FC = () => {
   };
 
   const handleEditEls = (user: User) => {
-    setOpenModal('createELS');
+    setEditElsStudentId(user.zid);
+    setOpenModal('editEls');
   };
 
   const userColumns = [
@@ -111,14 +122,6 @@ const AdminSettings: React.FC = () => {
     }
   ];
 
-  const getCourseId = (courseCode: string, term: string) => {
-    const course = courseOfferings.find((course: Course) => course.courseCode === courseCode && course.term === term);
-    if (!course) {
-      return null;
-    }
-    return course.id;
-  };
-
   const courseOfferingColumns = [
     {
       title: 'Course Code',
@@ -136,6 +139,34 @@ const AdminSettings: React.FC = () => {
       key: 'term',
     },
   ];
+
+  const elsColumns = [
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: 'Extra Days',
+      dataIndex: 'extraDays',
+      key: 'extraDays',
+    },
+  ];
+
+  if (isElsListLoading) {
+    return (
+      <Layout style={{ padding: '20px' }}>
+        <Content style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+          <Spin size="large" />
+        </Content>
+      </Layout>
+    );
+  }
+
+  const closeElsModal = () => {
+    setOpenModal('');
+    setCurrentElsId('');
+  };
 
   return (
     <Layout>
@@ -155,11 +186,11 @@ const AdminSettings: React.FC = () => {
           <Button type="primary" onClick={() => setOpenModal('createCourseOffering')} style={{ marginRight: '10px' }}>
             Create Course Offering
           </Button>
-          <Button type="primary" onClick={() => setOpenModal('createELS')}>
+          <Button type="primary" onClick={() => setOpenModal('ELSModalOpen')}>
             Create ELS
           </Button>
         </div>
-        <Collapse>
+        <Collapse style={{ marginBottom: '20px' }}>
           <Panel header="Courses" key="1">
             <Table
               dataSource={courseOfferings}
@@ -169,6 +200,15 @@ const AdminSettings: React.FC = () => {
               pagination={false}
               onRow={(record: Course) => ({
                 onClick: () => {
+                  const getCourseId = (courseCode: string, term: string) => {
+                    const course = courseOfferings.find((course: Course) =>
+                      course.courseCode === courseCode && course.term === term);
+                    if (!course) {
+                      return null;
+                    }
+                    return course.id;
+                  };
+
                   const courseId = getCourseId(record.courseCode, record.term);
                   setCurrentCourseOfferingId(courseId);
                   setOpenModal('editCourseOffering');
@@ -177,6 +217,29 @@ const AdminSettings: React.FC = () => {
               })}
             />
           </Panel>
+        </Collapse>
+        <Collapse>
+          <Panel header="ELS" key="2">
+              <Table
+                dataSource={elsList}
+                columns={elsColumns}
+                loading={isElsListLoading}
+                rowKey="id"
+                pagination={false}
+                onRow={(record: Els) => ({
+                  onClick: () => {
+                    setCurrentElsId(record.id);
+                    setOpenModal('ELSModalOpen');
+                  },
+                  style: { cursor: 'pointer' }
+                })}
+                locale={{
+                  emptyText: (
+                    <Empty description="No Els Types have been made." />
+                  ),
+                }}
+              />
+            </Panel>
         </Collapse>
 
         <CreateCourseModal isOpen={openModal === 'createCourse'}
@@ -195,9 +258,17 @@ const AdminSettings: React.FC = () => {
           closeModal={() => setOpenModal('')}
           users={users}
         />
-        <CreateElsModal
-          isOpen={openModal === 'createELS'}
+        <ElsModal
+          isOpen={openModal === 'ELSModalOpen'}
+          closeModal={() => closeElsModal()}
+          elsId={currentElsId}
+          refetch={refetchElsList}
+        />
+        <EditElsStudentModal
+          studentId={editElsStudentId}
+          isOpen={openModal === 'editEls'}
           closeModal={() => setOpenModal('')}
+          elsList={elsList}
         />
 
       </Content>

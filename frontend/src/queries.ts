@@ -92,3 +92,24 @@ export const useMarks = () => {
     queryFn: () => fetchWithAuth('api/student/marks', {})
   });
 };
+
+export const useElsList = () => {
+  return useQuery({
+    queryKey: ['elsList'],
+    queryFn: () => fetchWithAuth('api/admin/els', {})
+  });
+};
+
+export const useStudentEls = (zid: number) => {
+  return useQuery({
+    queryKey: ['studentEls', zid],
+    queryFn: () => fetchWithAuth(`api/admin/users/${zid}/els`, {})
+  });
+};
+
+export const useEls = (elsId: number) => {
+  return useQuery({
+    queryKey: ['els', elsId],
+    queryFn: () => fetchWithAuth(`api/admin/els/${elsId}`, {})
+  });
+};
