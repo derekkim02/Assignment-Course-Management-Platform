@@ -74,6 +74,7 @@ router.post('/assignments/:assignmentId/group/submit',validateGroupSubmission, u
  * @returns {number | null} 200.styleMark - Style-mark result, If null, the assignment has not been style-marked.
  * @returns {number | null} 200.latePenalty - Late penalty, If null, there is no submission made for this assignment.
  * @returns {number | null} 200.finalMark - Final mark, If null, the assignment has not been marked.
+ * @returns {string | null} 200.markerComments - Marker comments, If null, the assignment has no comments.
  */
 router.get('/marks', viewMarks);
 

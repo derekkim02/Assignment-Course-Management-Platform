@@ -56,9 +56,8 @@ const AssignmentDetails: React.FC = () => {
   const [viewSubmissions, setViewSubmissions] = useState(false);
   const [titleCard, setTitleCard] = useState(role === 'student' ? 'Submissions' : 'Enrolled Students');
   const [submissionId, setSubmissionId] = useState('');
-  const { data: submissions, refetch: refetchSubmission } = useSubmissions(assignmentId || '');
+  const { data: submissions, refetch: refetchSubmission } = useSubmissions(role || '', assignmentId || '');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  // const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>(submissions || []);
 
   // Runs on page load and whenever courseOffering changes
   useEffect(() => {
@@ -117,6 +116,7 @@ const AssignmentDetails: React.FC = () => {
         throw new Error('Failed to mark submissions');
       }
       refetchAssignment();
+      console.log(response);
       message.success('Submissions marked successfully!');
     })
       .catch((error) => {

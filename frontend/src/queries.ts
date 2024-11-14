@@ -79,10 +79,10 @@ export const useAssignment = (role: string, assignmentId: string) => {
   });
 };
 
-export const useSubmissions = (assignmentId: string) => {
+export const useSubmissions = (role: string, assignmentId: string) => {
   return useQuery({
     queryKey: ['submissions', assignmentId],
-    queryFn: () => fetchWithAuth(`api/tutor/assignments/${assignmentId}/submissions`, {})
+    queryFn: () => fetchWithAuth(`api/${role}/assignments/${assignmentId}/submissions`, {})
   });
 };
 
@@ -90,5 +90,12 @@ export const useMarks = () => {
   return useQuery({
     queryKey: ['marks'],
     queryFn: () => fetchWithAuth('api/student/marks', {})
+  });
+};
+
+export const useStudents = (role: string, courseId: string) => {
+  return useQuery({
+    queryKey: ['students', courseId],
+    queryFn: () => fetchWithAuth(`api/${role}/courses/${courseId}`, {})
   });
 };
