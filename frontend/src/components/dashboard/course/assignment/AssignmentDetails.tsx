@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Layout, Typography, List, Button, Spin, Skeleton, message, Pagination } from 'antd';
+import { Layout, Typography, List, Button, Spin, Skeleton, message, Pagination, Input } from 'antd';
 import dayjs from 'dayjs';
 import { bannerStyle, footerLineStyle, listContainerStyle } from '../styles';
-import { useEnrollment, useAssignment } from '../../../../queries';
+import { useEnrollment, useAssignment, useSubmissions } from '../../../../queries';
 import { format } from 'date-fns';
 import UploadSubmissionModal from './UploadSubmissionModal';
 import { config } from '../../../../config';
@@ -13,6 +13,7 @@ import MarkingModal from './MarkingModal';
 import AssignmentModal from '../AssignmentModal';
 import { useWatch } from 'antd/es/form/Form';
 
+const { Search } = Input;
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
 
@@ -55,6 +56,9 @@ const AssignmentDetails: React.FC = () => {
   const [viewSubmissions, setViewSubmissions] = useState(false);
   const [titleCard, setTitleCard] = useState(role === 'student' ? 'Submissions' : 'Enrolled Students');
   const [submissionId, setSubmissionId] = useState('');
+  const { data: submissions, refetch: refetchSubmission } = useSubmissions(assignmentId || '');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  // const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>(submissions || []);
 
   // Runs on page load and whenever courseOffering changes
   useEffect(() => {
@@ -97,7 +101,6 @@ const AssignmentDetails: React.FC = () => {
   };
 
   const handleEditTestCase = (testCaseId: number) => {
-    console.log(courseOffering)
     setCurrentTestCaseId(testCaseId.toString());
     setOpenModal('testcase');
   };
@@ -122,11 +125,24 @@ const AssignmentDetails: React.FC = () => {
   };
 
   const handleViewSubmissions = (zid: number, name: string) => {
-    const filter: Submission[] = assignment.submissions.filter((sub: Submission) => sub.studentId === zid);
-    setFilteredSubmissions(filter);
+    refetchSubmission();
+    const filtered: Submission[] = submissions.filter((sub: Submission) => sub.studentId === zid);
+    setFilteredSubmissions(filtered);
 
     setTitleCard(`${name}'s Submissions`);
     setViewSubmissions(true);
+  };
+
+  // Handle search
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    const filtered: User[] = courseOffering.enrolledStudents.filter((student: User) =>
+      `${student.firstName} ${student.lastName}`.toLowerCase().includes(query.toLowerCase()) ||
+      student.email.toLowerCase().includes(query.toLowerCase()) ||
+      student.zid.toString().includes(query)
+    );
+    setFilteredStudents(filtered);
+    setCurrentPage(1);
   };
 
   // Handle pagination
@@ -139,12 +155,17 @@ const AssignmentDetails: React.FC = () => {
       setPageSize(size);
     }
 
-    // const filtered = courseOffering?.students.slice(
-    //   (page - 1) * newSize,
-    //   page * newSize
-    // );
-    // setFilteredStudents(filtered);
-    setFilteredStudents([]);
+    let filtered;
+
+    if (courseOffering.enrolledStudents) {
+      filtered = courseOffering.enrolledStudents.slice(
+        (page - 1) * newSize,
+        page * newSize
+      );
+    } else {
+      filtered = [];
+    }
+    setFilteredStudents(filtered);
   };
 
   if (isAssignmentLoading) {
@@ -176,11 +197,11 @@ const AssignmentDetails: React.FC = () => {
         </div>
 
         <div style={footerLineStyle}/>
-        <Paragraph style={{ color: '#A3A3A3' }}>{assignment.description}</Paragraph>
+        <Paragraph style={{ color: '#A3A3A3' }}>{assignment.description || assignment.assignmentDescription}</Paragraph>
         <div style={footerLineStyle}/>
         <Paragraph style={{ color: '#A3A3A3' }}>Due Date: {dayjs(assignment.dueDate).format('YYYY-MM-DD HH:mm')}</Paragraph>
 
-        {role === 'lecturer' && (
+        {(role === 'lecturer') && (
           <>
            <div style={footerLineStyle}/>
             <div style={{ flexDirection: 'row' }}>
@@ -208,7 +229,7 @@ const AssignmentDetails: React.FC = () => {
       )}
       <div style={listContainerStyle}>
         <div style={{ minWidth: '80%', maxWidth: '90%', border: '1px solid #d9d9d9', borderRadius: '10px' }}>
-          {(role === 'student' || (role === 'lecturer' && viewSubmissions)) && (
+          {(role === 'student' || ((role === 'lecturer' || role === 'tutor') && viewSubmissions)) && (
             <List
               className="demo-loadmore-list"
               loading={isAssignmentLoading}
@@ -219,14 +240,14 @@ const AssignmentDetails: React.FC = () => {
                   actions={[
                     <>
                       <a key="list-loadmore-download" onClick={() => downloadSubmission(submission.id)}>Download</a>
-                      {role === 'lecturer' && (<><br /><a onClick={() => handleMarkSubmission(submission.id)}>{submission.isMarked ? 'Remark' : 'Mark'}</a></>)}
+                      {(role === 'tutor') && (<><br /><a onClick={() => handleMarkSubmission(submission.id)}>{submission.isMarked ? 'Remark' : 'Mark'}</a></>)}
                     </>
                   ]}
                 >
                   <Skeleton loading={isAssignmentLoading} active>
                     <List.Item.Meta
                     style={{ textAlign: 'left' }}
-                      title={`Submission ${assignment.submissions.length - index}`} // Increment the title by 1
+                      title={`Submission ${index + 1}`} // Increment the title by 1
                       description={`Submitted on: ${format(new Date(submission.submissionTime), 'HH:mm dd/MM/yyyy')}`}
                     />
                   </Skeleton>
@@ -234,41 +255,49 @@ const AssignmentDetails: React.FC = () => {
               )}
             />
           )}
-          {role === 'lecturer' && !viewSubmissions && (
+          {(role === 'lecturer' || role === 'tutor') && !viewSubmissions && (
             <>
+              <Search
+                placeholder="Search by name, email, or zid"
+                value={searchQuery}
+                onChange={e => handleSearch(e.target.value)}
+                style={{ marginBottom: '20px' }}
+              />
               <List
                 className="demo-loadmore-list"
                 itemLayout="horizontal"
                 dataSource={filteredStudents}
                 renderItem={(student: { zid: number; firstName: string; lastName: string; email: string }) => (
-                  <List.Item onClick={() => handleViewSubmissions(student.zid, `${student.firstName} ${student.lastName}`)}>
-                    <List.Item.Meta
-                      title={`${student.firstName} ${student.lastName}`}
-                      description={
-                        <>
-                          Email: {student.email}
-                          <br />
-                          ZID: {student.zid}
-                        </>
-                      }
-                    />
-                  </List.Item>
+                  <>
+                    <List.Item onClick={() => handleViewSubmissions(student.zid, `${student.firstName} ${student.lastName}`)}>
+                      <List.Item.Meta
+                        title={`${student.firstName} ${student.lastName}`}
+                        description={
+                          <>
+                            Email: {student.email}
+                            <br />
+                            ZID: {student.zid}
+                          </>
+                        }
+                      />
+                    </List.Item>
+                  </>
                 )}
               />
-              {/* <Pagination
+              <Pagination
                 defaultCurrent={1}
                 current={currentPage}
                 pageSize={pageSize}
-                total={courseOffering?.students.length}
+                total={courseOffering.enrolledStudents.length || 0}
                 align="center"
                 onChange={handlePageChange}
-              />; */}
+              />;
             </>
           )}
         </div>
       </div>
 
-      {role === 'lecturer' && !viewSubmissions && (
+      {(role === 'lecturer') && !viewSubmissions && (
         <>
          <Title level={3}>Test Cases</Title>
           <div style={listContainerStyle}>
@@ -318,6 +347,7 @@ const AssignmentDetails: React.FC = () => {
         closeModal={() => setOpenModal('')}
         assignmentId={assignmentId || ''}
         refetchAssignment={refetchAssignment}
+        refetchSubmission={refetchSubmission}
       />
 
       <AutotestModal

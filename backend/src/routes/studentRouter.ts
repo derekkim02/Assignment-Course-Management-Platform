@@ -93,7 +93,7 @@ router.get('/marks', viewMarks);
  * @returns {object} 404 - Assignment not found
  * @returns {object} 500 - Internal server error
  */
-router.get('/assignments/:assignmentId/view', viewAssignment);
+router.get('/assignments/:assignmentId', viewAssignment);
 
 /**
  * @route GET /assignments

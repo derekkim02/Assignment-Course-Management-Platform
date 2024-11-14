@@ -118,7 +118,7 @@ router.put('/courses/:courseId/assignments/:assignmentId', validateAssignmentDat
 router.delete('/assignments/:assignmentId', validateLecturerPermissions, deleteAssignment);
 
 /**
- * @route GET /assignments/:assignmentId/view
+ * @route GET /assignments/:assignmentId
  * @description View a specific assignment.
  * @param {string} assignmentId - Unique identifier of the assignment.
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
@@ -137,7 +137,7 @@ router.delete('/assignments/:assignmentId', validateLecturerPermissions, deleteA
  * @returns {object} 404 - Assignment not found
  * @returns {object} 500 - Internal server error
  */
-router.get('/assignments/:assignmentId/view', viewAssignment);
+router.get('/assignments/:assignmentId', viewAssignment);
 
 /**
  * @route POST /courses/:courseId/assignments/:assignmentId/testcases

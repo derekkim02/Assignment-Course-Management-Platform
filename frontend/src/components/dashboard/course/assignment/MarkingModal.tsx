@@ -48,6 +48,7 @@ const MarkingModal: React.FC<MarkingModalProps> = ({ isModalVisible, role, submi
       body: JSON.stringify(payload),
     });
     if (!response.ok) {
+      console.log(response)
       throw new Error('Failed');
     }
     return await response.json();
@@ -93,7 +94,7 @@ const MarkingModal: React.FC<MarkingModalProps> = ({ isModalVisible, role, submi
         <Form.Item
           name="comments"
           label="Marker Comments"
-          rules={[{ required: false, message: 'Please enter any comments' }]}
+          rules={[{ required: false, message: 'Please enter any comments.' }]}
         >
           <Input.TextArea />
         </Form.Item>
