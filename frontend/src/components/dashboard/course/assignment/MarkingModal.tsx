@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Modal, Form, Input, Slider, Button, message } from 'antd';
 import Cookies from 'js-cookie';
 import { config } from '../../../../config';
+import { useViewSubmission } from '../../../../queries';
+import { common } from '@mui/material/colors';
 
 interface MarkingModalProps {
   isModalVisible: boolean;
@@ -15,6 +17,17 @@ const MarkingModal: React.FC<MarkingModalProps> = ({ isModalVisible, role, submi
   const [form] = Form.useForm();
   const token = Cookies.get('token') || '';
 
+  const { data: mark, isLoading: isMarkLoading, refetch: refetchMark } = useViewSubmission(role, submissionId);
+
+  useEffect(() => {
+    if (mark) {
+      form.setFieldsValue({
+        styleMark: parseInt(mark.styleMark),
+        comments: mark.markerComments,
+      });
+    }
+  }, [mark, isMarkLoading]);
+
   const closeModalWrapper = () => {
     form.resetFields();
     closeModal();
@@ -23,9 +36,13 @@ const MarkingModal: React.FC<MarkingModalProps> = ({ isModalVisible, role, submi
   const handleMark = async () => {
     try {
       const values = await form.validateFields();
-      sendRequest(`${config.backendUrl}/api/tutor/submissions/${submissionId}`, 'PUT', values).then(() => {
+      sendRequest(`${config.backendUrl}/api/${role}/submissions/${submissionId}`, 'PUT', values).then((res) => {
         refetchAssignment();
         closeModalWrapper();
+        if (!res.ok) {
+          message.error('Failed to mark');
+          return;
+        }
         message.success('Successfully marked.');
       });
     } catch (error) {
@@ -38,8 +55,7 @@ const MarkingModal: React.FC<MarkingModalProps> = ({ isModalVisible, role, submi
       styleMark: values.styleMark,
       markerComments: values.comments,
     };
-
-    const response = await fetch(url, {
+    return await fetch(url, {
       method,
       headers: {
         'Content-Type': 'application/json',
@@ -47,11 +63,6 @@ const MarkingModal: React.FC<MarkingModalProps> = ({ isModalVisible, role, submi
       },
       body: JSON.stringify(payload),
     });
-    if (!response.ok) {
-      console.log(response)
-      throw new Error('Failed');
-    }
-    return await response.json();
   };
 
   return (
@@ -75,21 +86,21 @@ const MarkingModal: React.FC<MarkingModalProps> = ({ isModalVisible, role, submi
         layout="vertical"
       >
         <Form.Item
-            name="styleMark"
-            label="Style Mark"
-            rules={[{ required: true, message: 'Please set the style mark out of 100.' }]}
-          >
-            <Slider
-              min={0}
-              max={100}
-              marks={{
-                0: '0',
-                25: '25',
-                50: '50',
-                75: '75',
-                100: '100',
-              }}
-            />
+          name="styleMark"
+          label="Style Mark"
+          rules={[{ required: true, message: 'Please set the style mark out of 100.' }]}
+        >
+          <Slider
+            min={0}
+            max={100}
+            marks={{
+              0: '0',
+              25: '25',
+              50: '50',
+              75: '75',
+              100: '100',
+            }}
+          />
         </Form.Item>
         <Form.Item
           name="comments"

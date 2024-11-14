@@ -19,7 +19,8 @@ import {
 	downloadStudentSubmission,
 	downloadStudentGrade,
 	updateTest,
-	deleteTest
+	deleteTest,
+	markSubmission
 } from '../controllers/lecturerController';
 
 const router = express.Router();
@@ -217,6 +218,17 @@ router.get('/assignments/:assignmentId/submissions', viewAllSubmissions);
  * @returns {number?} 200.latePenalty - Late penalty
  */
 router.get('/submissions/:submissionId/view', viewSubmission);
+
+/**
+ * @route PUT /submissions/:submissionId
+ * @description Mark a student submission.
+ * @param {string} submissionId - Unique identifier of the submission
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @body {number} styleMark - Style mark result
+ * @body {string} comments - Marker comments
+ * @returns {object} 200 - Success message
+ */
+router.put('/submissions/:submissionId', markSubmission);
 
 /**
  * @route GET /students

@@ -86,6 +86,13 @@ export const useSubmissions = (role: string, assignmentId: string) => {
   });
 };
 
+export const useViewSubmission = (role: string, submissionId: string) => {
+  return useQuery({
+    queryKey: ['submission', submissionId],
+    queryFn: () => fetchWithAuth(`api/${role}/submissions/${submissionId}/view`, {})
+  });
+};
+
 export const useMarks = () => {
   return useQuery({
     queryKey: ['marks'],
@@ -120,4 +127,3 @@ export const useEls = (elsId: number) => {
     queryFn: () => fetchWithAuth(`api/admin/els/${elsId}`, {})
   });
 };
-
