@@ -7,6 +7,7 @@ import { config } from '../../../config';
 import CreateCourseModal from './CreateCourseModal';
 import CreateCourseOfferingModal from './CreateCourseOfferingModal';
 import EditCourseOfferingModal from './EditCourseOfferingModal';
+import CreateElsModal from './CreateElsModal';
 
 const { Content } = Layout;
 const { Panel } = Collapse;
@@ -38,9 +39,7 @@ const AdminSettings: React.FC = () => {
   const { data: courseOfferings, isLoading: isLoadingCourseOfferings } = useAdminCourseOfferings();
 
   const [paginationPos] = useState<TablePaginationPosition<User>>('bottomRight');
-
   const [currentCourseOfferingId, setCurrentCourseOfferingId] = useState('1');
-
   const [openModal, setOpenModal] = useState('');
 
   const handleRoleChange = async (zid: number, isAdmin: boolean) => {
@@ -65,6 +64,10 @@ const AdminSettings: React.FC = () => {
     } catch {
       message.error('Failed to update user role');
     }
+  };
+
+  const handleEditEls = (user: User) => {
+    setOpenModal('createELS');
   };
 
   const userColumns = [
@@ -93,6 +96,16 @@ const AdminSettings: React.FC = () => {
           onClick={() => handleRoleChange(record.zid, !text)}
         >
           {text ? 'Revoke Admin' : 'Grant Admin'}
+        </Button>
+      )
+    },
+    {
+      title: 'ELS',
+      dataIndex: 'elsDays',
+      key: 'elsDays',
+      render: (text: number, record: User) => (
+        <Button onClick={() => handleEditEls(record)}>
+          Edit ELS
         </Button>
       )
     }
@@ -139,8 +152,11 @@ const AdminSettings: React.FC = () => {
           <Button type="primary" onClick={() => setOpenModal('createCourse')} style={{ marginRight: '10px' }}>
             Create Course
           </Button>
-          <Button type="primary" onClick={() => setOpenModal('createCourseOffering')}>
+          <Button type="primary" onClick={() => setOpenModal('createCourseOffering')} style={{ marginRight: '10px' }}>
             Create Course Offering
+          </Button>
+          <Button type="primary" onClick={() => setOpenModal('createELS')}>
+            Create ELS
           </Button>
         </div>
         <Collapse>
@@ -178,6 +194,10 @@ const AdminSettings: React.FC = () => {
           isOpen={openModal === 'editCourseOffering'}
           closeModal={() => setOpenModal('')}
           users={users}
+        />
+        <CreateElsModal
+          isOpen={openModal === 'createELS'}
+          closeModal={() => setOpenModal('')}
         />
 
       </Content>
