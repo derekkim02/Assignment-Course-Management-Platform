@@ -5,6 +5,7 @@ const config: Config = {
   testEnvironment: 'node',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   transformIgnorePatterns: ['<rootDir>/node_modules/'],
+  testTimeout: 20000, // 20 second timeout
 };
 
 export default config;

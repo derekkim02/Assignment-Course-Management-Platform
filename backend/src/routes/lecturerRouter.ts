@@ -1,8 +1,8 @@
 import express from 'express';
 import { verifyToken } from '../middleware/jwt';
 import { validateAssignmentData, validateLecturerPermissions } from '../middleware/assignment';
-import { uploadCsv } from 'middleware/multer';
-import { importCsv } from 'controllers/adminController';
+import { uploadCsv } from '../middleware/multer';
+import { importCsv } from '../controllers/adminController';
 import { 
 	createAssignment,
 	searchStudentById,

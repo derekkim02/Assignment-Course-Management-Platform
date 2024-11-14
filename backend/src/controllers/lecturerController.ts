@@ -308,7 +308,7 @@ export const viewSubmission =  async (req: Request, res: Response): Promise<void
 
 export const getStudentsInCourse =  async (req: Request, res: Response): Promise<void> => {
   try {
-    const offeringId = parseInt(req.params.offeringId);
+    const offeringId = parseInt(req.params.courseId);
     const data = await prisma.courseOffering.findUnique({
       where: {
         id: offeringId,
