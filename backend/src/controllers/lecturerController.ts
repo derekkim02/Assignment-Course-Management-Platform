@@ -3,6 +3,7 @@ import prisma from '../prismaClient';
 import AutotestService from "../services/autotestService";
 import LatePenaltyService from "../services/latepenaltyService";
 import { stringify } from "csv-stringify";
+import { format } from "date-fns";
 
 export const createAssignment = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -578,7 +579,7 @@ export const downloadStudentGrade = async (req: Request, res: Response): Promise
       return acc;
     }, [] as typeof data.submissions).map(submission => ({
       submitterId: data.isGroupAssignment ? submission.groupId : submission.studentId,
-      submissionTime: submission.submissionTime,
+      submissionTime: format(submission.submissionTime, 'yyyy-MM-dd HH:mm:ss'),
       isMarked: submission.isMarked,
       autoMark: submission.autoMarkResult,
       styleMark: submission.styleMarkResult,
