@@ -110,7 +110,7 @@ router.get('/submissions/:submissionId', viewSubmission);
  * @body {string} comments - Marker comments
  * @returns {object} 200 - Success message
  */
-router.put('submissions/:submissionId', markSubmission);
+router.put('/submissions/:submissionId', markSubmission);
 
 /**
  * @route GET /submissions/:submissionId/download

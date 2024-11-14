@@ -1,4 +1,4 @@
-import {describe, expect, test} from '@jest/globals';
+import {beforeEach, describe, expect, test} from '@jest/globals';
 import { resetDatabase } from '../utils';
 import request from 'supertest';
 import app from '../../app';
@@ -10,12 +10,16 @@ import zlib from 'zlib';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const generateDbData = async (): Promise<{token1: string, token2: string, assigmentId: number}> => {
+beforeEach(async () => {
+	await resetDatabase();
+});
+
+const generateDbData = async (): Promise<{token1: string, token2: string, assigmentId: number, groupAssignmentId: number, courseId: number}> => {
 	// Registers 2 users
 	await request(app)
 		.post('/api/auth/register')
 		.send({
-			firstName: 'user', 
+			firstName: 'user',
 			lastName: '1',
 			email: 'user1@gmail.com',
 			password: 'bananas',
@@ -25,7 +29,7 @@ const generateDbData = async (): Promise<{token1: string, token2: string, assigm
 	await request(app)
 		.post('/api/auth/register')
 		.send({
-			firstName: 'user', 
+			firstName: 'user',
 			lastName: '2',
 			email: 'user2@gmail.com',
 			password: 'bananas',
@@ -61,13 +65,13 @@ const generateDbData = async (): Promise<{token1: string, token2: string, assigm
 			description: 'An introduction to programming'
 		})
 		.expect(201);
-	
+
 	// Admin gets the zid of the user1
 	const users = await request(app)
 		.get('/api/admin/users')
 		.set('authorization', `Bearer ${token1}`)
 		.expect(200);
-	
+
 	const zid1 = users.body[0].zid;
 	const zid2 = users.body[1].zid;
 
@@ -82,7 +86,7 @@ const generateDbData = async (): Promise<{token1: string, token2: string, assigm
 			lecturerId: zid1,
 		})
 		.expect(201);
-	
+
 	// Admin updates the course offering to include user2
 	await request(app)
 		.put(`/api/admin/course-offerings/${courseOffering.body.id}`)
@@ -92,7 +96,7 @@ const generateDbData = async (): Promise<{token1: string, token2: string, assigm
 			studentIds: [zid2],
 			tutorsIds: [zid1],
 		}).expect(201);
-	
+
 
 	// Admin creates an assignmen
 	const assignment = await request(app)
@@ -103,16 +107,34 @@ const generateDbData = async (): Promise<{token1: string, token2: string, assigm
 			description: 'This is an example assignment for Python 3',
 			dueDate: '2024-11-20 20:00',
 			isGroupAssignment: false,
-			defaultShCmd: 'python3 main.py'
+			defaultShCmd: 'python3 main.py',
+			autoTestWeighting: 0.6,
 		}).expect(201);
 
-	return {token1, token2, assigmentId: assignment.body.id};
+	const groupAssignment = await request(app)
+	.post(`/api/lecturer/courses/${courseOffering.body.id}/assignments`)
+	.set('authorization', `Bearer ${token1}`)
+	.send({
+		assignmentName: 'Python 3 Example',
+		description: 'This is an example assignment for Python 3',
+		dueDate: '2024-12-21 20:00',
+		isGroupAssignment: true,
+		defaultShCmd: 'python3 main.py',
+		autoTestWeighting: 0.6,
+	}).expect(201);
+
+	return {
+		token1,
+		token2,
+		assigmentId: assignment.body.id,
+		groupAssignmentId: groupAssignment.body.id,
+		courseId: course.body.id
+	};
 }
 
 describe('POST api/student/assignments/:assignmentId/submit', () => {
 	const py3FilePath = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz');
 	test('successful submit assignment', async () => {
-		await resetDatabase();
 		const {token2, assigmentId} = await generateDbData();
 		const response = await request(app)
 			.post(`/api/student/assignments/${assigmentId}/submit`)
@@ -120,7 +142,17 @@ describe('POST api/student/assignments/:assignmentId/submit', () => {
 			.attach('submission', py3FilePath)
 			.expect(201);
 		expect(response.body.results).toEqual([]);
-	});
+		});
+
+	test('Error, group submission errors on individual submission', async () => {
+		const {token2, groupAssignmentId} = await generateDbData();
+		await request(app)
+			.post(`/api/student/assignments/${groupAssignmentId}/submit`)
+			.set('authorization', `Bearer ${token2}`)
+			.attach('submission', py3FilePath)
+			.expect(400)
+			.expect({ error: 'Group assignment submission not supported' });
+		});
 })
 
 describe('GET api/student/submissions/:submissionId/download', () => {
@@ -153,7 +185,6 @@ describe('GET api/student/submissions/:submissionId/download', () => {
 	}
 	test('successful get submission', async () => {
 		const testFile = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz')
-		await resetDatabase();
 		const {token2, assigmentId} = await generateDbData();
 		const submission = await request(app)
 			.post(`/api/student/assignments/${assigmentId}/submit`)
@@ -179,5 +210,155 @@ describe('GET api/student/submissions/:submissionId/download', () => {
 			});
 		const tarGzBuffer = getResponse.body;
 		expect(await containsMainPy(tarGzBuffer)).toBe(true);
+		});
+
+	test('Error, invalid submissionId', async () => {
+		const testFile = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz')
+		const {token2, assigmentId} = await generateDbData();
+		await request(app)
+			.post(`/api/student/assignments/${assigmentId}/submit`) // Submit assignment
+			.set('authorization', `Bearer ${token2}`)
+			.attach('submission', testFile)
+			.expect(201);
+		await request(app)
+			.get(`/api/student/submissions/${123987}/download`) // Invalid submissionId
+			.set('authorization', `Bearer ${token2}`)
+			.expect('Content-Type', /json/)
+			.expect(404)
+			.expect({ error: 'Submission not found or you do not have permission' });
+	});
+
+	test('Error, student not authorised', async () => {
+		const testFile = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz')
+		const {token1, token2, assigmentId} = await generateDbData();
+		await request(app)
+			.post(`/api/student/assignments/${assigmentId}/submit`) // Submit assignment
+			.set('authorization', `Bearer ${token2}`)
+			.attach('submission', testFile)
+			.expect(201);
+		await request(app)
+			.get(`/api/student/submissions/${assigmentId}/download`) // Invalid submissionId
+			.set('authorization', `Bearer ${token1}`)
+			.expect('Content-Type', /json/)
+			.expect(404)
+			.expect({ error: 'Submission not found or you do not have permission' });
 	});
 });
+
+
+describe('GET api/student/courses', () => {
+	test('Successful view enrollments', async () => {
+		const {token2} = await generateDbData();
+		await request(app)
+		.get(`/api/student/courses`)
+		.set('authorization', `Bearer ${token2}`)
+		.expect('Content-Type', /json/)
+		.expect(200)
+	});
+
+	test('Empty view enrollments, student is not enrolled and returns empty', async () => {
+		const {token1} = await generateDbData();
+		const response = await request(app)
+		.get(`/api/student/courses`)
+		.set('authorization', `Bearer ${token1}`)
+		.expect('Content-Type', /json/)
+		.expect(200);
+		expect(response.body).toEqual([]);
+	});
+
+	test('Error view enrollments, failure to authenticate token', async () => {
+		await generateDbData();
+		await request(app)
+		.get(`/api/student/courses`)
+		.set('authorization', `Bearer ${'invalid_token'}`)
+		.expect('Content-Type', /json/)
+		.expect({ message: 'Failed to authenticate token' })
+		.expect(403);
+	});
+})
+
+describe('GET api/student/courses/:courseId', () => {
+	test('Successful view course enrollment details', async () => {
+		const {token2, courseId} = await generateDbData();
+		await request(app)
+		.get(`/api/student/courses/${courseId}`)
+		.set('authorization', `Bearer ${token2}`)
+		.expect('Content-Type', /json/)
+		.expect(200)
+	});
+
+	test('Error, student is not enrolled', async () => {
+		const {token1, courseId} = await generateDbData();
+		await request(app)
+		.get(`/api/student/courses/${courseId}`)
+		.set('authorization', `Bearer ${token1}`)
+		.expect('Content-Type', /json/)
+		.expect({"error": "Course not found or you are not enrolled in this course"})
+		.expect(404);
+	});
+
+	test('Error, course doesn\'t exist', async () => {
+		const {token2} = await generateDbData();
+		await request(app)
+		.get(`/api/student/courses/${123987}`) // Invalid course Id
+		.set('authorization', `Bearer ${token2}`)
+		.expect('Content-Type', /json/)
+		.expect({"error": "Course not found or you are not enrolled in this course"})
+		.expect(404);
+	});
+})
+
+describe('GET api/student/marks', () => {
+	test('Successful view marks', async () => {
+		const testFile = path.join(__dirname, '..', 'sample_assignments', 'python3SampleAssignment.tar.gz')
+		const {token1, token2, assigmentId} = await generateDbData();
+		await request(app)
+			.post(`/api/student/assignments/${assigmentId}/submit`)
+			.set('authorization', `Bearer ${token2}`)
+			.attach('submission', testFile)
+			.expect(201);
+		// MARKS SUBMISSIONS
+		await request(app)
+        .post(`/api/lecturer/assignments/${assigmentId}/mark`)
+        .set('authorization', `Bearer ${token1}`)
+        .expect(200);
+
+		await request(app)
+        .get(`/api/student/marks`)
+        .set('authorization', `Bearer ${token2}`)
+		.expect('Content-Type', /json/)
+        .expect(200);
+	});
+})
+
+describe('GET api/student/assignments/:assignmentId/view', () => {
+	test('Successful view specific assignment details', async () => {
+		const {token2, assigmentId} = await generateDbData();
+		await request(app)
+		.get(`/api/student/assignments/${assigmentId}/view`)
+		.set('authorization', `Bearer ${token2}`)
+		.expect('Content-Type', /json/)
+		.expect(200)
+	});
+
+	test('Error view specific assignment details, invalid assignmentId', async () => {
+		const {token2} = await generateDbData();
+		await request(app)
+		.get(`/api/student/assignments/${123987}/view`)
+		.set('authorization', `Bearer ${token2}`)
+		.expect('Content-Type', /json/)
+		.expect({ error: 'Assignment not found or you are not enrolled in the course.' })
+		.expect(404)
+	});
+})
+
+describe('GET api/student/assignment', () => {
+	test('Successful view all assignment details', async () => {
+		const {token2} = await generateDbData();
+		await request(app)
+		.get(`/api/student/assignments`)
+		.set('authorization', `Bearer ${token2}`)
+		.expect('Content-Type', /json/)
+		.expect(200)
+	});
+})

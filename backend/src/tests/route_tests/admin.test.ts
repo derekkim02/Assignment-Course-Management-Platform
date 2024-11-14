@@ -1,11 +1,11 @@
-import { describe, beforeAll, test, expect } from '@jest/globals';
+import { describe, test, expect, beforeEach } from '@jest/globals';
 import { resetDatabase } from '../utils';
 import request from 'supertest';
 import app from '../../app';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
-beforeAll(async () => {
+beforeEach(async () => {
 	await resetDatabase();
 });
 
