@@ -215,7 +215,7 @@ export const markSubmission = async (req: Request, res: Response): Promise<void>
 	try {
 		const submissionId = parseInt(req.params.submissionId);
 		const { styleMark, markerComments } = req.body;
-		
+
 		const assignment = await prisma.assignment.findFirst({
 			where: {
 				submissions: {

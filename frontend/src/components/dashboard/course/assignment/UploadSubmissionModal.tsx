@@ -13,9 +13,10 @@ interface UploadSubmissionModalProps {
   isModalVisible: boolean;
   closeModal: () => void;
   refetchAssignment: () => void;
+  refetchSubmission: () => void;
 }
 
-const UploadSubmissionModal: React.FC<UploadSubmissionModalProps> = ({ assignmentId, isModalVisible, closeModal, refetchAssignment }) => {
+const UploadSubmissionModal: React.FC<UploadSubmissionModalProps> = ({ assignmentId, isModalVisible, closeModal, refetchAssignment, refetchSubmission }) => {
   const [form] = Form.useForm();
 
   const [results, setResults] = React.useState([]);
@@ -34,6 +35,7 @@ const UploadSubmissionModal: React.FC<UploadSubmissionModalProps> = ({ assignmen
         console.log(testCases.results);
         setResults(testCases.results);
         message.success('Submission uploaded successfully!');
+        refetchSubmission();
       } else {
         message.error('Please upload at least one file.');
       }

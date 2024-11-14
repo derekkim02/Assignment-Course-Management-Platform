@@ -6,11 +6,12 @@ import { useAuth } from '../auth/AuthContext';
 import Dasbhoard from '../dashboard/student/Dashboard';
 import CalendarSection from '../dashboard/CalendarSection';
 import CoursesSection from '../dashboard/course/CoursesSection';
-import RecentSubmissions from '../dashboard/student/RecentSubmissions';
+import Marks from '../dashboard/student/Marks';
 import CourseDetails from '../dashboard/course/CourseDetails';
 import AssignmentDetails from '../dashboard/course/assignment/AssignmentDetails';
 import StudentList from '../dashboard/marker/StudentList';
 import AdminSettings from '../dashboard/admin/AdminSettings';
+import ViewStudentSubmission from '../dashboard/course/assignment/ViewStudentSubmission';
 
 const About = () => <div>About Page</div>;
 
@@ -35,7 +36,8 @@ const AppRouter = () => {
         <Route path="/dashboard/courses" element={<ProtectedRoute checkAccess={fullAccess} element={<Dasbhoard content={<CoursesSection/>}/>}/>}/>
         <Route path="/dashboard/courses/:role/:enrolmentId" element={<ProtectedRoute checkAccess={fullAccess} element={<Dasbhoard content={<CourseDetails />}/>}/>}/>
         <Route path="/dashboard/courses/:role/:enrolmentId/assignments/:assignmentId" element={<ProtectedRoute checkAccess={fullAccess} element={<Dasbhoard content={<AssignmentDetails/>}/>}/>}/>
-        <Route path="/dashboard/submissions" element={<ProtectedRoute checkAccess={fullAccess} element={<Dasbhoard content={<RecentSubmissions/>}/>}/>}/>
+        <Route path="/dashboard/courses/:role/:enrolmentId/assignments/:assignmentId/student/:studentId" element={<ProtectedRoute checkAccess={fullAccess} element={<Dasbhoard content={<ViewStudentSubmission/>}/>}/>}/>
+        <Route path="/dashboard/marks" element={<ProtectedRoute checkAccess={fullAccess} element={<Dasbhoard content={<Marks/>}/>}/>}/>
         <Route path="/dashboard/student-list" element={<ProtectedRoute checkAccess={() => auth.userRole === 'marker'} element={<Dasbhoard content={<StudentList/>}/>}/>}/>
         <Route path="/dashboard/admin-settings" element={<ProtectedRoute checkAccess={() => auth.isIGiveAdmin} element={<Dasbhoard content={<AdminSettings/>}/>}/>}/>
         <Route path="*" element={isAuthenticated ? <Navigate to="/dashboard/courses"/> : <Navigate to="/login"/>} />

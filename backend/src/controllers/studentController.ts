@@ -133,6 +133,7 @@ export const viewMarks = async (req: Request, res: Response): Promise<void> => {
 				styleMark:  latestSubmission ? latestSubmission.styleMarkResult : null,
 				latePenalty: latestSubmission ? latestSubmission.latePenalty : null,
 				finalMark: latestSubmission ? latestSubmission.finalMark: null,
+				markerComments: latestSubmission ? latestSubmission.markerComments : null,
 			}
 		});
 

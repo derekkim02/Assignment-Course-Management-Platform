@@ -207,6 +207,75 @@ export const updateTest = async (req: Request, res: Response): Promise<void> => 
   }
 }
 
+export const markSubmission = async (req: Request, res: Response): Promise<void> => {
+	try {
+		const submissionId = parseInt(req.params.submissionId);
+		const { styleMark, markerComments } = req.body;
+
+		const assignment = await prisma.assignment.findFirst({
+			where: {
+				submissions: {
+					some: {
+						id: submissionId
+					}
+				},
+				courseOffering: {
+					lecturer: {
+            email: req.userEmail
+          }
+				}
+			}
+		});
+
+		if (!assignment) {
+			res.status(404).json({ error: 'Submission does not exist or you are not the lecturer for this course' });
+			return;
+		}
+
+		const autoMark = await prisma.submission.findUnique({
+			where: {
+				id: submissionId
+			},
+			select: {
+				autoMarkResult: true,
+				latePenalty: true
+			}
+		});
+
+		if (!autoMark || !autoMark.autoMarkResult) {
+			res.status(404).json({ error: 'Submission does not exist' });
+			return;
+		}
+
+		const autoMarkWeighting = assignment.autoTestWeighting.toNumber();
+		const autoMarkResult = autoMark.autoMarkResult.toNumber();
+		const styleMarkResult = parseFloat(styleMark);
+		const latePenalty = !autoMark.latePenalty ? 0 : autoMark.latePenalty.toNumber();
+
+		const markedSubmission = await prisma.submission.update({
+			where: {
+				id: submissionId,
+			},
+			data: {
+				isMarked: true,
+				styleMarkResult,
+				finalMark: (autoMarkWeighting * autoMarkResult + (1 - autoMarkWeighting) * styleMarkResult) - latePenalty,
+				markerComments
+			}
+		});
+
+		if (!markedSubmission) {
+			res.status(404).json({ error: 'Submission not found or you are not the lecturer for this course' });
+			return;
+		}
+
+		res.status(201).json({ message: 'Submission marked successfully' });
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ error: 'Failed to mark submission' });
+	}
+}
+
 export const deleteTest = async (req: Request, res: Response): Promise<void> => {
   try {
     const testCaseId = parseInt(req.params.testId);
@@ -502,10 +571,10 @@ export const markAllSubmissions = async (req: Request, res: Response): Promise<v
 
       const latepenaltyService = new LatePenaltyService(data.dueDate, submission.submissionTime, penaltyStrategy , extraDays);
 
-      autotestService.runTests().then((results) => {
+      autotestService.runTests().then(async (results) => {
         const score = results.length !== 0 ? results.filter(result => result.passed).length / results.length : 100;
 
-        prisma.submission.update({
+        await prisma.submission.update({
           where: {
             id: submission.id,
           },

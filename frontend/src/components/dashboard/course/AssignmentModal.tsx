@@ -186,7 +186,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({ isModalVisible, enrol
                 100: '100%',
               }}
             />
-          </Form.Item>
+        </Form.Item>
         <Form.Item
           name="dueDate"
           label="Due Date"

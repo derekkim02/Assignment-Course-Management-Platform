@@ -19,7 +19,8 @@ import {
 	downloadStudentSubmission,
 	downloadStudentGrade,
 	updateTest,
-	deleteTest
+	deleteTest,
+	markSubmission
 } from '../controllers/lecturerController';
 
 const router = express.Router();
@@ -118,7 +119,7 @@ router.put('/courses/:courseId/assignments/:assignmentId', validateAssignmentDat
 router.delete('/assignments/:assignmentId', validateLecturerPermissions, deleteAssignment);
 
 /**
- * @route GET /assignments/:assignmentId/view
+ * @route GET /assignments/:assignmentId
  * @description View a specific assignment.
  * @param {string} assignmentId - Unique identifier of the assignment.
  * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
@@ -137,7 +138,7 @@ router.delete('/assignments/:assignmentId', validateLecturerPermissions, deleteA
  * @returns {object} 404 - Assignment not found
  * @returns {object} 500 - Internal server error
  */
-router.get('/assignments/:assignmentId/view', viewAssignment);
+router.get('/assignments/:assignmentId', viewAssignment);
 
 /**
  * @route POST /courses/:courseId/assignments/:assignmentId/testcases
@@ -217,6 +218,17 @@ router.get('/assignments/:assignmentId/submissions', viewAllSubmissions);
  * @returns {number?} 200.latePenalty - Late penalty
  */
 router.get('/submissions/:submissionId/view', viewSubmission);
+
+/**
+ * @route PUT /submissions/:submissionId
+ * @description Mark a student submission.
+ * @param {string} submissionId - Unique identifier of the submission
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @body {number} styleMark - Style mark result
+ * @body {string} comments - Marker comments
+ * @returns {object} 200 - Success message
+ */
+router.put('/submissions/:submissionId', markSubmission);
 
 /**
  * @route GET /students

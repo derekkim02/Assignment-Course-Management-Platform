@@ -5,6 +5,7 @@ import {
 	createCourse,
 	createEls,
 	createEnrollment,
+	deleteEls,
 	getAllEls,
 	getCourseOffering,
 	getCourseOfferings,
@@ -176,6 +177,7 @@ router.get('/els/:elsId', getEls);
  * @returns {string} 200.extraDays - Number of extra days for the ELS
  */
 router.get('/els', getAllEls);
+
 /**
  * @route PUT /els/:elsId
  * @description Update a specific ELS.
@@ -185,6 +187,13 @@ router.get('/els', getAllEls);
  * @returns {object} 200 - success message
  */
 router.put('/els/:elsId', updateEls);
+
+/**
+ * @route DELETE /els/:elsId
+ * @description Delete a specific ELS.
+ * @returns {object} 200 - success message
+ */
+router.delete('/els/:elsId', deleteEls);
 
 /**
  * @route POST /users/:userId/els

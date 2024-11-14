@@ -18,7 +18,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isMobile }) => {
   const location = useLocation();
 
   const menuItems = [
-    { key: '1', icon: <FileTextOutlined />, path: '/dashboard/submissions', label: 'Submissions', condition: true },
+    { key: '1', icon: <FileTextOutlined />, path: '/dashboard/marks', label: 'Check Results', condition: true },
     { key: '2', icon: <BookOutlined />, path: '/dashboard/courses', label: 'Courses', condition: true },
     { key: '3', icon: <CalendarOutlined />, path: '/dashboard/calendar', label: 'Calendar', condition: true },
     { key: '4', icon: <UserOutlined />, path: '/dashboard/student-list', label: 'Students', condition: true },

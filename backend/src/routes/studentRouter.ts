@@ -74,6 +74,7 @@ router.post('/assignments/:assignmentId/group/submit',validateGroupSubmission, u
  * @returns {number | null} 200.styleMark - Style-mark result, If null, the assignment has not been style-marked.
  * @returns {number | null} 200.latePenalty - Late penalty, If null, there is no submission made for this assignment.
  * @returns {number | null} 200.finalMark - Final mark, If null, the assignment has not been marked.
+ * @returns {string | null} 200.markerComments - Marker comments, If null, the assignment has no comments.
  */
 router.get('/marks', viewMarks);
 
@@ -81,7 +82,7 @@ router.get('/marks', viewMarks);
  * @route GET /assignments/:assignmentId/view
  * @description View assignment details. This route is used to retrieve the details of a specific assignment, including its submissions.
  * @param {string} assignmentId - Unique identifier of the assignment
- * @header {strinwg} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
  * @returns {object} 200 - Assignment details
  * @returns {string} 200.assignmentName - Name of the assignment
  * @returns {string} 200.description - Description of the assignment
@@ -93,7 +94,7 @@ router.get('/marks', viewMarks);
  * @returns {object} 404 - Assignment not found
  * @returns {object} 500 - Internal server error
  */
-router.get('/assignments/:assignmentId/view', viewAssignment);
+router.get('/assignments/:assignmentId', viewAssignment);
 
 /**
  * @route GET /assignments

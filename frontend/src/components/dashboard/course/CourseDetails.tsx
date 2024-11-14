@@ -14,6 +14,7 @@ interface Assignment {
   assignmentName: string;
   dueDate: string;
   description: string;
+  assignmentDescription: string;
 }
 
 const CourseDetails: React.FC = () => {
@@ -88,7 +89,7 @@ const CourseDetails: React.FC = () => {
                 <Link to={`assignments/${assignment.assignmentId}`} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
                   <List.Item.Meta
                     title={assignment.assignmentName}
-                    description={`${assignment.description}`}
+                    description={`${assignment.description || assignment.assignmentDescription}`}
                   />
                   Due Date: {format(new Date(assignment.dueDate), 'HH:mm dd/MM/yyyy')}
                 </Link>
