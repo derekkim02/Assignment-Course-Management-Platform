@@ -56,9 +56,8 @@ const AssignmentDetails: React.FC = () => {
   const [viewSubmissions, setViewSubmissions] = useState(false);
   const [titleCard, setTitleCard] = useState(role === 'student' ? 'Submissions' : 'Enrolled Students');
   const [submissionId, setSubmissionId] = useState('');
-  const { data: submissions, refetch: refetchSubmission } = useSubmissions(assignmentId || '');
+  const { data: submissions, refetch: refetchSubmission } = useSubmissions(role || '', assignmentId || '');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  // const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>(submissions || []);
 
   // Runs on page load and whenever courseOffering changes
   useEffect(() => {
@@ -133,7 +132,6 @@ const AssignmentDetails: React.FC = () => {
     setViewSubmissions(true);
   };
 
-  // Handle search
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     const filtered: User[] = courseOffering.enrolledStudents.filter((student: User) =>
@@ -144,6 +142,39 @@ const AssignmentDetails: React.FC = () => {
     setFilteredStudents(filtered);
     setCurrentPage(1);
   };
+
+  const handleCollectGrades = () => {
+    message.info('Downloading grades...');
+    try {
+      fetch(`${config.backendUrl}/api/lecturer/assignments/${assignmentId}/grades`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }).then(async (response) => {
+        if (!response.ok) {
+          throw new Error('Failed to collect grades!');
+        }
+        // console.log(response);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `assignment${assignmentId}_grades.csv`; // Set the desired file name
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        message.success('Grades collected successfully!');
+      })
+        .catch((error) => {
+          message.error(`Failed to download grades: ${error}`);
+        });
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      message.error('Failed to download file.');
+    }
+  }
 
   // Handle pagination
   const handlePageChange = (page: number, size?: number) => {
@@ -213,8 +244,12 @@ const AssignmentDetails: React.FC = () => {
                 Create Autotest
               </Button>
 
-              <Button type="primary" onClick={handleMarkSubmissions} style={{ marginBottom: '20px', width: '120px', alignSelf: 'center' }}>
+              <Button type="primary" onClick={handleMarkSubmissions} style={{ marginBottom: '20px', width: '120px', alignSelf: 'center', marginRight: '10px' }}>
                 Mark Submissions
+              </Button>
+
+              <Button type="primary" onClick={handleCollectGrades} style={{ marginBottom: '20px', width: '120px', alignSelf: 'center' }}>
+                Collect Grades
               </Button>
             </div>
           </>

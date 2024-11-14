@@ -15,12 +15,12 @@ class LatePenaltyService {
 	}
 
 	public getDaysLate(): number {
-		const timeDiff = this.dueDate.getTime() - this.submissionTime.getTime();
+		const timeDiff = this.submissionTime.getTime() - this.dueDate.getTime();
 		return Math.ceil(timeDiff / (1000 * 3600 * 24));
 	}
 
 	public getHoursLate(): number {
-		const timeDiff = this.dueDate.getTime() - this.submissionTime.getTime();
+		const timeDiff = this.submissionTime.getTime() - this.dueDate.getTime();
 		return Math.ceil(timeDiff / (1000 * 3600));
 	}
 	/**
