@@ -363,3 +363,20 @@ export const removeUserFromEls = async (req: Request, res: Response): Promise<vo
     res.status(400).json({ error: `Failed to remove user from ELS: ${e}` });
   }
 }
+
+export const getUserEls = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = parseInt(req.params.userId);
+    const elsDurations = await prisma.eLSDuration.findUnique({
+      where: {
+        studentId: userId
+      },
+      include: {
+        elsType: true
+      }
+    });
+    res.status(200).json(elsDurations);
+  } catch (e) {
+    res.status(400).json({ error: `Failed to fetch user ELS: ${e}` });
+  }
+}
