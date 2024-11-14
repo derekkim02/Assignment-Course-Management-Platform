@@ -10,6 +10,7 @@ import {
 	getCourseOfferings,
 	getCourses,
 	getEls,
+	getUserEls,
 	getUsers,
 	importCsv,
 	removeUserFromEls,
@@ -209,5 +210,22 @@ router.post('/users/:userId/els', addUserToEls);
  * @returns {object} 200 - Success message
  */
 router.delete('/users/:userId/els', removeUserFromEls);
+
+/**
+ * @route GET /users/:userId/els
+ * @description Fetch els for a specific user.
+ * @header {string} Authorization Bearer token for authentication. Format: `Bearer {token}`.
+ * @param {string} userId - The unique identifier of the user
+ * @returns {object | null} 200 - ELS Duration, If the user has an ELS otherwise null
+ * @returns {string} 200.studentId - The unique identifier of the student
+ * @returns {string} 200.elsTypeId - The unique identifier of the ELS
+ * @returns {string} 200.startDate - The start date of the ELS
+ * @returns {string} 200.endDate - The end date of the ELS
+ * @returns {object} 200.els - The ELS object
+ * @returns {string} 200.els.id - The unique identifier of the ELS
+ * @returns {string} 200.els.name - The name of the ELS
+ * @returns {string} 200.els.extraDays - The number of extra days for the ELS
+ */
+router.get('/users/:userId/els', getUserEls);
 
 export default router;
